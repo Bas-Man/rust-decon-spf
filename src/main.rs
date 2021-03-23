@@ -24,13 +24,18 @@ fn main() {
             for record in addresses {
                 println!("{} {}", record.preference(), record.exchange());
                 let host_name = record.exchange();
-                let lookup_response = resolver.lookup_ip(host_name.to_string().as_str()).unwrap();
-                let addr_list = lookup_response.iter();
-                for addr in addr_list {
-                    if addr.is_ipv4() {
-                        println!("\tip4: {}", addr)
-                    } else {
-                        println!("\tip6: {}", addr)
+                let lookup_response = resolver.lookup_ip(host_name.to_string().as_str());
+                match lookup_response {
+                    Err(_) => println!("This exchange host has not address."),
+                    Ok(lookup_response) => {
+                        let addr_list = lookup_response.iter();
+                        for addr in addr_list {
+                            if addr.is_ipv4() {
+                                println!("\tip4: {}", addr)
+                            } else {
+                                println!("\tip6: {}", addr)
+                            }
+                        }
                     }
                 }
             }
