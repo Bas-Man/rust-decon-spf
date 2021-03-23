@@ -1,0 +1,10 @@
+[package]
+name = "trust-dns"
+version = "0.1.0"
+authors = ["Adam Spann <Bas-Man@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+trust-dns-resolver = "0.20.1"
