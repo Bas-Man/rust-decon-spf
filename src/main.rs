@@ -20,20 +20,19 @@ fn main() {
     match mx_response {
         Err(_) => println!("No Records"),
         Ok(mx_response) => {
-            let addresses = mx_response.iter();
-            for record in addresses {
+            let records = mx_response.iter();
+            for record in records {
                 println!("{} {}", record.preference(), record.exchange());
-                let host_name = record.exchange();
-                let lookup_response = resolver.lookup_ip(host_name.to_string().as_str());
+                let lookup_response = resolver.lookup_ip(record.exchange().to_string().as_str());
                 match lookup_response {
                     Err(_) => println!("This exchange host has not address."),
                     Ok(lookup_response) => {
-                        let addr_list = lookup_response.iter();
-                        for addr in addr_list {
-                            if addr.is_ipv4() {
-                                println!("\tip4: {}", addr)
+                        let ip_addrs = lookup_response.iter();
+                        for ip_addr in ip_addrs {
+                            if ip_addr.is_ipv4() {
+                                println!("   ip4: {}", ip_addr)
                             } else {
-                                println!("\tip6: {}", addr)
+                                println!("   ip6: {}", ip_addr)
                             }
                         }
                     }
