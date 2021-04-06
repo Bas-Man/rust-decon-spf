@@ -5,46 +5,46 @@ use trust_dns_resolver::{config::*, lookup::MxLookup, lookup::SoaLookup, lookup:
 
 #[derive(Default, Debug, Clone)]
 struct Includes {
-    modifier: char,
+    qualifier: char,
     txt: String,
 }
 
 impl Includes {
-    fn new(modifier: char, txt: String) -> Self {
-        Self { modifier, txt }
+    fn new(qualifier: char, txt: String) -> Self {
+        Self { qualifier, txt }
     }
     fn as_string(&self) -> String {
         let mut txt = String::new();
-        if self.modifier != '+' {
-            txt.push(self.modifier);
+        if self.qualifier != '+' {
+            txt.push(self.qualifier);
         }
         txt.push_str("include:");
         txt.push_str(self.txt.as_str());
         txt
     }
     fn is_pass(&self) -> bool {
-        if self.modifier == '+' {
+        if self.qualifier == '+' {
             true
         } else {
             false
         }
     }
     fn is_fail(&self) -> bool {
-        if self.modifier == '-' {
+        if self.qualifier == '-' {
             true
         } else {
             false
         }
     }
     fn is_softfail(&self) -> bool {
-        if self.modifier == '~' {
+        if self.qualifier == '~' {
             true
         } else {
             false
         }
     }
     fn is_neutral(&self) -> bool {
-        if self.modifier == '?' {
+        if self.qualifier == '?' {
             true
         } else {
             false
@@ -54,45 +54,45 @@ impl Includes {
 
 #[derive(Debug, Clone)]
 struct A {
-    modifier: char,
+    qualifier: char,
     txt: String,
 }
 
 impl A {
-    fn new(modifier: char, txt: String) -> Self {
-        Self { modifier, txt }
+    fn new(qualifier: char, txt: String) -> Self {
+        Self { qualifier, txt }
     }
 }
 
 #[derive(Debug, Clone)]
 struct Mx {
-    modifier: char,
+    qualifier: char,
     txt: String,
 }
 
 impl Mx {
-    fn new(modifier: char, txt: String) -> Self {
-        Self { modifier, txt }
+    fn new(qualifier: char, txt: String) -> Self {
+        Self { qualifier, txt }
     }
 }
 
 #[derive(Debug, Clone)]
 struct Ip4 {
-    modifier: char,
+    qualifier: char,
     ip: IpNetwork,
 }
 
 impl Ip4 {
-    fn new(modifier: char, ip: IpNetwork) -> Self {
-        Self { modifier, ip }
+    fn new(qualifier: char, ip: IpNetwork) -> Self {
+        Self { qualifier, ip }
     }
     fn as_string(&self) -> String {
         self.ip.to_string()
     }
     fn as_spf(&self) -> String {
         let mut ip4_string = String::new();
-        if self.modifier != '+' {
-            ip4_string.push(self.modifier);
+        if self.qualifier != '+' {
+            ip4_string.push(self.qualifier);
         }
         ip4_string.push_str("ip4:");
         ip4_string.push_str(self.ip.to_string().as_str());
@@ -102,28 +102,28 @@ impl Ip4 {
         self.ip
     }
     fn is_pass(&self) -> bool {
-        if self.modifier == '+' {
+        if self.qualifier == '+' {
             true
         } else {
             false
         }
     }
     fn is_fail(&self) -> bool {
-        if self.modifier == '-' {
+        if self.qualifier == '-' {
             true
         } else {
             false
         }
     }
     fn is_softfail(&self) -> bool {
-        if self.modifier == '~' {
+        if self.qualifier == '~' {
             true
         } else {
             false
         }
     }
     fn is_neutral(&self) -> bool {
-        if self.modifier == '?' {
+        if self.qualifier == '?' {
             true
         } else {
             false
@@ -134,7 +134,7 @@ impl Ip4 {
 impl Default for Ip4 {
     fn default() -> Self {
         Self {
-            modifier: '+',
+            qualifier: '+',
             ip: IpNetwork::V4("0.0.0.0/0".parse().unwrap()),
         }
     }
@@ -142,20 +142,20 @@ impl Default for Ip4 {
 
 #[derive(Debug, Clone)]
 struct Ip6 {
-    modifier: char,
+    qualifier: char,
     ip: IpNetwork,
 }
 
 impl Ip6 {
-    fn new(modifier: char, ip: IpNetwork) -> Self {
-        Self { modifier, ip }
+    fn new(qualifier: char, ip: IpNetwork) -> Self {
+        Self { qualifier, ip }
     }
 }
 
 impl Default for Ip6 {
     fn default() -> Self {
         Self {
-            modifier: '+',
+            qualifier: '+',
             ip: IpNetwork::V6("FE80::1".parse().unwrap()),
         }
     }
@@ -171,7 +171,7 @@ struct Spf1 {
     mx: Option<Vec<Mx>>,
     ip4: Option<Vec<Ip4>>,
     ip6: Option<Vec<Ip6>>,
-    all_modifier: char,
+    all_qualifier: char,
 }
 
 impl Spf1 {
@@ -185,7 +185,7 @@ impl Spf1 {
             mx: None,
             ip4: None,
             ip6: None,
-            all_modifier: '+',
+            all_qualifier: '+',
         }
     }
     fn parse(&mut self) {
@@ -204,25 +204,30 @@ impl Spf1 {
                 }
                 self.is_redirected = true;
             } else if record.contains("include:") {
-                let mod_and_modified_str = return_and_remove_modifier(record, 'i');
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 for item in record.rsplit(":") {
-                    vec_of_includes.push(Includes::new(mod_and_modified_str.0, item.to_string()));
+                    vec_of_includes.push(Includes::new(
+                        qualifier_and_modified_str.0,
+                        item.to_string(),
+                    ));
                     break; // skip the 'include:'
                 }
             } else if record.contains("ip4:") {
-                let mod_and_modified_str = return_and_remove_modifier(record, 'i');
-                if let Some(raw_ip4) = mod_and_modified_str.1.strip_prefix("ip4:") {
-                    let network: Ip4 = Ip4::new(mod_and_modified_str.0, raw_ip4.parse().unwrap());
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
+                    let network: Ip4 =
+                        Ip4::new(qualifier_and_modified_str.0, raw_ip4.parse().unwrap());
                     vec_of_ip4.push(network);
                 }
             } else if record.contains("ip6:") {
-                let mod_and_modified_str = return_and_remove_modifier(record, 'i');
-                if let Some(raw_ip6) = mod_and_modified_str.1.strip_prefix("ip6:") {
-                    let network: Ip6 = Ip6::new(mod_and_modified_str.0, raw_ip6.parse().unwrap());
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
+                    let network: Ip6 =
+                        Ip6::new(qualifier_and_modified_str.0, raw_ip6.parse().unwrap());
                     vec_of_ip6.push(network);
                 }
             } else if record.ends_with("all") {
-                self.all_modifier = return_and_remove_modifier(record, 'a').0;
+                self.all_qualifier = return_and_remove_qualifier(record, 'a').0;
             }
         }
         //if vec_of_a.len() > 0 {
@@ -314,19 +319,19 @@ impl Spf1 {
 // Check if the initial character in the string `record` matches `c`
 // If they do no match then return the initial character
 // if c matches first character of record, we can `+`, a blank modiifer equates to `+`
-fn return_and_remove_modifier(record: &str, c: char) -> (char, &str) {
-    // Returns a tuple of (modifier, &str)
-    // &str will have had the modifier character removed if it existed. The &str will be unchanged
-    // if the modifier was not present
+fn return_and_remove_qualifier(record: &str, c: char) -> (char, &str) {
+    // Returns a tuple of (qualifier, &str)
+    // &str will have had the qualifier character removed if it existed. The &str will be unchanged
+    // if the qualifier was not present
     if c != record.chars().nth(0).unwrap() {
-        // Modifier exists. return tuple of modifier and `record` with modifier removed.
-        (record.chars().nth(0).unwrap(), remove_modifier(record))
+        // qualifier exists. return tuple of qualifier and `record` with qualifier removed.
+        (record.chars().nth(0).unwrap(), remove_qualifier(record))
     } else {
-        // Modifier does not exist, default to `+` and return unmodified `record`
+        // qualifier does not exist, default to `+` and return unmodified `record`
         ('+', record)
     }
 }
-fn remove_modifier(record: &str) -> &str {
+fn remove_qualifier(record: &str) -> &str {
     // Remove leading (+,-,~,?) character
     let mut chars = record.chars();
     chars.next();
