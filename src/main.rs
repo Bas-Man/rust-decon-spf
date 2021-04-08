@@ -1,4 +1,3 @@
-//use std::net::*;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::TxtLookup};
@@ -11,30 +10,52 @@ fn main() {
     // Lookup the IP addresses associated with a name.
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
+    //let response = resolver.lookup_ip("example.com.").unwrap();
     let query = "hotmail.com.";
-
-    let mx_response = resolver.mx_lookup(query);
-    let soa_response = resolver.soa_lookup(query);
+    //let mx_response = resolver.mx_lookup(query);
+    //let soa_response = resolver.soa_lookup(query);
     let txt_response = resolver.txt_lookup(query);
 
-    display_mx(&mx_response);
-    display_soa(&soa_response);
-    display_txt(&txt_response);
+    //display_mx(&mx_response);
+    //display_soa(&soa_response);
+    let mut data = display_txt(&query, &txt_response);
+    println!("\nDecontructing SPF Record");
+    data.parse();
+    //println!("{:?}", data);
+    println!("SPF1: {}\n", data.spf_source());
+    //println!("{:?}", data.includes());
+    data.list_includes();
+    data.ip4_networks();
+    data.ip4_mechanisms();
+    println!("\nIs a redirect: {}", data.is_redirect());
+    if data.is_redirect() {
+        println!("\nredirect: {}", data.redirect());
+        println!(
+            "mechanism: {}",
+            data.redirect_as_mechanism()
+                .unwrap_or("Not a redirect.".to_string())
+        );
+    }
 }
-fn display_txt(txt_response: &ResolveResult<TxtLookup>) {
+
+fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf1 {
+    let mut data = Spf1::default();
     match txt_response {
         Err(_) => println!("No TXT Records."),
         Ok(txt_response) => {
             let mut i = 1;
+            println!("List of TXT records found for {}", &query);
             for record in txt_response.iter() {
                 println!("TXT Record {}:", i);
-                let my_txt = &record.to_string();
-                println!("{}", my_txt);
-                println!("");
+                println!("{}", &record.to_string());
+                if record.to_string().starts_with("v=spf1") {
+                    data = Spf1::new(&record.to_string());
+                }
                 i = i + 1;
             }
         }
     }
+    data
 }
 fn display_soa(soa_response: &ResolveResult<SoaLookup>) {
     match soa_response {

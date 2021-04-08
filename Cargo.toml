@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 trust-dns-resolver = "0.20.1"
+ipnetwork = "0.17.0"
