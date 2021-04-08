@@ -11,7 +11,7 @@ fn main() {
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
-    let query = "hotmail.com.";
+    let query = "gmail.com.";
     //let mx_response = resolver.mx_lookup(query);
     //let soa_response = resolver.soa_lookup(query);
     let txt_response = resolver.txt_lookup(query);
