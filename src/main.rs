@@ -260,10 +260,10 @@ impl Spf1 {
         };
     }
 
-    fn spf_source(&self) -> &String {
+    fn source(&self) -> &String {
         &self.source
     }
-    fn clone_spf(&self) -> &Spf1 {
+    fn clone(&self) -> &Spf1 {
         self.clone()
     }
 
@@ -388,7 +388,7 @@ fn main() {
     println!("\nDecontructing SPF Record");
     data.parse();
     println!("{:?}", data);
-    println!("SPF1: {}\n", data.spf_source());
+    println!("SPF1: {}\n", data.source());
     //println!("{:?}", data.includes());
     data.list_includes();
     data.ip4_networks();
