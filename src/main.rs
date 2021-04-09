@@ -65,28 +65,16 @@ struct SpfMechanism<T> {
 
 impl SpfMechanism<String> {
     fn new_include(qualifier: char, mechanism: String) -> Self {
-        Self {
-            kind: MechanismKind::Include,
-            qualifier,
-            mechanism,
-        }
+        SpfMechanism::new(MechanismKind::Include, qualifier, mechanism)
     }
     fn new_redirect(qualifier: char, mechanism: String) -> Self {
-        Self {
-            kind: MechanismKind::Redirect,
-            qualifier,
-            mechanism,
-        }
+        SpfMechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
     fn new_all(qualifier: char, mechanism: String) -> Self {
-        Self {
-            kind: MechanismKind::All,
-            qualifier,
-            mechanism,
-        }
+        SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
     }
     fn as_mechanism(&self) -> String {
-        // rebuild and return the string represensation of a include, redirect mechanism
+        // rebuild and return the string representation of a include, redirect, a or mx mechanism
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
@@ -115,18 +103,10 @@ impl SpfMechanism<String> {
 }
 impl SpfMechanism<IpNetwork> {
     fn new_ip4(qualifier: char, mechanism: IpNetwork) -> Self {
-        Self {
-            kind: MechanismKind::IpV4,
-            qualifier,
-            mechanism,
-        }
+        SpfMechanism::new(MechanismKind::IpV4, qualifier, mechanism)
     }
     fn new_ip6(qualifier: char, mechanism: IpNetwork) -> Self {
-        Self {
-            kind: MechanismKind::IpV6,
-            qualifier,
-            mechanism,
-        }
+        SpfMechanism::new(MechanismKind::IpV6, qualifier, mechanism)
     }
     fn as_mechanism(&self) -> String {
         // rebuild and return the string represensation of a include, redirect mechanism
