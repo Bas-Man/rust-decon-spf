@@ -3,175 +3,183 @@ use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::MxLookup, lookup::SoaLookup, lookup::TxtLookup};
 
-#[derive(Default, Debug, Clone)]
-struct Include {
-    qualifier: char,
-    txt: String,
+#[derive(Debug, Clone)]
+enum MechanismKind {
+    Include,
+    Redirect,
+    A,
+    MX,
+    IpV4,
+    IpV6,
+    All,
 }
 
-impl Include {
-    fn new(qualifier: char, txt: String) -> Self {
-        Self { qualifier, txt }
+impl MechanismKind {
+    /// Returns `true` if the mechanism_kind is [`Include`].
+    fn is_include(&self) -> bool {
+        matches!(self, Self::Include)
+    }
+    /// Returns `true` if the mechanism_kind is [`A`].
+    fn is_a(&self) -> bool {
+        matches!(self, Self::A)
+    }
+
+    /// Returns `true` if the mechanism_kind is [`MX`].
+    fn is_mx(&self) -> bool {
+        matches!(self, Self::MX)
+    }
+
+    /// Returns `true` if the mechanism_kind is [`IpV4`].
+    fn is_ip_v4(&self) -> bool {
+        matches!(self, Self::IpV4)
+    }
+
+    /// Returns `true` if the mechanism_kind is [`IpV6`].
+    fn is_ip_v6(&self) -> bool {
+        matches!(self, Self::IpV6)
+    }
+
+    /// Returns `true` if the mechanism_kind is [`All`].
+    fn is_all(&self) -> bool {
+        matches!(self, Self::All)
+    }
+
+    /// Returns `true` if the mechanism_kind is [`Redirect`].
+    fn is_redirect(&self) -> bool {
+        matches!(self, Self::Redirect)
+    }
+}
+
+impl Default for MechanismKind {
+    fn default() -> Self {
+        Self::Include
+    }
+}
+
+#[derive(Debug, Clone)]
+struct SpfMechanism<T> {
+    kind: MechanismKind,
+    qualifier: char,
+    mechanism: T,
+}
+
+impl SpfMechanism<String> {
+    fn new_include(qualifier: char, mechanism: String) -> Self {
+        Self {
+            kind: MechanismKind::Include,
+            qualifier,
+            mechanism,
+        }
+    }
+    fn new_redirect(qualifier: char, mechanism: String) -> Self {
+        Self {
+            kind: MechanismKind::Redirect,
+            qualifier,
+            mechanism,
+        }
+    }
+    fn new_all(qualifier: char, mechanism: String) -> Self {
+        Self {
+            kind: MechanismKind::All,
+            qualifier,
+            mechanism,
+        }
     }
     fn as_mechanism(&self) -> String {
-        // rebuild and return the string represensation of a include mechanism
+        // rebuild and return the string represensation of a include, redirect mechanism
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
-        }
-        txt.push_str("include:");
-        txt.push_str(self.txt.as_str());
-        txt
-    }
-    fn is_pass(&self) -> bool {
-        if self.qualifier == '+' {
-            true
         } else {
-            false
+            // Do nothing omitting '+'
         }
-    }
-    fn is_fail(&self) -> bool {
-        if self.qualifier == '-' {
-            true
+        if self.kind.is_redirect() {
+            txt.push_str("redirect=")
+        } else if self.kind.is_include() {
+            txt.push_str("include:")
+        } else if self.kind.is_a() {
+            txt.push_str("a:")
+        } else if self.kind.is_mx() {
+            txt.push_str("mx:")
+        }
+        if self.kind.is_all() {
+            txt.push_str("all")
         } else {
-            false
+            txt.push_str(self.mechanism.as_str());
+        }
+        txt.to_string()
+    }
+    fn as_string(&self) -> &String {
+        &self.mechanism
+    }
+}
+impl SpfMechanism<IpNetwork> {
+    fn new_ip4(qualifier: char, mechanism: IpNetwork) -> Self {
+        Self {
+            kind: MechanismKind::IpV4,
+            qualifier,
+            mechanism,
         }
     }
-    fn is_softfail(&self) -> bool {
-        if self.qualifier == '~' {
-            true
-        } else {
-            false
+    fn new_ip6(qualifier: char, mechanism: IpNetwork) -> Self {
+        Self {
+            kind: MechanismKind::IpV6,
+            qualifier,
+            mechanism,
         }
-    }
-    fn is_neutral(&self) -> bool {
-        if self.qualifier == '?' {
-            true
-        } else {
-            false
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct A {
-    qualifier: char,
-    txt: String,
-}
-
-impl A {
-    fn new(qualifier: char, txt: String) -> Self {
-        Self { qualifier, txt }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Mx {
-    qualifier: char,
-    txt: String,
-}
-
-impl Mx {
-    fn new(qualifier: char, txt: String) -> Self {
-        Self { qualifier, txt }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Ip4 {
-    qualifier: char,
-    ip: IpNetwork,
-}
-
-impl Ip4 {
-    fn new(qualifier: char, ip: IpNetwork) -> Self {
-        Self { qualifier, ip }
-    }
-    fn as_string(&self) -> String {
-        self.ip.to_string()
     }
     fn as_mechanism(&self) -> String {
-        let mut ip4_string = String::new();
+        // rebuild and return the string represensation of a include, redirect mechanism
+        let mut txt = String::new();
         if self.qualifier != '+' {
-            ip4_string.push(self.qualifier);
+            txt.push(self.qualifier);
+        } else {
+            // Do nothing omitting '+'
         }
-        ip4_string.push_str("ip4:");
-        ip4_string.push_str(self.ip.to_string().as_str());
-        ip4_string
+        if self.kind.is_ip_v4() {
+            txt.push_str("ip4:")
+        } else {
+            txt.push_str("ip6:")
+        }
+        txt.push_str(self.mechanism.to_string().as_str());
+        txt.to_string()
     }
-    fn as_ip(&self) -> IpNetwork {
-        self.ip
+    fn as_string(&self) -> String {
+        self.mechanism.to_string()
+    }
+}
+impl<T> SpfMechanism<T> {
+    fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
+        Self {
+            kind,
+            qualifier,
+            mechanism,
+        }
     }
     fn is_pass(&self) -> bool {
-        if self.qualifier == '+' {
-            true
-        } else {
-            false
-        }
+        self.qualifier == '+'
     }
     fn is_fail(&self) -> bool {
-        if self.qualifier == '-' {
-            true
-        } else {
-            false
-        }
+        self.qualifier == '-'
     }
     fn is_softfail(&self) -> bool {
-        if self.qualifier == '~' {
-            true
-        } else {
-            false
-        }
+        self.qualifier == '~'
     }
     fn is_neutral(&self) -> bool {
-        if self.qualifier == '?' {
-            true
-        } else {
-            false
-        }
-    }
-}
-
-impl Default for Ip4 {
-    fn default() -> Self {
-        Self {
-            qualifier: '+',
-            ip: IpNetwork::V4("0.0.0.0/0".parse().unwrap()),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Ip6 {
-    qualifier: char,
-    ip: IpNetwork,
-}
-
-impl Ip6 {
-    fn new(qualifier: char, ip: IpNetwork) -> Self {
-        Self { qualifier, ip }
-    }
-}
-
-impl Default for Ip6 {
-    fn default() -> Self {
-        Self {
-            qualifier: '+',
-            ip: IpNetwork::V6("FE80::1".parse().unwrap()),
-        }
+        self.qualifier == '?'
     }
 }
 
 #[derive(Default, Debug)]
 struct Spf1 {
     source: String,
-    include: Option<Vec<Include>>,
-    redirect: Option<String>,
+    include: Option<Vec<SpfMechanism<String>>>,
+    redirect: Option<SpfMechanism<String>>,
     is_redirected: bool,
-    a: Option<Vec<A>>,
-    mx: Option<Vec<Mx>>,
-    ip4: Option<Vec<Ip4>>,
-    ip6: Option<Vec<Ip6>>,
+    a: Option<Vec<SpfMechanism<String>>>,
+    mx: Option<Vec<SpfMechanism<String>>>,
+    ip4: Option<Vec<SpfMechanism<IpNetwork>>>,
+    ip6: Option<Vec<SpfMechanism<IpNetwork>>>,
     all_qualifier: char,
 }
 
@@ -192,9 +200,9 @@ impl Spf1 {
     fn parse(&mut self) {
         // initialises required variables.
         let records = self.source.split_whitespace();
-        let mut vec_of_includes: Vec<Include> = Vec::new();
-        let mut vec_of_ip4: Vec<Ip4> = Vec::new();
-        let mut vec_of_ip6: Vec<Ip6> = Vec::new();
+        let mut vec_of_includes: Vec<SpfMechanism<String>> = Vec::new();
+        let mut vec_of_ip4: Vec<SpfMechanism<IpNetwork>> = Vec::new();
+        let mut vec_of_ip6: Vec<SpfMechanism<IpNetwork>> = Vec::new();
         //let mut vec_of_a: Vec<A> = Vec::new();
         //let mut vec_of_mx: Vec<A> = Vec::new();
         for record in records {
@@ -202,7 +210,7 @@ impl Spf1 {
                 // Match a redirect
                 let items = record.rsplit("=");
                 for item in items {
-                    self.redirect = Some(item.to_string());
+                    self.redirect = Some(SpfMechanism::new_redirect('+', item.to_string()));
                     break;
                 }
                 self.is_redirected = true;
@@ -210,24 +218,30 @@ impl Spf1 {
                 // Match an include
                 let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 for item in record.rsplit(":") {
-                    vec_of_includes
-                        .push(Include::new(qualifier_and_modified_str.0, item.to_string()));
+                    vec_of_includes.push(SpfMechanism::new_include(
+                        qualifier_and_modified_str.0,
+                        item.to_string(),
+                    ));
                     break; // skip the 'include:'
                 }
             } else if record.contains("ip4:") {
                 // Match an ip4
                 let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
-                    let network: Ip4 =
-                        Ip4::new(qualifier_and_modified_str.0, raw_ip4.parse().unwrap());
+                    let network = SpfMechanism::new_ip4(
+                        qualifier_and_modified_str.0,
+                        raw_ip4.parse().unwrap(),
+                    );
                     vec_of_ip4.push(network);
                 }
             } else if record.contains("ip6:") {
                 // Match an ip6
                 let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
-                    let network: Ip6 =
-                        Ip6::new(qualifier_and_modified_str.0, raw_ip6.parse().unwrap());
+                    let network = SpfMechanism::new_ip6(
+                        qualifier_and_modified_str.0,
+                        raw_ip6.parse().unwrap(),
+                    );
                     vec_of_ip6.push(network);
                 }
             } else if record.ends_with("all") {
@@ -253,7 +267,7 @@ impl Spf1 {
         self.clone()
     }
 
-    fn includes(&self) -> Option<Vec<Include>> {
+    fn includes(&self) -> Option<Vec<SpfMechanism<String>>> {
         self.include.clone()
     }
     fn list_includes(&self) {
@@ -267,7 +281,7 @@ impl Spf1 {
             }
         }
     }
-    fn ip4(&self) -> Option<Vec<Ip4>> {
+    fn ip4(&self) -> Option<Vec<SpfMechanism<IpNetwork>>> {
         self.ip4.clone()
     }
     fn ip4_networks(&self) {
@@ -292,26 +306,41 @@ impl Spf1 {
             }
         }
     }
-    fn ip6(&self) -> Option<Vec<Ip6>> {
+    fn ip6(&self) -> Option<Vec<SpfMechanism<IpNetwork>>> {
         self.ip6.clone()
+    }
+    fn ip6_networks(&self) {
+        match &self.ip6 {
+            None => println!("There are no ip6 networks"),
+            Some(record) => {
+                println!("List of ip6 networks/hosts:");
+                for item in record {
+                    println!("{}", item.as_string());
+                }
+            }
+        }
+    }
+    fn ip6_mechanisms(&self) {
+        match &self.ip6 {
+            None => println!("There are no ip6 spf records."),
+            Some(records) => {
+                println!("\nList of ip6 mechanisms:");
+                for record in records {
+                    println!("{}", record.as_mechanism())
+                }
+            }
+        }
     }
 
     fn is_redirect(&self) -> bool {
         self.is_redirected
     }
     fn redirect(&self) -> String {
-        if self.is_redirect() {
-            self.redirect.as_ref().unwrap().to_string()
-        } else {
-            String::from("")
-        }
+        self.redirect.as_ref().unwrap().as_string().to_string()
     }
     fn redirect_as_mechanism(&self) -> Option<String> {
         if self.is_redirect() {
-            let mut txt = String::new();
-            txt.push_str("redirect=");
-            txt.push_str(self.redirect.as_ref().unwrap().as_str());
-            Some(txt)
+            Some(self.redirect.as_ref().unwrap().as_mechanism())
         } else {
             None
         }
@@ -348,7 +377,7 @@ fn main() {
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
-    let query = "gmail.com.";
+    let query = "hotmail.com.";
     //let mx_response = resolver.mx_lookup(query);
     //let soa_response = resolver.soa_lookup(query);
     let txt_response = resolver.txt_lookup(query);
@@ -358,12 +387,14 @@ fn main() {
     let mut data = display_txt(&query, &txt_response);
     println!("\nDecontructing SPF Record");
     data.parse();
-    //println!("{:?}", data);
+    println!("{:?}", data);
     println!("SPF1: {}\n", data.spf_source());
     //println!("{:?}", data.includes());
     data.list_includes();
     data.ip4_networks();
     data.ip4_mechanisms();
+    data.ip6_networks();
+    data.ip6_mechanisms();
     println!("\nIs a redirect: {}", data.is_redirect());
     if data.is_redirect() {
         println!("\nredirect: {}", data.redirect());
