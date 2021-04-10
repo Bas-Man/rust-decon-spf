@@ -87,7 +87,7 @@ impl SpfMechanism<String> {
             txt.push_str(self.mechanism_prefix_from_kind().as_str());
             txt.push_str(self.mechanism.as_str());
         }
-        txt.to_string()
+        txt
     }
     fn as_string(&self) -> &String {
         &self.mechanism
@@ -110,7 +110,7 @@ impl SpfMechanism<IpNetwork> {
         }
         txt.push_str(self.mechanism_prefix_from_kind().as_str());
         txt.push_str(self.mechanism.to_string().as_str());
-        txt.to_string()
+        txt
     }
     fn as_string(&self) -> String {
         self.mechanism.to_string()
