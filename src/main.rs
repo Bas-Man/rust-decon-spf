@@ -81,18 +81,10 @@ impl SpfMechanism<String> {
         } else {
             // Do nothing omitting '+'
         }
-        if self.kind.is_redirect() {
-            txt.push_str("redirect=")
-        } else if self.kind.is_include() {
-            txt.push_str("include:")
-        } else if self.kind.is_a() {
-            txt.push_str("a:")
-        } else if self.kind.is_mx() {
-            txt.push_str("mx:")
-        }
         if self.kind.is_all() {
             txt.push_str("all")
         } else {
+            txt.push_str(self.mechanism_prefix_from_kind().as_str());
             txt.push_str(self.mechanism.as_str());
         }
         txt.to_string()
@@ -116,11 +108,7 @@ impl SpfMechanism<IpNetwork> {
         } else {
             // Do nothing omitting '+'
         }
-        if self.kind.is_ip_v4() {
-            txt.push_str("ip4:")
-        } else {
-            txt.push_str("ip6:")
-        }
+        txt.push_str(self.mechanism_prefix_from_kind().as_str());
         txt.push_str(self.mechanism.to_string().as_str());
         txt.to_string()
     }
@@ -147,6 +135,18 @@ impl<T> SpfMechanism<T> {
     }
     fn is_neutral(&self) -> bool {
         self.qualifier == '?'
+    }
+    fn mechanism_prefix_from_kind(&self) -> String {
+        let push_str = match self.kind {
+            MechanismKind::Redirect => "redirect=",
+            MechanismKind::Include => "include:",
+            MechanismKind::A => "a:",   // requires modification
+            MechanismKind::MX => "mx:", // requires modication
+            MechanismKind::IpV4 => "ip4:",
+            MechanismKind::IpV6 => "ip6:",
+            MechanismKind::All => "",
+        };
+        push_str.to_string()
     }
 }
 
@@ -357,7 +357,7 @@ fn main() {
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
-    let query = "_netblocks2.google.com.";
+    let query = "gmail.com.";
     //let mx_response = resolver.mx_lookup(query);
     //let soa_response = resolver.soa_lookup(query);
     let txt_response = resolver.txt_lookup(query);
