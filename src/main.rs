@@ -1,157 +1,14 @@
+mod dns;
+//use crate::dns::mx::display_mx;
+//use crate::dns::soa::display_soa;
+use crate::dns::spf_mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
-use trust_dns_resolver::{config::*, lookup::MxLookup, lookup::SoaLookup, lookup::TxtLookup};
-
-#[derive(Debug, Clone)]
-enum MechanismKind {
-    Include,
-    Redirect,
-    A,
-    MX,
-    IpV4,
-    IpV6,
-    All,
-}
-
-impl MechanismKind {
-    /// Returns `true` if the mechanism_kind is [`Include`].
-    fn is_include(&self) -> bool {
-        matches!(self, Self::Include)
-    }
-    /// Returns `true` if the mechanism_kind is [`A`].
-    fn is_a(&self) -> bool {
-        matches!(self, Self::A)
-    }
-
-    /// Returns `true` if the mechanism_kind is [`MX`].
-    fn is_mx(&self) -> bool {
-        matches!(self, Self::MX)
-    }
-
-    /// Returns `true` if the mechanism_kind is [`IpV4`].
-    fn is_ip_v4(&self) -> bool {
-        matches!(self, Self::IpV4)
-    }
-
-    /// Returns `true` if the mechanism_kind is [`IpV6`].
-    fn is_ip_v6(&self) -> bool {
-        matches!(self, Self::IpV6)
-    }
-
-    /// Returns `true` if the mechanism_kind is [`All`].
-    fn is_all(&self) -> bool {
-        matches!(self, Self::All)
-    }
-
-    /// Returns `true` if the mechanism_kind is [`Redirect`].
-    fn is_redirect(&self) -> bool {
-        matches!(self, Self::Redirect)
-    }
-}
-
-impl Default for MechanismKind {
-    fn default() -> Self {
-        Self::Include
-    }
-}
-
-#[derive(Debug, Clone)]
-struct SpfMechanism<T> {
-    kind: MechanismKind,
-    qualifier: char,
-    mechanism: T,
-}
-
-impl SpfMechanism<String> {
-    fn new_include(qualifier: char, mechanism: String) -> Self {
-        SpfMechanism::new(MechanismKind::Include, qualifier, mechanism)
-    }
-    fn new_redirect(qualifier: char, mechanism: String) -> Self {
-        SpfMechanism::new(MechanismKind::Redirect, qualifier, mechanism)
-    }
-    fn new_all(qualifier: char, mechanism: String) -> Self {
-        SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
-    }
-    fn as_mechanism(&self) -> String {
-        // rebuild and return the string representation of a include, redirect, a or mx mechanism
-        let mut txt = String::new();
-        if self.qualifier != '+' {
-            txt.push(self.qualifier);
-        } else {
-            // Do nothing omitting '+'
-        }
-        if self.kind.is_all() {
-            txt.push_str("all")
-        } else {
-            txt.push_str(self.mechanism_prefix_from_kind().as_str());
-            txt.push_str(self.mechanism.as_str());
-        }
-        txt
-    }
-    fn as_string(&self) -> &String {
-        &self.mechanism
-    }
-}
-impl SpfMechanism<IpNetwork> {
-    fn new_ip4(qualifier: char, mechanism: IpNetwork) -> Self {
-        SpfMechanism::new(MechanismKind::IpV4, qualifier, mechanism)
-    }
-    fn new_ip6(qualifier: char, mechanism: IpNetwork) -> Self {
-        SpfMechanism::new(MechanismKind::IpV6, qualifier, mechanism)
-    }
-    fn as_mechanism(&self) -> String {
-        // rebuild and return the string represensation of a include, redirect mechanism
-        let mut txt = String::new();
-        if self.qualifier != '+' {
-            txt.push(self.qualifier);
-        } else {
-            // Do nothing omitting '+'
-        }
-        txt.push_str(self.mechanism_prefix_from_kind().as_str());
-        txt.push_str(self.mechanism.to_string().as_str());
-        txt
-    }
-    fn as_string(&self) -> String {
-        self.mechanism.to_string()
-    }
-}
-impl<T> SpfMechanism<T> {
-    fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
-        Self {
-            kind,
-            qualifier,
-            mechanism,
-        }
-    }
-    fn is_pass(&self) -> bool {
-        self.qualifier == '+'
-    }
-    fn is_fail(&self) -> bool {
-        self.qualifier == '-'
-    }
-    fn is_softfail(&self) -> bool {
-        self.qualifier == '~'
-    }
-    fn is_neutral(&self) -> bool {
-        self.qualifier == '?'
-    }
-    fn mechanism_prefix_from_kind(&self) -> String {
-        let push_str = match self.kind {
-            MechanismKind::Redirect => "redirect=",
-            MechanismKind::Include => "include:",
-            MechanismKind::A => "a:",   // requires modification
-            MechanismKind::MX => "mx:", // requires modication
-            MechanismKind::IpV4 => "ip4:",
-            MechanismKind::IpV6 => "ip6:",
-            MechanismKind::All => "",
-        };
-        push_str.to_string()
-    }
-}
+use trust_dns_resolver::{config::*, lookup::TxtLookup};
 
 #[derive(Default, Debug)]
-struct Spf1 {
+struct Spf {
     source: String,
     include: Option<Vec<SpfMechanism<String>>>,
     redirect: Option<SpfMechanism<String>>,
@@ -163,7 +20,7 @@ struct Spf1 {
     all_qualifier: char,
 }
 
-impl Spf1 {
+impl Spf {
     fn new(str: &String) -> Self {
         Self {
             source: str.clone(),
@@ -243,7 +100,7 @@ impl Spf1 {
     fn source(&self) -> &String {
         &self.source
     }
-    fn clone(&self) -> &Spf1 {
+    fn clone(&self) -> &Spf {
         self.clone()
     }
 
@@ -386,8 +243,8 @@ fn main() {
     }
 }
 
-fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf1 {
-    let mut data = Spf1::default();
+fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
+    let mut data = Spf::default();
     match txt_response {
         Err(_) => println!("No TXT Records."),
         Ok(txt_response) => {
@@ -397,64 +254,11 @@ fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf1 {
                 println!("TXT Record {}:", i);
                 println!("{}", &record.to_string());
                 if record.to_string().starts_with("v=spf1") {
-                    data = Spf1::new(&record.to_string());
+                    data = Spf::new(&record.to_string());
                 }
                 i = i + 1;
             }
         }
     }
     data
-}
-fn display_soa(soa_response: &ResolveResult<SoaLookup>) {
-    match soa_response {
-        Err(_) => println!("No SOA."),
-        Ok(soa_response) => {
-            let soa_iter = soa_response.iter();
-            for record in soa_iter {
-                println!("Admin: {}", record.rname());
-                let email = convert_rname_to_email_address(&record.rname().to_string());
-                println!("Admin Email: {}", email);
-                println!("Primary: {}", record.mname());
-                println!("Serial: {}", record.serial());
-            }
-        }
-    }
-}
-fn convert_rname_to_email_address(rname: &String) -> String {
-    let rname = rname.clone();
-    let mut email_address: String = String::new();
-    let mut splitter = rname.splitn(2, ".");
-    email_address.push_str(splitter.next().unwrap());
-    email_address.push_str("@");
-    email_address.push_str(splitter.next().unwrap());
-    // Remove remaining period (.)
-    email_address.pop();
-    email_address
-}
-fn display_mx(mx_response: &ResolveResult<MxLookup>) {
-    match mx_response {
-        Err(_) => println!("No Records"),
-        Ok(mx_response) => {
-            let records = mx_response.iter();
-            for record in records {
-                println!("{} {}", record.preference(), record.exchange());
-                let resolver =
-                    Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-                let lookup_response = resolver.lookup_ip(record.exchange().to_string().as_str());
-                match lookup_response {
-                    Err(_) => println!("This exchange host has not address."),
-                    Ok(lookup_response) => {
-                        let ip_addrs = lookup_response.iter();
-                        for ip_addr in ip_addrs {
-                            if ip_addr.is_ipv4() {
-                                println!("   ip4: {}", ip_addr)
-                            } else {
-                                println!("   ip6: {}", ip_addr)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
