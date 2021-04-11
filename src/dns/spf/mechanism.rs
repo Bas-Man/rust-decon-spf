@@ -1,4 +1,4 @@
-use crate::dns::mechanismkind::MechanismKind;
+use crate::dns::spf::kinds::MechanismKind;
 use ipnetwork::IpNetwork;
 #[derive(Debug, Clone)]
 pub struct SpfMechanism<T> {
