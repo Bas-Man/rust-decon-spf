@@ -1,4 +1,7 @@
-use crate::dns::spf_mechanism::SpfMechanism;
+pub mod kinds;
+pub mod mechanism;
+
+use crate::dns::spf::mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
 #[derive(Default, Debug)]
 pub struct Spf {
