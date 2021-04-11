@@ -82,21 +82,21 @@ impl Spf {
                 self.all_qualifier = return_and_remove_qualifier(record, 'a').0;
             }
         }
-        if vec_of_includes.len() > 0 {
+        if !vec_of_includes.is_empty() {
             self.include = Some(vec_of_includes);
         };
-        if vec_of_ip4.len() > 0 {
+        if !vec_of_ip4.is_empty() {
             self.ip4 = Some(vec_of_ip4);
         };
-        if vec_of_ip6.len() > 0 {
+        if !vec_of_ip6.is_empty() {
             self.ip6 = Some(vec_of_ip6);
         };
     }
 
-    pub fn source(&self) -> &String {
-        &self.source
+    pub fn source(&self) -> String {
+        self.source.clone()
     }
-    pub fn clone(&self) -> &Spf {
+    pub fn spf_clone(&self) -> &Spf {
         self.clone()
     }
 
