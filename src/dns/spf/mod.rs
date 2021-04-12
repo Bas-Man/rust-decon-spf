@@ -93,8 +93,8 @@ impl Spf {
         };
     }
 
-    pub fn source(&self) -> String {
-        self.source.clone()
+    pub fn source(&self) -> &String {
+        &self.source
     }
     pub fn spf_clone(&self) -> &Spf {
         self.clone()
