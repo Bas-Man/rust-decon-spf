@@ -23,9 +23,7 @@ impl SpfMechanism<String> {
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
-        } else {
-            // Do nothing omitting '+'
-        }
+        };
         if self.kind.is_all() {
             txt.push_str("all")
         } else {
