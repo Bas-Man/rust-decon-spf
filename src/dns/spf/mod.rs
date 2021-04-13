@@ -124,6 +124,8 @@ impl Spf {
                 println!("List of ip4 networks/hosts:");
                 for item in record {
                     println!("{}", item.as_string());
+                    print!("Network: {}", item.as_network().network());
+                    println!(" Subnet: {}", item.as_network().prefix());
                 }
             }
         }
@@ -149,6 +151,8 @@ impl Spf {
                 println!("List of ip6 networks/hosts:");
                 for item in record {
                     println!("{}", item.as_string());
+                    print!("Network: {}", item.as_network().network());
+                    println!(" Subnet: {}", item.as_network().prefix());
                 }
             }
         }
@@ -173,7 +177,7 @@ impl Spf {
     }
     pub fn redirect_as_mechanism(&self) -> Option<String> {
         if self.is_redirect() {
-            Some(self.redirect.as_ref().unwrap().as_mechanism())
+            Some(self.redirect.as_ref()?.as_mechanism())
         } else {
             None
         }
