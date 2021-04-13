@@ -1,5 +1,6 @@
 use crate::dns::spf::kinds::MechanismKind;
 use ipnetwork::IpNetwork;
+
 #[derive(Debug, Clone)]
 pub struct SpfMechanism<T> {
     kind: MechanismKind,
@@ -164,5 +165,30 @@ mod SpfMechanismIpNetwork {
         let ip4_neutral = SpfMechanism::new_ip4('?', "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_neutral.is_neutral(), true);
         assert_eq!(ip4_neutral.as_mechanism(), "?ip4:203.32.160.10/32");
+    }
+    #[test]
+    fn test_ip6_pass() {
+        let ip_pass = SpfMechanism::new_ip6('+', "2001:4860:4000::/36".parse().unwrap());
+        assert_eq!(ip_pass.is_pass(), true);
+        assert_eq!(ip_pass.as_string(), "2001:4860:4000::/36");
+        assert_eq!(ip_pass.as_mechanism(), "ip6:2001:4860:4000::/36");
+    }
+    #[test]
+    fn test_ip6_fail() {
+        let ip_fail = SpfMechanism::new_ip6('-', "2001:4860:4000::/36".parse().unwrap());
+        assert_eq!(ip_fail.is_fail(), true);
+        assert_eq!(ip_fail.as_mechanism(), "-ip6:2001:4860:4000::/36");
+    }
+    #[test]
+    fn test_ip6_softfail() {
+        let ip_softfail = SpfMechanism::new_ip6('~', "2001:4860:4000::/36".parse().unwrap());
+        assert_eq!(ip_softfail.is_softfail(), true);
+        assert_eq!(ip_softfail.as_mechanism(), "~ip6:2001:4860:4000::/36");
+    }
+    #[test]
+    fn test_ip6_neutral() {
+        let ip_neutral = SpfMechanism::new_ip6('?', "2001:4860:4000::/36".parse().unwrap());
+        assert_eq!(ip_neutral.is_neutral(), true);
+        assert_eq!(ip_neutral.as_mechanism(), "?ip6:2001:4860:4000::/36");
     }
 }
