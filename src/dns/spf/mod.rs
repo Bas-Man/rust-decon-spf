@@ -200,9 +200,50 @@ fn return_and_remove_qualifier(record: &str, c: char) -> (char, &str) {
         ('+', record)
     }
 }
+#[test]
+fn test_return_and_remove_qualifier_no_qualifier() {
+    let source = "no prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('+', c);
+    assert_eq!(source, new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_pass() {
+    let source = "+prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('+', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_fail() {
+    let source = "-prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('-', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_softfail() {
+    let source = "~prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('~', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_neutral() {
+    let source = "?prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('?', c);
+    assert_eq!("prefix", new_str);
+}
 fn remove_qualifier(record: &str) -> &str {
     // Remove leading (+,-,~,?) character and return an updated str
     let mut chars = record.chars();
     chars.next();
     chars.as_str()
+}
+#[test]
+fn test_remove_qualifier() {
+    let test_str = "abc";
+    let result = remove_qualifier(test_str);
+    assert_eq!(result, "bc");
 }
