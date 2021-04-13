@@ -145,6 +145,9 @@ mod SpfMechanismIpNetwork {
         assert_eq!(ip4_pass.is_pass(), true);
         assert_eq!(ip4_pass.as_string(), "203.32.160.10/32");
         assert_eq!(ip4_pass.as_mechanism(), "ip4:203.32.160.10/32");
+        assert_eq!(ip4_pass.as_network().ip().to_string(), "203.32.160.10");
+        assert_eq!(ip4_pass.as_network().prefix().to_string(), "32");
+        assert_eq!(ip4_pass.as_network().network().to_string(), "203.32.160.10");
     }
     #[test]
     fn test_ip4_fail() {
