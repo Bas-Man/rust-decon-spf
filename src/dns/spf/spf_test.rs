@@ -12,6 +12,11 @@ mod test_spf {
         assert_eq!(input, spf.source());
         spf.parse();
         assert_eq!(spf.is_redirect(), true);
+        assert_eq!(spf.include.is_none(), true);
+        assert_eq!(spf.a.is_none(), true);
+        assert_eq!(spf.mx.is_none(), true);
+        assert_eq!(spf.ip4.is_none(), true);
+        assert_eq!(spf.ip6.is_none(), true);
     }
     #[test]
     fn test_hotmail() {
