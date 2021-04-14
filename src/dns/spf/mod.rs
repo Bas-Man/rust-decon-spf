@@ -1,8 +1,10 @@
 pub mod kinds;
 pub mod mechanism;
+mod spf_test;
 
 use crate::dns::spf::mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
+
 #[derive(Default, Debug)]
 pub struct Spf {
     source: String,
@@ -82,13 +84,13 @@ impl Spf {
                 self.all_qualifier = return_and_remove_qualifier(record, 'a').0;
             }
         }
-        if vec_of_includes.len() > 0 {
+        if !vec_of_includes.is_empty() {
             self.include = Some(vec_of_includes);
         };
-        if vec_of_ip4.len() > 0 {
+        if !vec_of_ip4.is_empty() {
             self.ip4 = Some(vec_of_ip4);
         };
-        if vec_of_ip6.len() > 0 {
+        if !vec_of_ip6.is_empty() {
             self.ip6 = Some(vec_of_ip6);
         };
     }
@@ -96,12 +98,12 @@ impl Spf {
     pub fn source(&self) -> &String {
         &self.source
     }
-    pub fn clone(&self) -> &Spf {
+    pub fn spf_clone(&self) -> &Spf {
         self.clone()
     }
 
-    pub fn includes(&self) -> Option<Vec<SpfMechanism<String>>> {
-        self.include.clone()
+    pub fn includes(&self) -> &Option<Vec<SpfMechanism<String>>> {
+        &self.include
     }
     pub fn list_includes(&self) {
         match &self.include {
@@ -114,8 +116,8 @@ impl Spf {
             }
         }
     }
-    pub fn ip4(&self) -> Option<Vec<SpfMechanism<IpNetwork>>> {
-        self.ip4.clone()
+    pub fn ip4(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
+        &self.ip4
     }
     pub fn ip4_networks(&self) {
         match &self.ip4 {
@@ -124,6 +126,8 @@ impl Spf {
                 println!("List of ip4 networks/hosts:");
                 for item in record {
                     println!("{}", item.as_string());
+                    print!("Network: {}", item.as_network().network());
+                    println!(" Subnet: {}", item.as_network().prefix());
                 }
             }
         }
@@ -139,8 +143,8 @@ impl Spf {
             }
         }
     }
-    pub fn ip6(&self) -> Option<Vec<SpfMechanism<IpNetwork>>> {
-        self.ip6.clone()
+    pub fn ip6(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
+        &self.ip6
     }
     pub fn ip6_networks(&self) {
         match &self.ip6 {
@@ -149,6 +153,8 @@ impl Spf {
                 println!("List of ip6 networks/hosts:");
                 for item in record {
                     println!("{}", item.as_string());
+                    print!("Network: {}", item.as_network().network());
+                    println!(" Subnet: {}", item.as_network().prefix());
                 }
             }
         }
@@ -171,9 +177,12 @@ impl Spf {
     pub fn redirect(&self) -> String {
         self.redirect.as_ref().unwrap().as_string().to_string()
     }
+    pub fn all(&self) -> &char {
+        &self.all_qualifier
+    }
     pub fn redirect_as_mechanism(&self) -> Option<String> {
         if self.is_redirect() {
-            Some(self.redirect.as_ref().unwrap().as_mechanism())
+            Some(self.redirect.as_ref()?.as_mechanism())
         } else {
             None
         }
@@ -195,9 +204,50 @@ fn return_and_remove_qualifier(record: &str, c: char) -> (char, &str) {
         ('+', record)
     }
 }
+#[test]
+fn test_return_and_remove_qualifier_no_qualifier() {
+    let source = "no prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('+', c);
+    assert_eq!(source, new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_pass() {
+    let source = "+prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('+', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_fail() {
+    let source = "-prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('-', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_softfail() {
+    let source = "~prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('~', c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn test_return_and_remove_qualifier_neutral() {
+    let source = "?prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!('?', c);
+    assert_eq!("prefix", new_str);
+}
 fn remove_qualifier(record: &str) -> &str {
     // Remove leading (+,-,~,?) character and return an updated str
     let mut chars = record.chars();
     chars.next();
     chars.as_str()
+}
+#[test]
+fn test_remove_qualifier() {
+    let test_str = "abc";
+    let result = remove_qualifier(test_str);
+    assert_eq!(result, "bc");
 }
