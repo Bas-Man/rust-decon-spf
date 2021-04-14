@@ -1,5 +1,6 @@
 pub mod kinds;
 pub mod mechanism;
+mod spf_test;
 
 use crate::dns::spf::mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
@@ -175,6 +176,9 @@ impl Spf {
     }
     pub fn redirect(&self) -> String {
         self.redirect.as_ref().unwrap().as_string().to_string()
+    }
+    pub fn all(&self) -> &char {
+        &self.all_qualifier
     }
     pub fn redirect_as_mechanism(&self) -> Option<String> {
         if self.is_redirect() {
