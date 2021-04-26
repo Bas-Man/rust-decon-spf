@@ -37,6 +37,7 @@ impl SpfMechanism<String> {
     }
 }
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod SpfMechanismString {
 
     use super::SpfMechanism;
@@ -135,6 +136,7 @@ impl<T> SpfMechanism<T> {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod SpfMechanismIpNetwork {
 
     use super::SpfMechanism;
