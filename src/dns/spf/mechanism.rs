@@ -15,6 +15,9 @@ impl SpfMechanism<String> {
     pub fn new_redirect(qualifier: char, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
+    pub fn new_a(qualifier: char, mechanism: String) -> Self {
+        SpfMechanism::new(MechanismKind::A, qualifier, mechanism)
+    }
     pub fn new_all(qualifier: char, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
     }
@@ -73,6 +76,12 @@ mod SpfMechanismString {
         assert_eq!(include.is_neutral(), true);
         assert_eq!(include.as_mechanism(), "?include:_spf.test.com");
     }
+    #[test]
+    fn test_new_a() {
+        let a_mechanism = SpfMechanism::new_a('-', "a".to_string());
+        assert_eq!(a_mechanism.is_fail(), true);
+        assert_eq!(a_mechanism.as_string(), "a");
+    }
 }
 
 impl SpfMechanism<IpNetwork> {
@@ -125,7 +134,7 @@ impl<T> SpfMechanism<T> {
         let push_str = match self.kind {
             MechanismKind::Redirect => "redirect=",
             MechanismKind::Include => "include:",
-            MechanismKind::A => "a:",   // requires modification
+            MechanismKind::A => "",     // requires modification
             MechanismKind::MX => "mx:", // requires modication
             MechanismKind::IpV4 => "ip4:",
             MechanismKind::IpV6 => "ip6:",

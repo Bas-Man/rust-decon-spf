@@ -1,9 +1,11 @@
 pub mod kinds;
 pub mod mechanism;
+mod spf_a_mechanism_test;
 mod spf_test;
 
 use crate::dns::spf::mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
+use regex::Regex;
 
 #[derive(Default, Debug)]
 pub struct Spf {
@@ -38,9 +40,12 @@ impl Spf {
         let mut vec_of_includes: Vec<SpfMechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<SpfMechanism<IpNetwork>> = Vec::new();
         let mut vec_of_ip6: Vec<SpfMechanism<IpNetwork>> = Vec::new();
-        //let mut vec_of_a: Vec<A> = Vec::new();
+        let mut vec_of_a: Vec<SpfMechanism<String>> = Vec::new();
         //let mut vec_of_mx: Vec<A> = Vec::new();
         for record in records {
+            // Make this lazy.
+            let a_pattern =
+                Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
             if record.contains("redirect=") {
                 // Match a redirect
                 let items = record.rsplit("=");
@@ -81,7 +86,9 @@ impl Spf {
                 }
             } else if record.ends_with("all") {
                 // deal with all if present
-                self.all_qualifier = return_and_remove_qualifier(record, 'a').0;
+                self.all_qualifier = return_and_remove_qualifier(record, 'a').0
+            } else if let Some(a_mechanism) = capture_matches(a_pattern, record) {
+                vec_of_a.push(a_mechanism);
             }
         }
         if !vec_of_includes.is_empty() {
@@ -93,6 +100,9 @@ impl Spf {
         if !vec_of_ip6.is_empty() {
             self.ip6 = Some(vec_of_ip6);
         };
+        if !vec_of_a.is_empty() {
+            self.a = Some(vec_of_a);
+        }
     }
 
     pub fn source(&self) -> &String {
@@ -115,6 +125,9 @@ impl Spf {
                 }
             }
         }
+    }
+    pub fn a(&self) -> &Option<Vec<SpfMechanism<String>>> {
+        &self.a
     }
     pub fn ip4(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
         &self.ip4
@@ -250,4 +263,84 @@ fn test_remove_qualifier() {
     let test_str = "abc";
     let result = remove_qualifier(test_str);
     assert_eq!(result, "bc");
+}
+
+fn capture_matches(pattern: Regex, string: &str) -> Option<SpfMechanism<String>> {
+    let caps = pattern.captures(string);
+    let mut q: char = '+';
+    let m: String;
+    match caps {
+        None => return None,
+        Some(caps) => {
+            // There was a match
+            if caps.name("qualifier").is_some() {
+                q = caps
+                    .name("qualifier")
+                    .unwrap()
+                    .as_str()
+                    .chars()
+                    .nth(0)
+                    .unwrap();
+            };
+            if caps.name("mechanism").is_some() {
+                m = caps.name("mechanism").unwrap().as_str().to_string();
+            } else {
+                m = caps.get(0).unwrap().as_str().to_string();
+            }
+            let a = SpfMechanism::new_a(q, (*m).to_string());
+            Some(a)
+        }
+    }
+}
+#[test]
+fn test_match_on_a_only() {
+    let string = "a";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_pass(), true);
+    assert_eq!(test.as_string(), "a");
+    assert_eq!(test.as_mechanism(), "a");
+}
+#[test]
+fn test_match_on_a_colon() {
+    let string = "-a:example.com";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_fail(), true);
+    assert_eq!(test.as_string(), "a:example.com");
+    assert_eq!(test.as_mechanism(), "-a:example.com");
+}
+#[test]
+fn test_match_on_a_slash() {
+    let string = "~a/24";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_softfail(), true);
+    assert_eq!(test.as_string(), "a/24");
+    assert_eq!(test.as_mechanism(), "~a/24");
+}
+#[test]
+fn test_match_on_a_colon_slash() {
+    let string = "+a:example.com/24";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_pass(), true);
+    assert_eq!(test.as_string(), "a:example.com/24");
+    assert_eq!(test.as_mechanism(), "a:example.com/24");
 }
