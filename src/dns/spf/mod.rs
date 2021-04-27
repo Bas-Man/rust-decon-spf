@@ -1,6 +1,7 @@
 pub mod kinds;
 pub mod mechanism;
 mod spf_a_mechanism_test;
+mod spf_mx_mechanism_test;
 mod spf_test;
 
 use crate::dns::spf::mechanism::SpfMechanism;
@@ -41,11 +42,13 @@ impl Spf {
         let mut vec_of_ip4: Vec<SpfMechanism<IpNetwork>> = Vec::new();
         let mut vec_of_ip6: Vec<SpfMechanism<IpNetwork>> = Vec::new();
         let mut vec_of_a: Vec<SpfMechanism<String>> = Vec::new();
-        //let mut vec_of_mx: Vec<A> = Vec::new();
+        let mut vec_of_mx: Vec<SpfMechanism<String>> = Vec::new();
         for record in records {
             // Make this lazy.
             let a_pattern =
                 Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
+            let mx_pattern =
+                Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
             if record.contains("redirect=") {
                 // Match a redirect
                 let items = record.rsplit("=");
@@ -89,6 +92,8 @@ impl Spf {
                 self.all_qualifier = return_and_remove_qualifier(record, 'a').0
             } else if let Some(a_mechanism) = capture_matches(a_pattern, record) {
                 vec_of_a.push(a_mechanism);
+            } else if let Some(mx_mechanism) = capture_matches(mx_pattern, record) {
+                vec_of_mx.push(mx_mechanism);
             }
         }
         if !vec_of_includes.is_empty() {
@@ -102,6 +107,9 @@ impl Spf {
         };
         if !vec_of_a.is_empty() {
             self.a = Some(vec_of_a);
+        }
+        if !vec_of_mx.is_empty() {
+            self.mx = Some(vec_of_mx);
         }
     }
 
@@ -128,6 +136,9 @@ impl Spf {
     }
     pub fn a(&self) -> &Option<Vec<SpfMechanism<String>>> {
         &self.a
+    }
+    pub fn mx(&self) -> &Option<Vec<SpfMechanism<String>>> {
+        &self.mx
     }
     pub fn ip4(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
         &self.ip4
@@ -343,4 +354,57 @@ fn test_match_on_a_colon_slash() {
     assert_eq!(test.is_pass(), true);
     assert_eq!(test.as_string(), "a:example.com/24");
     assert_eq!(test.as_mechanism(), "a:example.com/24");
+}
+// MX
+#[test]
+fn test_match_on_mx_only() {
+    let string = "mx";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_pass(), true);
+    assert_eq!(test.as_string(), "mx");
+    assert_eq!(test.as_mechanism(), "mx");
+}
+#[test]
+fn test_match_on_mx_colon() {
+    let string = "-mx:example.com";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_fail(), true);
+    assert_eq!(test.as_string(), "mx:example.com");
+    assert_eq!(test.as_mechanism(), "-mx:example.com");
+}
+#[test]
+fn test_match_on_mx_slash() {
+    let string = "~mx/24";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_softfail(), true);
+    assert_eq!(test.as_string(), "mx/24");
+    assert_eq!(test.as_mechanism(), "~mx/24");
+}
+#[test]
+fn test_match_on_mx_colon_slash() {
+    let string = "+mx:example.com/24";
+    let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
+    let option_test: Option<SpfMechanism<String>>;
+
+    option_test = capture_matches(pattern, &string);
+
+    let test = option_test.unwrap();
+    assert_eq!(test.is_pass(), true);
+    assert_eq!(test.as_string(), "mx:example.com/24");
+    assert_eq!(test.as_mechanism(), "mx:example.com/24");
 }
