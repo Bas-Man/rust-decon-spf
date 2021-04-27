@@ -90,9 +90,13 @@ impl Spf {
             } else if record.ends_with("all") {
                 // deal with all if present
                 self.all_qualifier = return_and_remove_qualifier(record, 'a').0
-            } else if let Some(a_mechanism) = capture_matches(a_pattern, record) {
+            } else if let Some(a_mechanism) =
+                capture_matches(a_pattern, record, kinds::MechanismKind::A)
+            {
                 vec_of_a.push(a_mechanism);
-            } else if let Some(mx_mechanism) = capture_matches(mx_pattern, record) {
+            } else if let Some(mx_mechanism) =
+                capture_matches(mx_pattern, record, kinds::MechanismKind::MX)
+            {
                 vec_of_mx.push(mx_mechanism);
             }
         }
@@ -276,7 +280,11 @@ fn test_remove_qualifier() {
     assert_eq!(result, "bc");
 }
 
-fn capture_matches(pattern: Regex, string: &str) -> Option<SpfMechanism<String>> {
+fn capture_matches(
+    pattern: Regex,
+    string: &str,
+    kind: kinds::MechanismKind,
+) -> Option<SpfMechanism<String>> {
     let caps = pattern.captures(string);
     let mut q: char = '+';
     let m: String;
@@ -293,13 +301,9 @@ fn capture_matches(pattern: Regex, string: &str) -> Option<SpfMechanism<String>>
                     .nth(0)
                     .unwrap();
             };
-            if caps.name("mechanism").is_some() {
-                m = caps.name("mechanism").unwrap().as_str().to_string();
-            } else {
-                m = caps.get(0).unwrap().as_str().to_string();
-            }
-            let a = SpfMechanism::new_a(q, (*m).to_string());
-            Some(a)
+            m = caps.name("mechanism").unwrap().as_str().to_string();
+            let mechanism = SpfMechanism::new(kind, q, (*m).to_string());
+            Some(mechanism)
         }
     }
 }
@@ -309,7 +313,7 @@ fn test_match_on_a_only() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
@@ -322,7 +326,7 @@ fn test_match_on_a_colon() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
@@ -335,7 +339,7 @@ fn test_match_on_a_slash() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
@@ -348,12 +352,13 @@ fn test_match_on_a_colon_slash() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>a(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
     assert_eq!(test.as_string(), "a:example.com/24");
     assert_eq!(test.as_mechanism(), "a:example.com/24");
+    assert!(test.kind.is_a());
 }
 // MX
 #[test]
@@ -362,7 +367,7 @@ fn test_match_on_mx_only() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
@@ -375,7 +380,7 @@ fn test_match_on_mx_colon() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
@@ -388,7 +393,7 @@ fn test_match_on_mx_slash() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
@@ -401,7 +406,7 @@ fn test_match_on_mx_colon_slash() {
     let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?(?P<mechanism>mx(?:[:/]{0,1}.+)?)").unwrap();
     let option_test: Option<SpfMechanism<String>>;
 
-    option_test = capture_matches(pattern, &string);
+    option_test = capture_matches(pattern, &string, kinds::MechanismKind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);

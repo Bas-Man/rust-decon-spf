@@ -18,6 +18,9 @@ impl SpfMechanism<String> {
     pub fn new_a(qualifier: char, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::A, qualifier, mechanism)
     }
+    pub fn new_mx(qualifier: char, mechanism: String) -> Self {
+        SpfMechanism::new(MechanismKind::MX, qualifier, mechanism)
+    }
     pub fn new_all(qualifier: char, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
     }
