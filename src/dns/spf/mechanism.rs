@@ -134,8 +134,8 @@ impl<T> SpfMechanism<T> {
         let push_str = match self.kind {
             MechanismKind::Redirect => "redirect=",
             MechanismKind::Include => "include:",
-            MechanismKind::A => "",     // requires modification
-            MechanismKind::MX => "mx:", // requires modication
+            MechanismKind::A => "",
+            MechanismKind::MX => "",
             MechanismKind::IpV4 => "ip4:",
             MechanismKind::IpV6 => "ip6:",
             MechanismKind::All => "",
