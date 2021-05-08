@@ -1,15 +1,13 @@
-//! This module creates an object that contains a deconstructed SPF DNS record.
+//! This module allows you to deconstruct an exiting SPF DNS Record into its
+//! constituant parts.  
+//! It is not intended to validate the spf record.
 
 pub mod kinds;
 pub mod mechanism;
 #[doc(hidden)]
-mod spf_a_mechanism_test;
-#[doc(hidden)]
-mod spf_mx_mechanism_test;
-#[doc(hidden)]
-mod spf_test;
+mod tests;
 
-use crate::dns::spf::mechanism::SpfMechanism;
+use crate::spf::mechanism::SpfMechanism;
 use ipnetwork::IpNetwork;
 use regex::Regex;
 
@@ -32,7 +30,9 @@ impl Spf {
     /// # Example
     ///
     /// ```
-    /// let spf = Spf::new("v=spf1 redirect=_spf.example.com");
+    /// use decon_spf::spf::Spf;
+    /// let source_str = "v=spf1 redirect=_spf.example.com";
+    /// let spf = Spf::new(&source_str.to_string());
     /// ```
     ///
     pub fn new(str: &String) -> Self {

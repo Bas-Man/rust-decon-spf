@@ -1,7 +1,4 @@
-mod dns;
-//use crate::dns::mx::display_mx;
-//use crate::dns::soa::display_soa;
-use crate::dns::spf::Spf;
+use decon_spf::spf::Spf;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::TxtLookup};

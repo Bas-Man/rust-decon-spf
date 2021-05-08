@@ -2,7 +2,7 @@
 
 mod test_spf {
 
-    use crate::dns::spf::Spf;
+    use crate::spf::Spf;
 
     #[test]
     fn test_redirect() {

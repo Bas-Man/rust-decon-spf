@@ -1,7 +1,7 @@
 [package]
-name = "trust-dns"
+name = "decon-spf"
 version = "0.1.0"
-authors = ["Adam Spann <Bas-Man@users.noreply.github.com>"]
+authors = ["Adam.S <Bas-Man@users.noreply.github.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

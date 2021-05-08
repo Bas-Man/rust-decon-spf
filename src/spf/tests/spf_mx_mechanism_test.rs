@@ -2,7 +2,7 @@
 
 mod spf_mx_mechanism_test {
 
-    use crate::dns::spf::Spf;
+    use crate::spf::Spf;
 
     #[test]
     fn test_simple_mx_mechanism() {

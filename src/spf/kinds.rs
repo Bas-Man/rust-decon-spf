@@ -1,15 +1,27 @@
-/// Defines the supported SPF Mechanicms
+/// Defines the supported SPF Mechanisms
 #[derive(Debug, Clone)]
 pub enum MechanismKind {
     /// Represents a Mechanism of type include:
     Include,
-    /// Represents a Mechanism of type redirect=
+    /// Represents a Mechanism of type redirect=  
+    /// If this is present, no other mechanism should be present.
     Redirect,
     /// Represents a Mechanism of type a
+    /// # Possible Values:  
+    /// ```bash
+    /// a (Only one allowed if in this format)  
+    /// a/24  
+    /// a:example.com/24 (/prefix is optional)
+    /// ```
     A,
     /// Represents a Mechanism of type mx
+    /// Possible values follow the same loyout as for [`A`](MechanismKind::A)
     MX,
-    /// Represents a Mechanism of type ip4:
+    /// Represents a Mechanism of type ip4:  
+    /// # Example Values:  
+    /// ```bash
+    /// ip4:192.168.11.0/24 ip4:10.10.1.1
+    /// ```
     IpV4,
     /// Represents a Mechanism of type ip6:
     IpV6,

@@ -1,4 +1,4 @@
-use crate::dns::spf::kinds::MechanismKind;
+use crate::spf::kinds::MechanismKind;
 use ipnetwork::IpNetwork;
 
 #[derive(Debug, Clone)]
@@ -6,6 +6,44 @@ pub struct SpfMechanism<T> {
     kind: MechanismKind,
     qualifier: char,
     mechanism: T,
+}
+
+impl<T> SpfMechanism<T> {
+    //! These are the generic methods for the struct of SpfMechanism.  
+    //! All the following methods can be used on any struct of type SpfMechanism.
+    #[doc(hidden)]
+    pub fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
+        Self {
+            kind,
+            qualifier,
+            mechanism,
+        }
+    }
+    pub fn is_pass(&self) -> bool {
+        self.qualifier == '+'
+    }
+    pub fn is_fail(&self) -> bool {
+        self.qualifier == '-'
+    }
+    pub fn is_softfail(&self) -> bool {
+        self.qualifier == '~'
+    }
+    pub fn is_neutral(&self) -> bool {
+        self.qualifier == '?'
+    }
+    #[doc(hidden)]
+    fn mechanism_prefix_from_kind(&self) -> String {
+        let push_str = match self.kind {
+            MechanismKind::Redirect => "redirect=",
+            MechanismKind::Include => "include:",
+            MechanismKind::A => "",
+            MechanismKind::MX => "",
+            MechanismKind::IpV4 => "ip4:",
+            MechanismKind::IpV6 => "ip6:",
+            MechanismKind::All => "",
+        };
+        push_str.to_string()
+    }
 }
 
 impl SpfMechanism<String> {
@@ -101,8 +139,18 @@ impl SpfMechanism<IpNetwork> {
     pub fn new_ip6(qualifier: char, mechanism: IpNetwork) -> Self {
         SpfMechanism::new(MechanismKind::IpV6, qualifier, mechanism)
     }
+    // Returns the mechanism string representation of an IP4/6 mechanism.
+    // # Example
+    ///
+    /// ```
+    /// use ipnetwork::IpNetwork;
+    /// use decon_spf::spf::mechanism::SpfMechanism;
+    /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
+    /// let ip_mechanism = SpfMechanism::new_ip4('+', ip);
+    /// assert_eq!(ip_mechanism.as_mechanism(), "ip4:192.168.11.0/24");
+    /// ```
+    ///
     pub fn as_mechanism(&self) -> String {
-        // rebuild and return the string represensation of a include, redirect mechanism
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
@@ -112,45 +160,21 @@ impl SpfMechanism<IpNetwork> {
         txt
     }
     pub fn as_string(&self) -> String {
+        //! Returns the simple string representation of the mechanism
+        //! # Example
+        //!
+        //! ```
+        //! use ipnetwork::IpNetwork;
+        //! use decon_spf::spf::mechanism::SpfMechanism;
+        //! let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
+        //! let ip_mechanism = SpfMechanism::new_ip4('+', ip);
+        //! assert_eq!(ip_mechanism.as_string(), "192.168.11.0/24");
+        //! ```
+        //!
         self.mechanism.to_string()
     }
     pub fn as_network(&self) -> &IpNetwork {
         &self.mechanism
-    }
-}
-impl<T> SpfMechanism<T> {
-    #[doc(hidden)]
-    pub fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
-        Self {
-            kind,
-            qualifier,
-            mechanism,
-        }
-    }
-    pub fn is_pass(&self) -> bool {
-        self.qualifier == '+'
-    }
-    pub fn is_fail(&self) -> bool {
-        self.qualifier == '-'
-    }
-    pub fn is_softfail(&self) -> bool {
-        self.qualifier == '~'
-    }
-    pub fn is_neutral(&self) -> bool {
-        self.qualifier == '?'
-    }
-    #[doc(hidden)]
-    fn mechanism_prefix_from_kind(&self) -> String {
-        let push_str = match self.kind {
-            MechanismKind::Redirect => "redirect=",
-            MechanismKind::Include => "include:",
-            MechanismKind::A => "",
-            MechanismKind::MX => "",
-            MechanismKind::IpV4 => "ip4:",
-            MechanismKind::IpV6 => "ip6:",
-            MechanismKind::All => "",
-        };
-        push_str.to_string()
     }
 }
 
