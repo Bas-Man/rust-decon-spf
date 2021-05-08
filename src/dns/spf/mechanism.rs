@@ -24,8 +24,8 @@ impl SpfMechanism<String> {
     pub fn new_all(qualifier: char, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
     }
+    /// Rebuild and return the string representation of the given mechanism
     pub fn as_mechanism(&self) -> String {
-        // rebuild and return the string representation of a include, redirect, a or mx mechanism
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
@@ -88,6 +88,13 @@ mod SpfMechanismString {
 }
 
 impl SpfMechanism<IpNetwork> {
+    pub fn new_ip(qualifier: char, mechanism: IpNetwork) -> Self {
+        if mechanism.is_ipv4() {
+            SpfMechanism::new_ip4(qualifier, mechanism)
+        } else {
+            SpfMechanism::new_ip6(qualifier, mechanism)
+        }
+    }
     pub fn new_ip4(qualifier: char, mechanism: IpNetwork) -> Self {
         SpfMechanism::new(MechanismKind::IpV4, qualifier, mechanism)
     }
@@ -99,9 +106,7 @@ impl SpfMechanism<IpNetwork> {
         let mut txt = String::new();
         if self.qualifier != '+' {
             txt.push(self.qualifier);
-        } else {
-            // Do nothing omitting '+'
-        }
+        };
         txt.push_str(self.mechanism_prefix_from_kind().as_str());
         txt.push_str(self.mechanism.to_string().as_str());
         txt
@@ -114,6 +119,7 @@ impl SpfMechanism<IpNetwork> {
     }
 }
 impl<T> SpfMechanism<T> {
+    #[doc(hidden)]
     pub fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
         Self {
             kind,
@@ -133,6 +139,7 @@ impl<T> SpfMechanism<T> {
     pub fn is_neutral(&self) -> bool {
         self.qualifier == '?'
     }
+    #[doc(hidden)]
     fn mechanism_prefix_from_kind(&self) -> String {
         let push_str = match self.kind {
             MechanismKind::Redirect => "redirect=",
