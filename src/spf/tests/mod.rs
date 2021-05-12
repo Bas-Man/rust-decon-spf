@@ -1,6 +1,6 @@
 #[doc(hidden)]
-mod spf_a_mechanism_test;
+mod a_mechanism;
 #[doc(hidden)]
-mod spf_mx_mechanism_test;
+mod mx_mechanism;
 #[doc(hidden)]
-mod spf_test;
+mod spf;

@@ -1,6 +1,6 @@
 #[cfg(test)]
 
-mod test_spf {
+mod spf {
 
     use crate::spf::Spf;
 

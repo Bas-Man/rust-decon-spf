@@ -1,6 +1,6 @@
 #[cfg(test)]
 
-mod spf_mx_mechanism_test {
+mod mx_mechanism {
 
     use crate::spf::Spf;
 

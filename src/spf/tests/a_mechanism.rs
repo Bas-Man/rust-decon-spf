@@ -1,6 +1,6 @@
 #[cfg(test)]
 
-mod spf_a_mechanism_test {
+mod test_a_mechanism {
 
     use crate::spf::Spf;
 
