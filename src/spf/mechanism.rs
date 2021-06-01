@@ -1,10 +1,11 @@
 use crate::spf::kinds::MechanismKind;
+use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 
 #[derive(Debug, Clone)]
 pub struct SpfMechanism<T> {
     kind: MechanismKind,
-    qualifier: char,
+    qualifier: Qualifier,
     mechanism: T,
 }
 
@@ -12,7 +13,7 @@ impl<T> SpfMechanism<T> {
     //! These are the generic methods for the struct of SpfMechanism.  
     //! All the following methods can be used on any struct of type SpfMechanism.
     #[doc(hidden)]
-    pub fn new(kind: MechanismKind, qualifier: char, mechanism: T) -> Self {
+    pub fn new(kind: MechanismKind, qualifier: Qualifier, mechanism: T) -> Self {
         Self {
             kind,
             qualifier,
@@ -20,16 +21,16 @@ impl<T> SpfMechanism<T> {
         }
     }
     pub fn is_pass(&self) -> bool {
-        self.qualifier == '+'
+        self.qualifier == Qualifier::Pass
     }
     pub fn is_fail(&self) -> bool {
-        self.qualifier == '-'
+        self.qualifier == Qualifier::Fail
     }
     pub fn is_softfail(&self) -> bool {
-        self.qualifier == '~'
+        self.qualifier == Qualifier::SoftFail
     }
     pub fn is_neutral(&self) -> bool {
-        self.qualifier == '?'
+        self.qualifier == Qualifier::Neutral
     }
     #[doc(hidden)]
     fn mechanism_prefix_from_kind(&self) -> String {
@@ -47,26 +48,26 @@ impl<T> SpfMechanism<T> {
 }
 
 impl SpfMechanism<String> {
-    pub fn new_include(qualifier: char, mechanism: String) -> Self {
+    pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::Include, qualifier, mechanism)
     }
-    pub fn new_redirect(qualifier: char, mechanism: String) -> Self {
+    pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
-    pub fn new_a(qualifier: char, mechanism: String) -> Self {
+    pub fn new_a(qualifier: Qualifier, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::A, qualifier, mechanism)
     }
-    pub fn new_mx(qualifier: char, mechanism: String) -> Self {
+    pub fn new_mx(qualifier: Qualifier, mechanism: String) -> Self {
         SpfMechanism::new(MechanismKind::MX, qualifier, mechanism)
     }
-    pub fn new_all(qualifier: char, mechanism: String) -> Self {
-        SpfMechanism::new(MechanismKind::All, qualifier, mechanism)
+    pub fn new_all(qualifier: Qualifier) -> Self {
+        SpfMechanism::new(MechanismKind::All, qualifier, String::from("all"))
     }
     /// Rebuild and return the string representation of the given mechanism
     pub fn as_mechanism(&self) -> String {
         let mut txt = String::new();
-        if self.qualifier != '+' {
-            txt.push(self.qualifier);
+        if self.qualifier != Qualifier::Pass {
+            txt.push_str(self.qualifier.get_str());
         };
         if self.kind.is_all() {
             txt.push_str("all")
@@ -84,59 +85,61 @@ impl SpfMechanism<String> {
 #[allow(non_snake_case)]
 mod SpfMechanismString {
 
+    use super::Qualifier;
     use super::SpfMechanism;
     #[test]
     fn test_redirect() {
-        let redirect = SpfMechanism::new_redirect('+', String::from("_spf.example.com"));
+        let redirect =
+            SpfMechanism::new_redirect(Qualifier::Pass, String::from("_spf.example.com"));
         assert_eq!(redirect.is_pass(), true);
         assert_eq!(redirect.as_string(), "_spf.example.com");
         assert_eq!(redirect.as_mechanism(), "redirect=_spf.example.com");
     }
     #[test]
     fn test_include_pass() {
-        let include = SpfMechanism::new_include('+', String::from("_spf.test.com"));
+        let include = SpfMechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
         assert_eq!(include.is_pass(), true);
         assert_eq!(include.as_string(), "_spf.test.com");
         assert_eq!(include.as_mechanism(), "include:_spf.test.com");
     }
     #[test]
     fn test_include_fail() {
-        let include = SpfMechanism::new_include('-', String::from("_spf.test.com"));
+        let include = SpfMechanism::new_include(Qualifier::Fail, String::from("_spf.test.com"));
         assert_eq!(include.is_fail(), true);
         assert_eq!(include.as_mechanism(), "-include:_spf.test.com");
     }
     #[test]
     fn test_include_softfail() {
-        let include = SpfMechanism::new_include('~', String::from("_spf.test.com"));
+        let include = SpfMechanism::new_include(Qualifier::SoftFail, String::from("_spf.test.com"));
         assert_eq!(include.is_softfail(), true);
         assert_eq!(include.as_mechanism(), "~include:_spf.test.com");
     }
     #[test]
     fn test_include_neutral() {
-        let include = SpfMechanism::new_include('?', String::from("_spf.test.com"));
+        let include = SpfMechanism::new_include(Qualifier::Neutral, String::from("_spf.test.com"));
         assert_eq!(include.is_neutral(), true);
         assert_eq!(include.as_mechanism(), "?include:_spf.test.com");
     }
     #[test]
     fn test_new_a() {
-        let a_mechanism = SpfMechanism::new_a('-', "a".to_string());
+        let a_mechanism = SpfMechanism::new_a(Qualifier::Fail, "a".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
         assert_eq!(a_mechanism.as_string(), "a");
     }
 }
 
 impl SpfMechanism<IpNetwork> {
-    pub fn new_ip(qualifier: char, mechanism: IpNetwork) -> Self {
+    pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         if mechanism.is_ipv4() {
             SpfMechanism::new_ip4(qualifier, mechanism)
         } else {
             SpfMechanism::new_ip6(qualifier, mechanism)
         }
     }
-    pub fn new_ip4(qualifier: char, mechanism: IpNetwork) -> Self {
+    pub fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         SpfMechanism::new(MechanismKind::IpV4, qualifier, mechanism)
     }
-    pub fn new_ip6(qualifier: char, mechanism: IpNetwork) -> Self {
+    pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         SpfMechanism::new(MechanismKind::IpV6, qualifier, mechanism)
     }
     // Returns the mechanism string representation of an IP4/6 mechanism.
@@ -144,16 +147,17 @@ impl SpfMechanism<IpNetwork> {
     ///
     /// ```
     /// use ipnetwork::IpNetwork;
+    /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::SpfMechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    /// let ip_mechanism = SpfMechanism::new_ip4('+', ip);
+    /// let ip_mechanism = SpfMechanism::new_ip4(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.as_mechanism(), "ip4:192.168.11.0/24");
     /// ```
     ///
     pub fn as_mechanism(&self) -> String {
         let mut txt = String::new();
-        if self.qualifier != '+' {
-            txt.push(self.qualifier);
+        if self.qualifier != Qualifier::Pass {
+            txt.push_str(self.qualifier.get_str());
         };
         txt.push_str(self.mechanism_prefix_from_kind().as_str());
         txt.push_str(self.mechanism.to_string().as_str());
@@ -165,9 +169,10 @@ impl SpfMechanism<IpNetwork> {
         //!
         //! ```
         //! use ipnetwork::IpNetwork;
+        //! use decon_spf::spf::qualifier::Qualifier;
         //! use decon_spf::spf::mechanism::SpfMechanism;
         //! let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-        //! let ip_mechanism = SpfMechanism::new_ip4('+', ip);
+        //! let ip_mechanism = SpfMechanism::new_ip4(Qualifier::Pass, ip);
         //! assert_eq!(ip_mechanism.as_string(), "192.168.11.0/24");
         //! ```
         //!
@@ -182,11 +187,12 @@ impl SpfMechanism<IpNetwork> {
 #[allow(non_snake_case)]
 mod SpfMechanismIpNetwork {
 
+    use super::Qualifier;
     use super::SpfMechanism;
 
     #[test]
     fn test_ip4_pass() {
-        let ip4_pass = SpfMechanism::new_ip4('+', "203.32.160.10/32".parse().unwrap());
+        let ip4_pass = SpfMechanism::new_ip4(Qualifier::Pass, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_pass.is_pass(), true);
         assert_eq!(ip4_pass.as_string(), "203.32.160.10/32");
         assert_eq!(ip4_pass.as_mechanism(), "ip4:203.32.160.10/32");
@@ -196,44 +202,50 @@ mod SpfMechanismIpNetwork {
     }
     #[test]
     fn test_ip4_fail() {
-        let ip4_fail = SpfMechanism::new_ip4('-', "203.32.160.10/32".parse().unwrap());
+        let ip4_fail = SpfMechanism::new_ip4(Qualifier::Fail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_fail.is_fail(), true);
         assert_eq!(ip4_fail.as_mechanism(), "-ip4:203.32.160.10/32");
     }
     #[test]
     fn test_ip4_softfail() {
-        let ip4_softfail = SpfMechanism::new_ip4('~', "203.32.160.10/32".parse().unwrap());
+        let ip4_softfail =
+            SpfMechanism::new_ip4(Qualifier::SoftFail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_softfail.is_softfail(), true);
         assert_eq!(ip4_softfail.as_mechanism(), "~ip4:203.32.160.10/32");
     }
     #[test]
     fn test_ip4_neutral() {
-        let ip4_neutral = SpfMechanism::new_ip4('?', "203.32.160.10/32".parse().unwrap());
+        let ip4_neutral =
+            SpfMechanism::new_ip4(Qualifier::Neutral, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_neutral.is_neutral(), true);
         assert_eq!(ip4_neutral.as_mechanism(), "?ip4:203.32.160.10/32");
     }
     #[test]
     fn test_ip6_pass() {
-        let ip_pass = SpfMechanism::new_ip6('+', "2001:4860:4000::/36".parse().unwrap());
+        let ip_pass =
+            SpfMechanism::new_ip6(Qualifier::Pass, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_pass.is_pass(), true);
         assert_eq!(ip_pass.as_string(), "2001:4860:4000::/36");
         assert_eq!(ip_pass.as_mechanism(), "ip6:2001:4860:4000::/36");
     }
     #[test]
     fn test_ip6_fail() {
-        let ip_fail = SpfMechanism::new_ip6('-', "2001:4860:4000::/36".parse().unwrap());
+        let ip_fail =
+            SpfMechanism::new_ip6(Qualifier::Fail, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_fail.is_fail(), true);
         assert_eq!(ip_fail.as_mechanism(), "-ip6:2001:4860:4000::/36");
     }
     #[test]
     fn test_ip6_softfail() {
-        let ip_softfail = SpfMechanism::new_ip6('~', "2001:4860:4000::/36".parse().unwrap());
+        let ip_softfail =
+            SpfMechanism::new_ip6(Qualifier::SoftFail, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_softfail.is_softfail(), true);
         assert_eq!(ip_softfail.as_mechanism(), "~ip6:2001:4860:4000::/36");
     }
     #[test]
     fn test_ip6_neutral() {
-        let ip_neutral = SpfMechanism::new_ip6('?', "2001:4860:4000::/36".parse().unwrap());
+        let ip_neutral =
+            SpfMechanism::new_ip6(Qualifier::Neutral, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_neutral.is_neutral(), true);
         assert_eq!(ip_neutral.as_mechanism(), "?ip6:2001:4860:4000::/36");
     }

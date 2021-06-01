@@ -67,6 +67,6 @@ impl MechanismKind {
 
 impl Default for MechanismKind {
     fn default() -> Self {
-        Self::Include
+        Self::A
     }
 }

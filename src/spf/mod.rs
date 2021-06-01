@@ -4,10 +4,12 @@
 
 pub mod kinds;
 pub mod mechanism;
+pub mod qualifier;
 #[doc(hidden)]
 mod tests;
 
 use crate::spf::mechanism::SpfMechanism;
+use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 use regex::Regex;
 
@@ -21,7 +23,7 @@ pub struct Spf {
     mx: Option<Vec<SpfMechanism<String>>>,
     ip4: Option<Vec<SpfMechanism<IpNetwork>>>,
     ip6: Option<Vec<SpfMechanism<IpNetwork>>>,
-    all_qualifier: char,
+    all: Option<SpfMechanism<String>>,
 }
 
 impl Spf {
@@ -45,7 +47,7 @@ impl Spf {
             mx: None,
             ip4: None,
             ip6: None,
-            all_qualifier: '+',
+            all: None,
         }
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`
@@ -67,7 +69,10 @@ impl Spf {
                 // Match a redirect
                 let items = record.rsplit("=");
                 for item in items {
-                    self.redirect = Some(SpfMechanism::new_redirect('+', item.to_string()));
+                    self.redirect = Some(SpfMechanism::new_redirect(
+                        Qualifier::Pass,
+                        item.to_string(),
+                    ));
                     break;
                 }
                 self.is_redirected = true;
@@ -103,7 +108,9 @@ impl Spf {
                 }
             } else if record.ends_with("all") {
                 // deal with all if present
-                self.all_qualifier = return_and_remove_qualifier(record, 'a').0
+                self.all = Some(SpfMechanism::new_all(
+                    return_and_remove_qualifier(record, 'a').0,
+                ))
             } else if let Some(a_mechanism) =
                 capture_matches(a_pattern, record, kinds::MechanismKind::A)
             {
@@ -219,8 +226,15 @@ impl Spf {
     pub fn redirect(&self) -> String {
         self.redirect.as_ref().unwrap().as_string().to_string()
     }
-    pub fn all(&self) -> &char {
-        &self.all_qualifier
+    pub fn all(&self) -> String {
+        self.all.as_ref().unwrap().as_string().to_string()
+    }
+    pub fn all_mechanism(&self) -> String {
+        if self.all.is_some() {
+            self.all.as_ref().unwrap().as_mechanism()
+        } else {
+            return "".to_string();
+        }
     }
     pub fn redirect_as_mechanism(&self) -> Option<String> {
         if self.is_redirect() {
@@ -230,55 +244,67 @@ impl Spf {
         }
     }
 }
+fn char_to_qualifier(c: char) -> Qualifier {
+    match c {
+        '+' => return Qualifier::Pass,
+        '-' => return Qualifier::Fail,
+        '~' => return Qualifier::SoftFail,
+        '?' => return Qualifier::Neutral,
+        _ => return Qualifier::Pass,
+    }
+}
 #[doc(hidden)]
 // Check if the initial character in the string `record` matches `c`
 // If they do no match then return the initial character
 // if c matches first character of record, we can `+`, a blank modiifer equates to `+`
-fn return_and_remove_qualifier(record: &str, c: char) -> (char, &str) {
+fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, &str) {
     // Returns a tuple of (qualifier, &str)
     // &str will have had the qualifier character removed if it existed. The &str will be unchanged
     // if the qualifier was not present
     if c != record.chars().nth(0).unwrap() {
         // qualifier exists. return tuple of qualifier and `record` with qualifier removed.
-        (record.chars().nth(0).unwrap(), remove_qualifier(record))
+        (
+            char_to_qualifier(record.chars().nth(0).unwrap()),
+            remove_qualifier(record),
+        )
     } else {
         // qualifier does not exist, default to `+` and return unmodified `record`
-        ('+', record)
+        (Qualifier::Pass, record)
     }
 }
 #[test]
 fn test_return_and_remove_qualifier_no_qualifier() {
     let source = "no prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!('+', c);
+    assert_eq!(Qualifier::Pass, c);
     assert_eq!(source, new_str);
 }
 #[test]
 fn test_return_and_remove_qualifier_pass() {
     let source = "+prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!('+', c);
+    assert_eq!(Qualifier::Pass, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
 fn test_return_and_remove_qualifier_fail() {
     let source = "-prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!('-', c);
+    assert_eq!(Qualifier::Fail, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
 fn test_return_and_remove_qualifier_softfail() {
     let source = "~prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!('~', c);
+    assert_eq!(Qualifier::SoftFail, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
 fn test_return_and_remove_qualifier_neutral() {
     let source = "?prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!('?', c);
+    assert_eq!(Qualifier::Neutral, c);
     assert_eq!("prefix", new_str);
 }
 #[doc(hidden)]
@@ -301,7 +327,8 @@ fn capture_matches(
     kind: kinds::MechanismKind,
 ) -> Option<SpfMechanism<String>> {
     let caps = pattern.captures(string);
-    let mut q: char = '+';
+    let q: char;
+    let mut q2: Qualifier = Qualifier::Pass;
     let m: String;
     match caps {
         None => return None,
@@ -315,9 +342,10 @@ fn capture_matches(
                     .chars()
                     .nth(0)
                     .unwrap();
+                q2 = char_to_qualifier(q);
             };
             m = caps.name("mechanism").unwrap().as_str().to_string();
-            let mechanism = SpfMechanism::new(kind, q, (*m).to_string());
+            let mechanism = SpfMechanism::new(kind, q2, (*m).to_string());
             Some(mechanism)
         }
     }

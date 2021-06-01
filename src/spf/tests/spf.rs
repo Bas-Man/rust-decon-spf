@@ -37,7 +37,7 @@ mod spf {
             spf.ip4().as_ref().unwrap()[0].as_mechanism(),
             "ip4:157.55.9.128/25"
         );
-        assert_eq!(*spf.all(), '~');
+        assert_eq!(spf.all_mechanism(), "~all");
     }
     #[test]
     fn test_netblocks2_google_com() {
@@ -53,6 +53,6 @@ mod spf {
             spf.ip6().as_ref().unwrap()[0].as_mechanism(),
             "ip6:2001:4860:4000::/36"
         );
-        assert_eq!(*spf.all(), '~');
+        assert_eq!(spf.all_mechanism(), "~all");
     }
 }
