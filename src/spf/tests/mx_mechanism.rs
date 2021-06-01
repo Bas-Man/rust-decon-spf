@@ -8,7 +8,7 @@ mod mx_mechanism {
     fn test_simple_mx_mechanism() {
         let input = "v=spf1 mx ~all";
 
-        let mut spf = Spf::new(&input.to_string());
+        let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_pass(), true);
@@ -19,7 +19,7 @@ mod mx_mechanism {
     fn test_mx_mechanism_slash() {
         let input = "v=spf1 -mx/24 ~all";
 
-        let mut spf = Spf::new(&input.to_string());
+        let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_fail(), true);
@@ -30,7 +30,7 @@ mod mx_mechanism {
     fn test_mx_mechanism_colon() {
         let input = "v=spf1 ?mx:example.com ~all";
 
-        let mut spf = Spf::new(&input.to_string());
+        let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_neutral(), true);
@@ -44,7 +44,7 @@ mod mx_mechanism {
     fn test_mx_mechanism_colon_slash() {
         let input = "v=spf1 ~mx:example.com/24 ~all";
 
-        let mut spf = Spf::new(&input.to_string());
+        let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_softfail(), true);

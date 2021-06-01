@@ -16,6 +16,7 @@ use regex::Regex;
 #[derive(Default, Debug)]
 pub struct Spf {
     source: String,
+    from_src: bool,
     include: Option<Vec<SpfMechanism<String>>>,
     redirect: Option<SpfMechanism<String>>,
     is_redirected: bool,
@@ -34,12 +35,27 @@ impl Spf {
     /// ```
     /// use decon_spf::spf::Spf;
     /// let source_str = "v=spf1 redirect=_spf.example.com";
-    /// let spf = Spf::new(&source_str.to_string());
+    /// let spf = Spf::from_str(&source_str.to_string());
     /// ```
     ///
-    pub fn new(str: &String) -> Self {
+    pub fn from_str(str: &String) -> Self {
         Self {
             source: str.clone(),
+            from_src: true,
+            include: None,
+            redirect: None,
+            is_redirected: false,
+            a: None,
+            mx: None,
+            ip4: None,
+            ip6: None,
+            all: None,
+        }
+    }
+    pub fn new() -> Self {
+        Self {
+            source: String::new(),
+            from_src: false,
             include: None,
             redirect: None,
             is_redirected: false,
@@ -138,6 +154,21 @@ impl Spf {
         }
     }
 
+    pub fn is_valid(&self) -> bool {
+        if self.from_src {
+            if self.include.is_some() {
+                if self.include.as_ref().unwrap().len() > 10 {
+                    return false;
+                } else {
+                    true
+                }
+            } else {
+                true
+            }
+        } else {
+            true
+        }
+    }
     pub fn source(&self) -> &String {
         &self.source
     }
@@ -223,8 +254,8 @@ impl Spf {
     pub fn is_redirect(&self) -> bool {
         self.is_redirected
     }
-    pub fn redirect(&self) -> String {
-        self.redirect.as_ref().unwrap().as_string().to_string()
+    pub fn redirect(&self) -> &Option<SpfMechanism<String>> {
+        &self.redirect
     }
     pub fn all(&self) -> String {
         self.all.as_ref().unwrap().as_string().to_string()
@@ -234,13 +265,6 @@ impl Spf {
             self.all.as_ref().unwrap().as_mechanism()
         } else {
             return "".to_string();
-        }
-    }
-    pub fn redirect_as_mechanism(&self) -> Option<String> {
-        if self.is_redirect() {
-            Some(self.redirect.as_ref()?.as_mechanism())
-        } else {
-            None
         }
     }
 }

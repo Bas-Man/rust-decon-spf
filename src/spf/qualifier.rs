@@ -37,7 +37,8 @@ impl Qualifier {
     pub fn is_neutral(&self) -> bool {
         matches!(self, Self::Neutral)
     }
-
+    /// Returns the character, as a string slice, that represents a given ['Qualifier'](Qualifier) value in
+    /// SPF.
     pub fn get_str(&self) -> &str {
         match self {
             Qualifier::Pass => return "",
@@ -46,6 +47,8 @@ impl Qualifier {
             Qualifier::Neutral => return "?",
         }
     }
+    /// Returns the character, as a `char`, that represents a given ['Qualifier'](Qualifier) value in
+    /// SPF.
     pub fn get_char(&self) -> char {
         match self {
             Qualifier::Pass => return '+',

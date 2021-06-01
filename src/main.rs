@@ -31,11 +31,13 @@ fn main() {
     data.ip6_mechanisms();
     println!("\nIs a redirect: {}", data.is_redirect());
     if data.is_redirect() {
-        println!("\nredirect: {}", data.redirect());
+        println!(
+            "\nredirect: {}",
+            data.redirect().as_ref().unwrap().as_string()
+        );
         println!(
             "mechanism: {}",
-            data.redirect_as_mechanism()
-                .unwrap_or("Not a redirect.".to_string())
+            data.redirect().as_ref().unwrap().as_mechanism()
         );
     }
 }
@@ -51,7 +53,7 @@ fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
                 println!("TXT Record {}:", i);
                 println!("{}", &record.to_string());
                 if record.to_string().starts_with("v=spf1") {
-                    data = Spf::new(&record.to_string());
+                    data = Spf::from_str(&record.to_string());
                 }
                 i = i + 1;
             }
