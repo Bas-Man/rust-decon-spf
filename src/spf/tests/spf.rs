@@ -17,6 +17,11 @@ mod spf {
         assert_eq!(spf.mx.is_none(), true);
         assert_eq!(spf.ip4.is_none(), true);
         assert_eq!(spf.ip6.is_none(), true);
+        assert_eq!(spf.redirect().as_ref().unwrap().qualifier().get_str(), "");
+        assert_eq!(
+            spf.redirect().as_ref().unwrap().mechanism(),
+            "_spf.google.com"
+        );
         assert_eq!(
             spf.redirect().as_ref().unwrap().as_string(),
             "_spf.google.com"
@@ -60,6 +65,10 @@ mod spf {
         assert_eq!(
             spf.ip6().as_ref().unwrap()[0].as_mechanism(),
             "ip6:2001:4860:4000::/36"
+        );
+        assert_eq!(
+            spf.ip6().as_ref().unwrap()[0].mechanism().to_string(),
+            "2001:4860:4000::/36"
         );
         assert_eq!(spf.all_mechanism(), "~all");
     }

@@ -12,7 +12,7 @@ mod mx_mechanism {
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_pass(), true);
-        assert_eq!(spf.mx().as_ref().unwrap()[0].as_string(), "mx");
+        assert_eq!(spf.mx().as_ref().unwrap()[0].mechanism(), "mx");
         assert_eq!(spf.mx().as_ref().unwrap()[0].as_mechanism(), "mx");
     }
     #[test]
@@ -23,7 +23,7 @@ mod mx_mechanism {
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_fail(), true);
-        assert_eq!(spf.mx().as_ref().unwrap()[0].as_string(), "mx/24");
+        assert_eq!(spf.mx().as_ref().unwrap()[0].mechanism(), "mx/24");
         assert_eq!(spf.mx().as_ref().unwrap()[0].as_mechanism(), "-mx/24");
     }
     #[test]
@@ -34,7 +34,7 @@ mod mx_mechanism {
         spf.parse();
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_neutral(), true);
-        assert_eq!(spf.mx().as_ref().unwrap()[0].as_string(), "mx:example.com");
+        assert_eq!(spf.mx().as_ref().unwrap()[0].mechanism(), "mx:example.com");
         assert_eq!(
             spf.mx().as_ref().unwrap()[0].as_mechanism(),
             "?mx:example.com"
@@ -49,7 +49,7 @@ mod mx_mechanism {
         assert!(spf.mx().as_ref().is_some());
         assert_eq!(spf.mx().as_ref().unwrap()[0].is_softfail(), true);
         assert_eq!(
-            spf.mx().as_ref().unwrap()[0].as_string(),
+            spf.mx().as_ref().unwrap()[0].mechanism(),
             "mx:example.com/24"
         );
         assert_eq!(
