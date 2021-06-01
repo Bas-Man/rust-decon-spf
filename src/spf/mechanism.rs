@@ -41,7 +41,7 @@ impl<T> SpfMechanism<T> {
             MechanismKind::MX => "",
             MechanismKind::IpV4 => "ip4:",
             MechanismKind::IpV6 => "ip6:",
-            MechanismKind::All => "",
+            MechanismKind::All => "all",
         };
         push_str.to_string()
     }
@@ -61,7 +61,7 @@ impl SpfMechanism<String> {
         SpfMechanism::new(MechanismKind::MX, qualifier, mechanism)
     }
     pub fn new_all(qualifier: Qualifier) -> Self {
-        SpfMechanism::new(MechanismKind::All, qualifier, String::from("all"))
+        SpfMechanism::new(MechanismKind::All, qualifier, String::new())
     }
     /// Rebuild and return the string representation of the given mechanism
     pub fn as_mechanism(&self) -> String {
@@ -69,12 +69,8 @@ impl SpfMechanism<String> {
         if self.qualifier != Qualifier::Pass {
             txt.push_str(self.qualifier.get_str());
         };
-        if self.kind.is_all() {
-            txt.push_str("all")
-        } else {
-            txt.push_str(self.mechanism_prefix_from_kind().as_str());
-            txt.push_str(self.mechanism.as_str());
-        }
+        txt.push_str(self.mechanism_prefix_from_kind().as_str());
+        txt.push_str(self.mechanism.as_str());
         txt
     }
     pub fn as_string(&self) -> &String {
