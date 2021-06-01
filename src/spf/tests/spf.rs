@@ -17,19 +17,10 @@ mod spf {
         assert_eq!(spf.mx.is_none(), true);
         assert_eq!(spf.ip4.is_none(), true);
         assert_eq!(spf.ip6.is_none(), true);
-        assert_eq!(spf.redirect().as_ref().unwrap().qualifier().get_str(), "");
-        assert_eq!(
-            spf.redirect().as_ref().unwrap().mechanism(),
-            "_spf.google.com"
-        );
-        assert_eq!(
-            spf.redirect().as_ref().unwrap().as_string(),
-            "_spf.google.com"
-        );
-        assert_eq!(
-            spf.redirect().as_ref().unwrap().as_mechanism(),
-            "redirect=_spf.google.com"
-        )
+        assert_eq!(spf.redirect().unwrap().qualifier().get_str(), "");
+        assert_eq!(spf.redirect().unwrap().mechanism(), "_spf.google.com");
+        assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
+        assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com")
     }
     #[test]
     fn test_hotmail() {
@@ -39,18 +30,15 @@ mod spf {
         assert_eq!(input, spf.source());
         spf.parse();
         assert_eq!(spf.is_redirect(), false);
-        assert_eq!(!spf.includes().as_ref().unwrap().is_empty(), true);
-        assert_eq!(spf.includes().as_ref().unwrap().len(), 6);
+        assert_eq!(!spf.includes().unwrap().is_empty(), true);
+        assert_eq!(spf.includes().unwrap().len(), 6);
         assert_eq!(
-            spf.includes().as_ref().unwrap()[0].as_mechanism(),
+            spf.includes().unwrap()[0].string(),
             "include:spf.protection.outlook.com"
         );
-        assert_eq!(spf.ip4().as_ref().unwrap().len(), 1);
-        assert_eq!(
-            spf.ip4().as_ref().unwrap()[0].as_mechanism(),
-            "ip4:157.55.9.128/25"
-        );
-        assert_eq!(spf.all_mechanism(), "~all");
+        assert_eq!(spf.ip4().unwrap().len(), 1);
+        assert_eq!(spf.ip4().unwrap()[0].string(), "ip4:157.55.9.128/25");
+        assert_eq!(spf.all().unwrap().string(), "~all");
     }
     #[test]
     fn test_netblocks2_google_com() {
@@ -58,18 +46,15 @@ mod spf {
 
         let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
-        assert_eq!(spf.includes().as_ref().is_none(), true);
-        assert_eq!(spf.ip4().as_ref().is_none(), true);
-        assert_eq!(!spf.ip6().as_ref().is_none(), true);
-        assert_eq!(spf.ip6().as_ref().unwrap().len(), 6);
+        assert_eq!(spf.includes().is_none(), true);
+        assert_eq!(spf.ip4().is_none(), true);
+        assert_eq!(!spf.ip6().is_none(), true);
+        assert_eq!(spf.ip6().unwrap().len(), 6);
+        assert_eq!(spf.ip6().unwrap()[0].string(), "ip6:2001:4860:4000::/36");
         assert_eq!(
-            spf.ip6().as_ref().unwrap()[0].as_mechanism(),
-            "ip6:2001:4860:4000::/36"
-        );
-        assert_eq!(
-            spf.ip6().as_ref().unwrap()[0].mechanism().to_string(),
+            spf.ip6().unwrap()[0].mechanism().to_string(),
             "2001:4860:4000::/36"
         );
-        assert_eq!(spf.all_mechanism(), "~all");
+        assert_eq!(spf.all().unwrap().string(), "~all");
     }
 }

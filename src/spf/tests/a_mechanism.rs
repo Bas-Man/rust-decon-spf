@@ -13,7 +13,7 @@ mod test_a_mechanism {
         assert!(spf.a().as_ref().is_some());
         assert_eq!(spf.a().as_ref().unwrap()[0].is_pass(), true);
         assert_eq!(spf.a().as_ref().unwrap()[0].mechanism(), "a");
-        assert_eq!(spf.a().as_ref().unwrap()[0].as_mechanism(), "a");
+        assert_eq!(spf.a().as_ref().unwrap()[0].string(), "a");
     }
     #[test]
     fn test_a_mechanism_slash() {
@@ -24,7 +24,7 @@ mod test_a_mechanism {
         assert!(spf.a().as_ref().is_some());
         assert_eq!(spf.a().as_ref().unwrap()[0].is_fail(), true);
         assert_eq!(spf.a().as_ref().unwrap()[0].mechanism(), "a/24");
-        assert_eq!(spf.a().as_ref().unwrap()[0].as_mechanism(), "-a/24");
+        assert_eq!(spf.a().as_ref().unwrap()[0].string(), "-a/24");
     }
     #[test]
     fn test_a_mechanism_colon() {
@@ -35,10 +35,7 @@ mod test_a_mechanism {
         assert!(spf.a().as_ref().is_some());
         assert_eq!(spf.a().as_ref().unwrap()[0].is_neutral(), true);
         assert_eq!(spf.a().as_ref().unwrap()[0].mechanism(), "a:example.com");
-        assert_eq!(
-            spf.a().as_ref().unwrap()[0].as_mechanism(),
-            "?a:example.com"
-        );
+        assert_eq!(spf.a().as_ref().unwrap()[0].string(), "?a:example.com");
     }
     #[test]
     fn test_a_mechanism_colon_slash() {
@@ -49,9 +46,6 @@ mod test_a_mechanism {
         assert!(spf.a().as_ref().is_some());
         assert_eq!(spf.a().as_ref().unwrap()[0].is_softfail(), true);
         assert_eq!(spf.a().as_ref().unwrap()[0].mechanism(), "a:example.com/24");
-        assert_eq!(
-            spf.a().as_ref().unwrap()[0].as_mechanism(),
-            "~a:example.com/24"
-        );
+        assert_eq!(spf.a().as_ref().unwrap()[0].string(), "~a:example.com/24");
     }
 }

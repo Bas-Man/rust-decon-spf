@@ -172,12 +172,8 @@ impl Spf {
     pub fn source(&self) -> &String {
         &self.source
     }
-    pub fn spf_clone(&self) -> &Spf {
-        self.clone()
-    }
-
-    pub fn includes(&self) -> &Option<Vec<SpfMechanism<String>>> {
-        &self.include
+    pub fn includes(&self) -> Option<&Vec<SpfMechanism<String>>> {
+        self.include.as_ref()
     }
     pub fn list_includes(&self) {
         match &self.include {
@@ -185,19 +181,19 @@ impl Spf {
             Some(elements) => {
                 println!("Include Mechanisms:");
                 for element in elements {
-                    println!("{}", element.as_mechanism());
+                    println!("{}", element.string());
                 }
             }
         }
     }
-    pub fn a(&self) -> &Option<Vec<SpfMechanism<String>>> {
-        &self.a
+    pub fn a(&self) -> Option<&Vec<SpfMechanism<String>>> {
+        self.a.as_ref()
     }
-    pub fn mx(&self) -> &Option<Vec<SpfMechanism<String>>> {
-        &self.mx
+    pub fn mx(&self) -> Option<&Vec<SpfMechanism<String>>> {
+        self.mx.as_ref()
     }
-    pub fn ip4(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
-        &self.ip4
+    pub fn ip4(&self) -> Option<&Vec<SpfMechanism<IpNetwork>>> {
+        self.ip4.as_ref()
     }
     pub fn ip4_networks(&self) {
         match &self.ip4 {
@@ -205,7 +201,7 @@ impl Spf {
             Some(record) => {
                 println!("List of ip4 networks/hosts:");
                 for item in record {
-                    println!("{}", item.as_string());
+                    println!("{}", item.raw());
                     print!("Network: {}", item.as_network().network());
                     println!(" Subnet: {}", item.as_network().prefix());
                 }
@@ -218,13 +214,13 @@ impl Spf {
             Some(records) => {
                 println!("\nList of ip4 mechanisms:");
                 for record in records {
-                    println!("{}", record.as_mechanism())
+                    println!("{}", record.string())
                 }
             }
         }
     }
-    pub fn ip6(&self) -> &Option<Vec<SpfMechanism<IpNetwork>>> {
-        &self.ip6
+    pub fn ip6(&self) -> Option<&Vec<SpfMechanism<IpNetwork>>> {
+        self.ip6.as_ref()
     }
     pub fn ip6_networks(&self) {
         match &self.ip6 {
@@ -232,9 +228,9 @@ impl Spf {
             Some(record) => {
                 println!("List of ip6 networks/hosts:");
                 for item in record {
-                    println!("{}", item.as_string());
-                    print!("Network: {}", item.as_network().network());
-                    println!(" Subnet: {}", item.as_network().prefix());
+                    println!("{}", item.raw());
+                    print!("Network: {}", item.mechanism().network());
+                    println!(" Subnet: {}", item.mechanism().prefix());
                 }
             }
         }
@@ -245,7 +241,7 @@ impl Spf {
             Some(records) => {
                 println!("\nList of ip6 mechanisms:");
                 for record in records {
-                    println!("{}", record.as_mechanism())
+                    println!("{}", record.string())
                 }
             }
         }
@@ -254,18 +250,18 @@ impl Spf {
     pub fn is_redirect(&self) -> bool {
         self.is_redirected
     }
-    pub fn redirect(&self) -> &Option<SpfMechanism<String>> {
-        &self.redirect
+    pub fn redirect(&self) -> Option<&SpfMechanism<String>> {
+        self.redirect.as_ref()
     }
-    pub fn all(&self) -> String {
-        self.all.as_ref().unwrap().as_string().to_string()
-    }
-    pub fn all_mechanism(&self) -> String {
-        if self.all.is_some() {
-            self.all.as_ref().unwrap().as_mechanism()
-        } else {
-            return "".to_string();
-        }
+    //pub fn redirect_as_mechanism(&self) -> String {
+    //    if self.redirect.is_some() {
+    //        self.redirect.as_ref().unwrap().as_mechanism()
+    //    } else {
+    //        "".to_string()
+    //    }
+    //}
+    pub fn all(&self) -> Option<&SpfMechanism<String>> {
+        self.all.as_ref()
     }
 }
 fn char_to_qualifier(c: char) -> Qualifier {
@@ -274,7 +270,7 @@ fn char_to_qualifier(c: char) -> Qualifier {
         '-' => return Qualifier::Fail,
         '~' => return Qualifier::SoftFail,
         '?' => return Qualifier::Neutral,
-        _ => return Qualifier::Pass,
+        _ => return Qualifier::Pass, // This should probably be Neutral
     }
 }
 #[doc(hidden)]
@@ -384,8 +380,8 @@ fn test_match_on_a_only() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
-    assert_eq!(test.as_string(), "a");
-    assert_eq!(test.as_mechanism(), "a");
+    assert_eq!(test.raw(), "a");
+    assert_eq!(test.string(), "a");
 }
 #[test]
 fn test_match_on_a_colon() {
@@ -397,8 +393,8 @@ fn test_match_on_a_colon() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
-    assert_eq!(test.as_string(), "a:example.com");
-    assert_eq!(test.as_mechanism(), "-a:example.com");
+    assert_eq!(test.raw(), "a:example.com");
+    assert_eq!(test.string(), "-a:example.com");
 }
 #[test]
 fn test_match_on_a_slash() {
@@ -410,8 +406,8 @@ fn test_match_on_a_slash() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
-    assert_eq!(test.as_string(), "a/24");
-    assert_eq!(test.as_mechanism(), "~a/24");
+    assert_eq!(test.raw(), "a/24");
+    assert_eq!(test.string(), "~a/24");
 }
 #[test]
 fn test_match_on_a_colon_slash() {
@@ -423,8 +419,8 @@ fn test_match_on_a_colon_slash() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
-    assert_eq!(test.as_string(), "a:example.com/24");
-    assert_eq!(test.as_mechanism(), "a:example.com/24");
+    assert_eq!(test.raw(), "a:example.com/24");
+    assert_eq!(test.string(), "a:example.com/24");
     //assert!(test.kind.is_a());
 }
 // MX
@@ -438,8 +434,8 @@ fn test_match_on_mx_only() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
-    assert_eq!(test.as_string(), "mx");
-    assert_eq!(test.as_mechanism(), "mx");
+    assert_eq!(test.raw(), "mx");
+    assert_eq!(test.string(), "mx");
 }
 #[test]
 fn test_match_on_mx_colon() {
@@ -451,8 +447,8 @@ fn test_match_on_mx_colon() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
-    assert_eq!(test.as_string(), "mx:example.com");
-    assert_eq!(test.as_mechanism(), "-mx:example.com");
+    assert_eq!(test.raw(), "mx:example.com");
+    assert_eq!(test.string(), "-mx:example.com");
 }
 #[test]
 fn test_match_on_mx_slash() {
@@ -464,8 +460,8 @@ fn test_match_on_mx_slash() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
-    assert_eq!(test.as_string(), "mx/24");
-    assert_eq!(test.as_mechanism(), "~mx/24");
+    assert_eq!(test.raw(), "mx/24");
+    assert_eq!(test.string(), "~mx/24");
 }
 #[test]
 fn test_match_on_mx_colon_slash() {
@@ -477,6 +473,6 @@ fn test_match_on_mx_colon_slash() {
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
-    assert_eq!(test.as_string(), "mx:example.com/24");
-    assert_eq!(test.as_mechanism(), "mx:example.com/24");
+    assert_eq!(test.raw(), "mx:example.com/24");
+    assert_eq!(test.string(), "mx:example.com/24");
 }

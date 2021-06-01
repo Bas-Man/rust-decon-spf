@@ -31,14 +31,8 @@ fn main() {
     data.ip6_mechanisms();
     println!("\nIs a redirect: {}", data.is_redirect());
     if data.is_redirect() {
-        println!(
-            "\nredirect: {}",
-            data.redirect().as_ref().unwrap().as_string()
-        );
-        println!(
-            "mechanism: {}",
-            data.redirect().as_ref().unwrap().as_mechanism()
-        );
+        println!("\nredirect: {}", data.redirect().unwrap().raw());
+        println!("mechanism: {}", data.redirect().unwrap().string());
     }
 }
 
