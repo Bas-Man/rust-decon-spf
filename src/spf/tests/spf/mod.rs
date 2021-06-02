@@ -1,6 +1,11 @@
+#[doc(hidden)]
+mod a;
+#[doc(hidden)]
+mod mx;
+
 #[cfg(test)]
 
-mod spf {
+mod test_spf {
 
     use crate::spf::Spf;
 

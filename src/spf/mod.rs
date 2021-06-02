@@ -13,7 +13,7 @@ use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 use regex::Regex;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct Spf {
     source: String,
     from_src: bool,
@@ -24,7 +24,28 @@ pub struct Spf {
     mx: Option<Vec<SpfMechanism<String>>>,
     ip4: Option<Vec<SpfMechanism<IpNetwork>>>,
     ip6: Option<Vec<SpfMechanism<IpNetwork>>>,
+    ptr: Option<Vec<SpfMechanism<String>>>,
+    exists: Option<Vec<SpfMechanism<String>>>,
     all: Option<SpfMechanism<String>>,
+}
+
+impl Default for Spf {
+    fn default() -> Self {
+        Self {
+            source: String::new(),
+            from_src: false,
+            include: None,
+            redirect: None,
+            is_redirected: false,
+            a: None,
+            mx: None,
+            ip4: None,
+            ip6: None,
+            ptr: None,
+            exists: None,
+            all: None,
+        }
+    }
 }
 
 impl Spf {
@@ -49,22 +70,13 @@ impl Spf {
             mx: None,
             ip4: None,
             ip6: None,
+            ptr: None,
+            exists: None,
             all: None,
         }
     }
     pub fn new() -> Self {
-        Self {
-            source: String::new(),
-            from_src: false,
-            include: None,
-            redirect: None,
-            is_redirected: false,
-            a: None,
-            mx: None,
-            ip4: None,
-            ip6: None,
-            all: None,
-        }
+        Spf::default()
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`
     pub fn parse(&mut self) {
@@ -253,13 +265,6 @@ impl Spf {
     pub fn redirect(&self) -> Option<&SpfMechanism<String>> {
         self.redirect.as_ref()
     }
-    //pub fn redirect_as_mechanism(&self) -> String {
-    //    if self.redirect.is_some() {
-    //        self.redirect.as_ref().unwrap().as_mechanism()
-    //    } else {
-    //        "".to_string()
-    //    }
-    //}
     pub fn all(&self) -> Option<&SpfMechanism<String>> {
         self.all.as_ref()
     }

@@ -1,11 +1,11 @@
 #[cfg(test)]
 
-mod mx_mechanism {
+mod test_mx {
 
     use crate::spf::Spf;
 
     #[test]
-    fn test_simple_mx_mechanism() {
+    fn test_mx_mechanism() {
         let input = "v=spf1 mx ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
