@@ -1,7 +1,17 @@
 #[doc(hidden)]
-mod a;
+mod a_capture;
 #[doc(hidden)]
-mod mx;
+mod a_parse;
+#[doc(hidden)]
+mod exists;
+#[doc(hidden)]
+mod mx_capture;
+#[doc(hidden)]
+mod mx_parse;
+#[doc(hidden)]
+mod ptr_capture;
+#[doc(hidden)]
+mod ptr_parse;
 
 #[cfg(test)]
 

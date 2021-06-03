@@ -4,7 +4,8 @@ pub enum MechanismKind {
     /// Represents a Mechanism of type include:
     Include,
     /// Represents a Mechanism of type redirect=  
-    /// If this is present, no other mechanism should be present.
+    /// If this is present, no other mechanism should be present.  
+    /// **Note**: There should only be a maximum of 10 Includes.
     Redirect,
     /// Represents a Mechanism of type a
     /// # Possible Values:  
@@ -19,12 +20,17 @@ pub enum MechanismKind {
     MX,
     /// Represents a Mechanism of type ip4:  
     /// # Example Values:  
-    /// ```bash
-    /// ip4:192.168.11.0/24 ip4:10.10.1.1
+    /// ```text
+    /// ip4:192.168.11.0/24  
+    /// ip4:10.10.1.1
     /// ```
     IpV4,
     /// Represents a Mechanism of type ip6:
     IpV6,
+    /// Represents a Mechanism of type ptr: Note: This is rarely use.
+    Ptr,
+    /// Represents a Mechanism of type exists:
+    Exists,
     /// Represents a Mechanism of type all
     All,
 }
@@ -62,6 +68,14 @@ impl MechanismKind {
     /// Returns `true` if the mechanism is [`Redirect`](MechanismKind::Redirect).
     pub fn is_redirect(&self) -> bool {
         matches!(self, Self::Redirect)
+    }
+    /// Returns `true` if the mechanism is [`Ptr`](MechanismKind::Ptr).
+    pub fn is_ptr(&self) -> bool {
+        matches!(self, Self::Ptr)
+    }
+    /// Returns `true` if the mechanism is [`Exists`](MechanismKind::Exists).
+    pub fn is_exists(&self) -> bool {
+        matches!(self, Self::Exists)
     }
 }
 
