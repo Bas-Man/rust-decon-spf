@@ -210,18 +210,11 @@ impl Spf {
     }
     pub fn is_valid(&self) -> bool {
         if self.from_src {
-            if self.include.is_some() {
-                if self.include.as_ref().unwrap().len() > 10 {
-                    return false;
-                } else {
-                    true
-                }
-            } else {
-                true
-            }
-        } else {
-            true
-        }
+            if self.includes().unwrap().len() > 10 {
+                return false;
+            };
+        };
+        true
     }
     pub fn source(&self) -> &String {
         &self.source
