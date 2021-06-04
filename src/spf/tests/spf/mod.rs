@@ -1,17 +1,11 @@
 #[doc(hidden)]
-mod a_capture;
-#[doc(hidden)]
-mod a_parse;
+mod a;
 #[doc(hidden)]
 mod exists;
 #[doc(hidden)]
-mod mx_capture;
+mod mx;
 #[doc(hidden)]
-mod mx_parse;
-#[doc(hidden)]
-mod ptr_capture;
-#[doc(hidden)]
-mod ptr_parse;
+mod ptr;
 
 #[cfg(test)]
 

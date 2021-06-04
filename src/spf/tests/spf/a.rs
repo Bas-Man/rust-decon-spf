@@ -1,6 +1,6 @@
 #[cfg(test)]
 
-mod a_capture {
+mod capture {
 
     use crate::spf::helpers;
     use crate::spf::kinds;
@@ -59,5 +59,59 @@ mod a_capture {
         assert_eq!(test.raw(), ":example.com/24");
         assert_eq!(test.string(), "a:example.com/24");
         //assert!(test.kind.is_a());
+    }
+}
+#[cfg(test)]
+
+mod parse {
+
+    use crate::spf::Spf;
+
+    #[test]
+    fn test_a_mechanism() {
+        let input = "v=spf1 a ~all";
+
+        let mut spf = Spf::from_str(&input.to_string());
+        spf.parse();
+        assert!(spf.a().is_some());
+        assert_eq!(spf.a().unwrap()[0].is_pass(), true);
+        assert_eq!(spf.a().unwrap()[0].mechanism(), "a");
+        assert_eq!(spf.a().unwrap()[0].string(), "a");
+        assert_eq!(spf.all().unwrap().is_softfail(), true);
+        //assert_eq!(spf.all().unwrap().mechanism(), "all");
+        assert_eq!(spf.all().unwrap().string(), "~all");
+    }
+    #[test]
+    fn test_a_mechanism_slash() {
+        let input = "v=spf1 -a/24 ~all";
+
+        let mut spf = Spf::from_str(&input.to_string());
+        spf.parse();
+        assert!(spf.a().is_some());
+        assert_eq!(spf.a().unwrap()[0].is_fail(), true);
+        assert_eq!(spf.a().unwrap()[0].mechanism(), "/24");
+        assert_eq!(spf.a().unwrap()[0].string(), "-a/24");
+    }
+    #[test]
+    fn test_a_mechanism_colon() {
+        let input = "v=spf1 ?a:example.com ~all";
+
+        let mut spf = Spf::from_str(&input.to_string());
+        spf.parse();
+        assert!(spf.a().is_some());
+        assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
+        assert_eq!(spf.a().unwrap()[0].mechanism(), ":example.com");
+        assert_eq!(spf.a().unwrap()[0].string(), "?a:example.com");
+    }
+    #[test]
+    fn test_a_mechanism_colon_slash() {
+        let input = "v=spf1 ~a:example.com/24 ~all";
+
+        let mut spf = Spf::from_str(&input.to_string());
+        spf.parse();
+        assert!(spf.a().is_some());
+        assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
+        assert_eq!(spf.a().unwrap()[0].mechanism(), ":example.com/24");
+        assert_eq!(spf.a().unwrap()[0].string(), "~a:example.com/24");
     }
 }

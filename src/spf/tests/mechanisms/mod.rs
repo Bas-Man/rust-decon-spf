@@ -70,7 +70,7 @@ mod Ip4 {
     use crate::spf::Qualifier;
 
     #[test]
-    fn test_ip4_pass() {
+    fn ip4_pass() {
         let ip4_pass = Mechanism::new_ip4(Qualifier::Pass, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_pass.is_pass(), true);
         assert_eq!(ip4_pass.raw(), "203.32.160.10/32");
@@ -80,20 +80,20 @@ mod Ip4 {
         assert_eq!(ip4_pass.mechanism().network().to_string(), "203.32.160.10");
     }
     #[test]
-    fn test_ip4_fail() {
+    fn ip4_fail() {
         let ip4_fail = Mechanism::new_ip4(Qualifier::Fail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_fail.is_fail(), true);
         assert_eq!(ip4_fail.string(), "-ip4:203.32.160.10/32");
     }
     #[test]
-    fn test_ip4_softfail() {
+    fn ip4_softfail() {
         let ip4_softfail =
             Mechanism::new_ip4(Qualifier::SoftFail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_softfail.is_softfail(), true);
         assert_eq!(ip4_softfail.string(), "~ip4:203.32.160.10/32");
     }
     #[test]
-    fn test_ip4_neutral() {
+    fn ip4_neutral() {
         let ip4_neutral =
             Mechanism::new_ip4(Qualifier::Neutral, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_neutral.is_neutral(), true);
@@ -110,27 +110,27 @@ mod ip6 {
     use crate::spf::Qualifier;
 
     #[test]
-    fn test_ip6_pass() {
+    fn ip6_pass() {
         let ip_pass = Mechanism::new_ip6(Qualifier::Pass, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_pass.is_pass(), true);
         assert_eq!(ip_pass.raw(), "2001:4860:4000::/36");
         assert_eq!(ip_pass.string(), "ip6:2001:4860:4000::/36");
     }
     #[test]
-    fn test_ip6_fail() {
+    fn ip6_fail() {
         let ip_fail = Mechanism::new_ip6(Qualifier::Fail, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_fail.is_fail(), true);
         assert_eq!(ip_fail.string(), "-ip6:2001:4860:4000::/36");
     }
     #[test]
-    fn test_ip6_softfail() {
+    fn ip6_softfail() {
         let ip_softfail =
             Mechanism::new_ip6(Qualifier::SoftFail, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_softfail.is_softfail(), true);
         assert_eq!(ip_softfail.string(), "~ip6:2001:4860:4000::/36");
     }
     #[test]
-    fn test_ip6_neutral() {
+    fn ip6_neutral() {
         let ip_neutral =
             Mechanism::new_ip6(Qualifier::Neutral, "2001:4860:4000::/36".parse().unwrap());
         assert_eq!(ip_neutral.is_neutral(), true);
@@ -145,10 +145,10 @@ mod all {
     use crate::spf::Qualifier;
 
     #[test]
-    fn test_new_a() {
-        let a_mechanism = Mechanism::new_a(Qualifier::Fail, "a".to_string());
+    fn new_all() {
+        let a_mechanism = Mechanism::new_all(Qualifier::Fail);
         assert_eq!(a_mechanism.is_fail(), true);
-        assert_eq!(a_mechanism.raw(), "a");
-        assert_eq!(a_mechanism.string(), "-a");
+        assert_eq!(a_mechanism.raw(), "all");
+        assert_eq!(a_mechanism.string(), "-all");
     }
 }

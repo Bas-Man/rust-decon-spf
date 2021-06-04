@@ -310,35 +310,35 @@ fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, &str) {
     }
 }
 #[test]
-fn test_return_and_remove_qualifier_no_qualifier() {
+fn return_and_remove_qualifier_no_qualifier() {
     let source = "no prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
     assert_eq!(Qualifier::Pass, c);
     assert_eq!(source, new_str);
 }
 #[test]
-fn test_return_and_remove_qualifier_pass() {
+fn return_and_remove_qualifier_pass() {
     let source = "+prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
     assert_eq!(Qualifier::Pass, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
-fn test_return_and_remove_qualifier_fail() {
+fn return_and_remove_qualifier_fail() {
     let source = "-prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
     assert_eq!(Qualifier::Fail, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
-fn test_return_and_remove_qualifier_softfail() {
+fn return_and_remove_qualifier_softfail() {
     let source = "~prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
     assert_eq!(Qualifier::SoftFail, c);
     assert_eq!("prefix", new_str);
 }
 #[test]
-fn test_return_and_remove_qualifier_neutral() {
+fn return_and_remove_qualifier_neutral() {
     let source = "?prefix";
     let (c, new_str) = return_and_remove_qualifier(source, 'n');
     assert_eq!(Qualifier::Neutral, c);

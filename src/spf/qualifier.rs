@@ -59,42 +59,42 @@ impl Qualifier {
     }
 }
 #[test]
-fn test_qualifer_is_pass() {
+fn is_pass() {
     let q = Qualifier::Pass;
     assert_eq!(q.is_pass(), true);
 }
 #[test]
-fn test_qualifer_is_fail() {
+fn is_fail() {
     let q = Qualifier::Fail;
     assert_eq!(q.is_fail(), true);
 }
 #[test]
-fn test_qualifer_is_softfail() {
+fn is_softfail() {
     let q = Qualifier::SoftFail;
     assert_eq!(q.is_softfail(), true);
 }
 #[test]
-fn test_qualifer_is_neutral() {
+fn is_neutral() {
     let q = Qualifier::Neutral;
     assert_eq!(q.is_neutral(), true);
 }
 #[test]
-fn test_get_pass() {
+fn get_pass() {
     let q = Qualifier::Pass;
     assert_eq!(q.get_str(), "");
 }
 #[test]
-fn test_get_fail() {
+fn get_fail() {
     let q = Qualifier::Fail;
     assert_eq!(q.get_str(), "-");
 }
 #[test]
-fn test_get_softfail() {
+fn get_softfail() {
     let q = Qualifier::SoftFail;
     assert_eq!(q.get_str(), "~");
 }
 #[test]
-fn test_get_neutral() {
+fn get_neutral() {
     let q = Qualifier::Neutral;
     assert_eq!(q.get_str(), "?");
 }
