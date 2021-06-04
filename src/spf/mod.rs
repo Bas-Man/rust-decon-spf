@@ -17,6 +17,7 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct Spf {
     source: String,
+    version: String,
     from_src: bool,
     include: Option<Vec<Mechanism<String>>>,
     redirect: Option<Mechanism<String>>,
@@ -34,6 +35,7 @@ impl Default for Spf {
     fn default() -> Self {
         Self {
             source: String::new(),
+            version: String::new(),
             from_src: false,
             include: None,
             redirect: None,
@@ -63,6 +65,7 @@ impl Spf {
     pub fn from_str(str: &String) -> Self {
         Self {
             source: str.clone(),
+            version: String::new(),
             from_src: true,
             include: None,
             redirect: None,
@@ -181,6 +184,30 @@ impl Spf {
         }
     }
 
+    pub fn make_v1(&mut self) {
+        self.version = String::from("v=spf1");
+    }
+    pub fn make_v2_pra(&mut self) {
+        self.version = String::from("spf2.0/pra");
+    }
+    pub fn make_v2_mfrom(&mut self) {
+        self.version = String::from("spf2.0/mfrom");
+    }
+    pub fn make_v2_pra_mfrom(&mut self) {
+        self.version = String::from("spf2.0/pra,mfrom");
+    }
+    pub fn make_v2_mfrom_pra(&mut self) {
+        self.version = String::from("spf2.0/mfrom,pra");
+    }
+    pub fn version(&self) -> &String {
+        &self.version
+    }
+    pub fn is_v1(&self) -> bool {
+        self.version.contains("v=spf1")
+    }
+    pub fn is_v2(&self) -> bool {
+        self.version.starts_with("spf2.0")
+    }
     pub fn is_valid(&self) -> bool {
         if self.from_src {
             if self.include.is_some() {
