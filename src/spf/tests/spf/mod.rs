@@ -1,5 +1,6 @@
 #[doc(hidden)]
 mod a;
+mod as_spf;
 mod construct;
 #[doc(hidden)]
 mod exists;

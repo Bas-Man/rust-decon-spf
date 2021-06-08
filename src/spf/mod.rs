@@ -208,13 +208,61 @@ impl Spf {
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0")
     }
+    pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
+        let mut vec: Vec<Mechanism<String>> = Vec::new();
+        vec.push(mechanism);
+        if self.a.is_none() {
+            self.a = Some(vec);
+        } else {
+            self.a.as_mut().unwrap().append(&mut vec);
+        }
+    }
     pub fn is_valid(&self) -> bool {
         if self.from_src {
             if self.includes().unwrap().len() > 10 {
                 return false;
             };
+            if self.source.len() > 255 {
+                return false;
+            };
         };
         true
+    }
+    pub fn as_spf(&self) -> Option<String> {
+        if !self.is_valid() {
+            None
+        } else {
+            let mut spf = String::new();
+            spf.push_str(self.version());
+            if self.is_redirected {
+                spf.push_str(" ");
+                spf.push_str(self.redirect().unwrap().string().as_str());
+            } else {
+                if self.a().is_some() {
+                    for i in self.a().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                };
+                if self.mx().is_some() {
+                    for i in self.mx().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                };
+                if self.includes().is_some() {
+                    for i in self.includes().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                }
+                if self.all().is_some() {
+                    spf.push_str(" ");
+                    spf.push_str(self.all().unwrap().string().as_str());
+                }
+            }
+            return Some(spf);
+        }
     }
     pub fn source(&self) -> &String {
         &self.source
