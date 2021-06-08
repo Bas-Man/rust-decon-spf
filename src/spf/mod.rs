@@ -84,6 +84,7 @@ impl Spf {
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`
     pub fn parse(&mut self) {
+        // # TODO: This needs to have a test for emtpy source. return a Result?
         // initialises required variables.
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
