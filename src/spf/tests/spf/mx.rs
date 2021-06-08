@@ -5,11 +5,12 @@ mod capture {
     use crate::spf::helpers;
     use crate::spf::kinds;
     use crate::spf::mechanism::Mechanism;
+    use crate::spf::MECHANISM_MX_PATTERN;
     use regex::Regex;
     #[test]
     fn test_match_on_mx_only() {
         let string = "mx";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::MX);
@@ -22,7 +23,7 @@ mod capture {
     #[test]
     fn test_match_on_mx_colon() {
         let string = "-mx:example.com";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::MX);
@@ -35,7 +36,7 @@ mod capture {
     #[test]
     fn test_match_on_mx_slash() {
         let string = "~mx/24";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::MX);
@@ -48,7 +49,7 @@ mod capture {
     #[test]
     fn test_match_on_mx_colon_slash() {
         let string = "+mx:example.com/24";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::MX);

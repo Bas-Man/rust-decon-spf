@@ -9,6 +9,10 @@ pub mod qualifier;
 #[doc(hidden)]
 mod tests;
 
+const MECHANISM_A_PATTERN: &str = r"^(?P<qualifier>[+?~-])?a(?P<mechanism>[:/]{0,1}.+)?";
+const MECHANISM_MX_PATTERN: &str = r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?";
+const MECHANISM_PTR_PATTERN: &str = r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?";
+
 use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
@@ -95,12 +99,10 @@ impl Spf {
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
         for record in records {
             // Make this lazy.
-            let a_pattern =
-                Regex::new(r"^(?P<qualifier>[+?~-])?a(?P<mechanism>[:/]{0,1}.+)?").unwrap();
-            let mx_pattern =
-                Regex::new(r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?").unwrap();
-            let ptr_pattern =
-                Regex::new(r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?").unwrap();
+            let a_pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
+            let mx_pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
+            let ptr_pattern = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
+
             if record.contains("redirect=") {
                 // Match a redirect
                 let items = record.rsplit("=");

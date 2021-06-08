@@ -5,12 +5,13 @@ mod capture {
     use crate::spf::helpers;
     use crate::spf::kinds;
     use crate::spf::mechanism::Mechanism;
+    use crate::spf::MECHANISM_PTR_PATTERN;
     use regex::Regex;
 
     #[test]
     fn test_match_on_ptr() {
         let string = "ptr";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::Ptr);
@@ -24,7 +25,7 @@ mod capture {
     #[test]
     fn test_match_on_ptr_colon() {
         let string = "ptr:example.com";
-        let pattern = Regex::new(r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?").unwrap();
+        let pattern = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
         option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::Ptr);
