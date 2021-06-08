@@ -185,19 +185,19 @@ impl Spf {
         }
     }
 
-    pub fn make_v1(&mut self) {
+    pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
     }
-    pub fn make_v2_pra(&mut self) {
+    pub fn set_v2_pra(&mut self) {
         self.version = String::from("spf2.0/pra");
     }
-    pub fn make_v2_mfrom(&mut self) {
+    pub fn set_v2_mfrom(&mut self) {
         self.version = String::from("spf2.0/mfrom");
     }
-    pub fn make_v2_pra_mfrom(&mut self) {
+    pub fn set_v2_pra_mfrom(&mut self) {
         self.version = String::from("spf2.0/pra,mfrom");
     }
-    pub fn make_v2_mfrom_pra(&mut self) {
+    pub fn set_v2_mfrom_pra(&mut self) {
         self.version = String::from("spf2.0/mfrom,pra");
     }
     pub fn version(&self) -> &String {
@@ -257,9 +257,12 @@ impl Spf {
                         spf.push_str(i.string().as_str());
                     }
                 }
-                if self.all().is_some() {
-                    spf.push_str(" ");
-                    spf.push_str(self.all().unwrap().string().as_str());
+                // All can only be used if this is not a redirect.
+                if !self.is_redirected {
+                    if self.all().is_some() {
+                        spf.push_str(" ");
+                        spf.push_str(self.all().unwrap().string().as_str());
+                    }
                 }
             }
             return Some(spf);
