@@ -1,5 +1,5 @@
 //! This module allows you to deconstruct an exiting SPF DNS Record into its
-//! constituant parts.  
+//! constituent parts.  
 //! It is not intended to validate the spf record.
 
 mod helpers;
