@@ -4,12 +4,15 @@
 // Todo: MX, PTR, Exists
 mod A {
 
+    use crate::spf::kinds::MechanismKind;
     use crate::spf::Mechanism;
     use crate::spf::Qualifier;
+
     #[test]
     fn new_a() {
         let a_mechanism = Mechanism::new_a(Qualifier::Fail, "a".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
+        assert_eq!(*a_mechanism.kind(), MechanismKind::A);
         assert_eq!(a_mechanism.raw(), "a");
         assert_eq!(a_mechanism.string(), "-a");
     }
@@ -19,12 +22,14 @@ mod A {
 #[allow(non_snake_case)]
 mod Include {
 
+    use crate::spf::kinds::MechanismKind;
     use crate::spf::Mechanism;
     use crate::spf::Qualifier;
     #[test]
     fn test_include_pass() {
         let include = Mechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
         assert_eq!(include.is_pass(), true);
+        assert_eq!(*include.kind(), MechanismKind::Include);
         assert_eq!(include.raw(), "_spf.test.com");
         assert_eq!(include.string(), "include:_spf.test.com");
     }

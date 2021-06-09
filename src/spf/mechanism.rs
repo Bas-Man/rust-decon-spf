@@ -2,6 +2,9 @@ use crate::spf::kinds::MechanismKind;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 
+/// A struct created either by having an existing SPF record `parsed` or programmatically created.
+
+/// Stores its `kind`, `Qualifier` and its `mechanism`
 #[derive(Debug, Clone)]
 pub struct Mechanism<T> {
     kind: MechanismKind,
@@ -47,60 +50,83 @@ impl<T> Mechanism<T> {
         };
         push_str.to_string()
     }
+    /// Returns a reference to the Mechanism's MechanismKind
+    pub fn kind(&self) -> &MechanismKind {
+        &self.kind
+    }
     /// Returns a reference to the Mechanism's Qualifier
     pub fn qualifier(&self) -> &Qualifier {
         &self.qualifier
     }
-    /// Returns a reference to the Mechanism's Value of Type T.
+    /// Returns a reference to the Mechanism's Value.
     pub fn mechanism(&self) -> &T {
         &self.mechanism
     }
 }
 
 impl Mechanism<String> {
-    pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::new(MechanismKind::Include, qualifier, mechanism)
-    }
+    /// create a new Mechanism struct of `Redirect`
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
+    /// create a new Mechanism struct of `A`
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from(":example.com"));
+    /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
+    /// assert_eq!(mechanism_of_a.raw(), ":example.com");
+    /// assert_eq!(mechanism_of_a.string(), "a:example.com")
+    /// ```
     pub fn new_a(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, mechanism)
     }
+    /// create a new Mechanism struct of `MX`
     pub fn new_mx(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, mechanism)
     }
+    /// create a new Mechanism struct of `Include`
+    pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
+        Mechanism::new(MechanismKind::Include, qualifier, mechanism)
+    }
+    /// create a new Mechanism struct of `Ptr`
     pub fn new_ptr(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, mechanism)
     }
+    /// create a new Mechanism struct of `Ptr` with no value
     pub fn new_ptr_blank(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, String::new())
     }
+    /// create a new Mechanism struct of `Exists`
     pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Exists, qualifier, mechanism)
     }
+    /// create a new Mechanism struct of `All`
     pub fn new_all(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::All, qualifier, String::from("all"))
     }
+    /// Return the string stored inthe attribute `mechanism`
     pub fn raw(&self) -> &String {
         &self.mechanism
     }
     /// Rebuild and return the string representation of the given mechanism
     pub fn string(&self) -> String {
-        let mut txt = String::new();
+        let mut mechanism_str = String::new();
         if self.qualifier != Qualifier::Pass {
-            txt.push_str(self.qualifier.get_str());
+            mechanism_str.push_str(self.qualifier.as_str());
         };
         match self.kind {
             MechanismKind::A | MechanismKind::MX | MechanismKind::Ptr | MechanismKind::All => {
                 if self.mechanism.starts_with(":") || self.mechanism.starts_with("/") {
-                    txt.push_str(self.mechanism_prefix_from_kind().as_str());
+                    mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str());
                 }
+                // If there is no ":" or "/" we dont want to add A, MX, Ptr or All.
             }
-            _ => txt.push_str(self.mechanism_prefix_from_kind().as_str()),
+            _ => mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str()),
         };
-        txt.push_str(self.mechanism.as_str());
-        txt
+        mechanism_str.push_str(self.mechanism.as_str());
+        mechanism_str
     }
 }
 
@@ -131,6 +157,7 @@ impl Mechanism<IpNetwork> {
     /// ```
     ///
     pub fn raw(&self) -> String {
+        // Consider striping ":" and "/" if they are the first characters.
         self.mechanism.to_string()
     }
     /// Returns the mechanism string representation of an IP4/6 mechanism.
@@ -146,14 +173,15 @@ impl Mechanism<IpNetwork> {
     /// ```
     ///
     pub fn string(&self) -> String {
-        let mut txt = String::new();
+        let mut ip_mechanism_str = String::new();
         if self.qualifier != Qualifier::Pass {
-            txt.push_str(self.qualifier.get_str());
+            ip_mechanism_str.push_str(self.qualifier.as_str());
         };
-        txt.push_str(self.mechanism_prefix_from_kind().as_str());
-        txt.push_str(self.mechanism.to_string().as_str());
-        txt
+        ip_mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str());
+        ip_mechanism_str.push_str(self.mechanism.to_string().as_str());
+        ip_mechanism_str
     }
+    /// returns the mechanbism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         &self.mechanism
     }

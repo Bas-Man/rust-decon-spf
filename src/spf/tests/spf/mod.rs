@@ -27,7 +27,7 @@ mod test_spf {
         assert_eq!(spf.mx.is_none(), true);
         assert_eq!(spf.ip4.is_none(), true);
         assert_eq!(spf.ip6.is_none(), true);
-        assert_eq!(spf.redirect().unwrap().qualifier().get_str(), "");
+        assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
         assert_eq!(spf.redirect().unwrap().mechanism(), "_spf.google.com");
         assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
         assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com")

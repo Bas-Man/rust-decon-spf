@@ -56,19 +56,25 @@ impl Default for Spf {
 }
 
 impl Spf {
+    pub fn new() -> Self {
+        Spf::default()
+    }
     /// Create a new Spf with the provided `str`
+    ///
+    /// # Arguments
+    /// * `str` - a reference to a string slice, which is the SPF record.
     ///
     /// # Example
     ///
     /// ```
     /// use decon_spf::spf::Spf;
     /// let source_str = "v=spf1 redirect=_spf.example.com";
-    /// let spf = Spf::from_str(&source_str.to_string());
+    /// let spf = Spf::from_str(&source_str);
     /// ```
     ///
-    pub fn from_str(str: &String) -> Self {
+    pub fn from_str(str: &str) -> Self {
         Self {
-            source: str.clone(),
+            source: str.clone().to_string(),
             version: String::new(),
             from_src: true,
             include: None,
@@ -82,9 +88,6 @@ impl Spf {
             exists: None,
             all: None,
         }
-    }
-    pub fn new() -> Self {
-        Spf::default()
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`
     pub fn parse(&mut self) {
@@ -102,8 +105,9 @@ impl Spf {
             let a_pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
             let mx_pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
             let ptr_pattern = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
-
-            if record.contains("redirect=") {
+            if record.contains("v=spf1") || record.starts_with("spf2.0") {
+                self.version = record.to_string();
+            } else if record.contains("redirect=") {
                 // Match a redirect
                 let items = record.rsplit("=");
                 for item in items {
@@ -202,14 +206,14 @@ impl Spf {
     pub fn set_v2_mfrom_pra(&mut self) {
         self.version = String::from("spf2.0/mfrom,pra");
     }
-    pub fn version(&self) -> &String {
-        &self.version
-    }
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
     }
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0")
+    }
+    pub fn version(&self) -> &String {
+        &self.version
     }
     pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
@@ -271,21 +275,17 @@ impl Spf {
         }
     }
     pub fn source(&self) -> &String {
+        // Source is set to "" by default.
         &self.source
+    }
+    pub fn is_redirect(&self) -> bool {
+        self.is_redirected
+    }
+    pub fn redirect(&self) -> Option<&Mechanism<String>> {
+        self.redirect.as_ref()
     }
     pub fn includes(&self) -> Option<&Vec<Mechanism<String>>> {
         self.include.as_ref()
-    }
-    pub fn list_includes(&self) {
-        match &self.include {
-            None => println!("There are no include elements"),
-            Some(elements) => {
-                println!("Include Mechanisms:");
-                for element in elements {
-                    println!("{}", element.string());
-                }
-            }
-        }
     }
     pub fn a(&self) -> Option<&Vec<Mechanism<String>>> {
         self.a.as_ref()
@@ -296,63 +296,8 @@ impl Spf {
     pub fn ip4(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip4.as_ref()
     }
-    pub fn ip4_networks(&self) {
-        match &self.ip4 {
-            None => println!("There are no ip4 networks"),
-            Some(record) => {
-                println!("List of ip4 networks/hosts:");
-                for item in record {
-                    println!("{}", item.raw());
-                    print!("Network: {}", item.as_network().network());
-                    println!(" Subnet: {}", item.as_network().prefix());
-                }
-            }
-        }
-    }
-    pub fn ip4_mechanisms(&self) {
-        match &self.ip4 {
-            None => println!("There are no ip4 spf records."),
-            Some(records) => {
-                println!("\nList of ip4 mechanisms:");
-                for record in records {
-                    println!("{}", record.string())
-                }
-            }
-        }
-    }
     pub fn ip6(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip6.as_ref()
-    }
-    pub fn ip6_networks(&self) {
-        match &self.ip6 {
-            None => println!("There are no ip6 networks"),
-            Some(record) => {
-                println!("List of ip6 networks/hosts:");
-                for item in record {
-                    println!("{}", item.raw());
-                    print!("Network: {}", item.mechanism().network());
-                    println!(" Subnet: {}", item.mechanism().prefix());
-                }
-            }
-        }
-    }
-    pub fn ip6_mechanisms(&self) {
-        match &self.ip6 {
-            None => println!("There are no ip6 spf records."),
-            Some(records) => {
-                println!("\nList of ip6 mechanisms:");
-                for record in records {
-                    println!("{}", record.string())
-                }
-            }
-        }
-    }
-
-    pub fn is_redirect(&self) -> bool {
-        self.is_redirected
-    }
-    pub fn redirect(&self) -> Option<&Mechanism<String>> {
-        self.redirect.as_ref()
     }
     pub fn exists(&self) -> Option<&Vec<Mechanism<String>>> {
         self.exists.as_ref()

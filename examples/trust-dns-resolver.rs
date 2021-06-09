@@ -11,24 +11,47 @@ fn main() {
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
-    let query = "gmail.com.";
-    //let mx_response = resolver.mx_lookup(query);
-    //let soa_response = resolver.soa_lookup(query);
+
+    //let query = "gmail.com.";
+    let query = "hotmail.com.";
+    //let query = "_netblocks.google.com."; // ip4
+    //let query = "_netblocks2.google.com."; // ip6
+
     let txt_response = resolver.txt_lookup(query);
 
-    //display_mx(&mx_response);
-    //display_soa(&soa_response);
     let mut data = display_txt(&query, &txt_response);
     println!("\nDecontructing SPF Record");
     data.parse();
     println!("{:?}", data);
     println!("SPF1: {}\n", data.source());
-    //println!("{:?}", data.includes());
-    data.list_includes();
-    data.ip4_networks();
-    data.ip4_mechanisms();
-    data.ip6_networks();
-    data.ip6_mechanisms();
+    if data.includes().is_some() {
+        println!("Include list");
+        for i in data.includes().unwrap().iter() {
+            println!("spf: {}", i.string());
+        }
+    }
+    if data.ip4().is_some() {
+        println!("IP4 Address Ranges");
+        for i in data.ip4().unwrap().iter() {
+            println!(
+                "IP: {} prefix: {}",
+                i.mechanism().network(),
+                i.mechanism().prefix()
+            );
+            println!("spf: {}", i.string());
+        }
+    }
+    if data.ip6().is_some() {
+        println!("IP6 Address Ranges");
+        for i in data.ip6().unwrap().iter() {
+            println!(
+                "IP: {} prefix: {}",
+                i.mechanism().network(),
+                i.mechanism().prefix()
+            );
+            println!("spf: {}", i.string());
+        }
+    }
     println!("\nIs a redirect: {}", data.is_redirect());
     if data.is_redirect() {
         println!("\nredirect: {}", data.redirect().unwrap().raw());

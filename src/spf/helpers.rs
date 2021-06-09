@@ -3,42 +3,41 @@ use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use regex::Regex;
 
-#[doc(hidden)]
 pub(crate) fn capture_matches(
     pattern: Regex,
     string: &str,
     kind: kinds::MechanismKind,
 ) -> Option<Mechanism<String>> {
     let caps = pattern.captures(string);
-    let q: char;
-    let mut q2: Qualifier = Qualifier::Pass;
-    let m: String;
+    let qualifier_char: char;
+    let mut qualifier_result: Qualifier = Qualifier::Pass;
+    let mechanism_string: String;
     let mechanism;
     match caps {
         None => return None,
         Some(caps) => {
             // There was a match
             if caps.name("qualifier").is_some() {
-                q = caps
+                qualifier_char = caps
                     .name("qualifier")
                     .unwrap()
                     .as_str()
                     .chars()
                     .nth(0)
                     .unwrap();
-                q2 = char_to_qualifier(q);
+                qualifier_result = char_to_qualifier(qualifier_char);
             };
             if caps.name("mechanism").is_some() {
-                m = caps.name("mechanism").unwrap().as_str().to_string();
-                mechanism = Mechanism::new(kind, q2, (*m).to_string());
+                mechanism_string = caps.name("mechanism").unwrap().as_str().to_string();
+                mechanism = Mechanism::new(kind, qualifier_result, (*mechanism_string).to_string());
             } else {
-                m = match kind {
+                mechanism_string = match kind {
                     kinds::MechanismKind::A => "a".to_string(),
                     kinds::MechanismKind::MX => "mx".to_string(),
                     kinds::MechanismKind::Ptr => "ptr".to_string(),
                     _ => unreachable!(),
                 };
-                mechanism = Mechanism::new(kind, q2, m);
+                mechanism = Mechanism::new(kind, qualifier_result, mechanism_string);
             }
 
             Some(mechanism)

@@ -6,7 +6,34 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+description = """
+This is a simple tool to be able to deconstruct and existing SPF record that might be
+retreived in a normal DNS TXT lookup.
+"""
+
+documentation = "https://docs.rs/decon-spf"
+#homepage = ""
+repository = "https://github.com/Bas-man/rust-decon-spf"
+
+readme = "README.md"
+
+keywords = ["DNS", "SPF"]
+categories = ["network-programming"]
+
+#license = "MIT"
+license-file = "LICENSE"
+
+[lib]
+name = "decon_spf"
+path = "src/lib.rs"
+
+[[example]]
+name = "trust-dns-demo"
+path = "examples/trust-dns-resolver.rs"
 [dependencies]
-trust-dns-resolver = "0.20.1"
+#trust-dns-resolver = "0.20.1"
 ipnetwork = "0.17.0"
 regex = "1"
+
+[dev-dependencies]
+trust-dns-resolver = "0.20.1"

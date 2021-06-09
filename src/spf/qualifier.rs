@@ -1,3 +1,5 @@
+/// An enumeration of possible qualifiers that are used in SPF records.
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Qualifier {
     /// This is the default value for a qualifier if the value is not present in the SPF record.
@@ -39,7 +41,7 @@ impl Qualifier {
     }
     /// Returns the character, as a string slice, that represents a given ['Qualifier'](Qualifier) value in
     /// SPF.
-    pub fn get_str(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         match self {
             Qualifier::Pass => return "",
             Qualifier::Fail => return "-",
@@ -49,7 +51,7 @@ impl Qualifier {
     }
     /// Returns the character, as a `char`, that represents a given ['Qualifier'](Qualifier) value in
     /// SPF.
-    pub fn get_char(&self) -> char {
+    pub fn as_char(&self) -> char {
         match self {
             Qualifier::Pass => return '+',
             Qualifier::Fail => return '-',
@@ -79,22 +81,22 @@ fn is_neutral() {
     assert_eq!(q.is_neutral(), true);
 }
 #[test]
-fn get_pass() {
+fn as_pass() {
     let q = Qualifier::Pass;
-    assert_eq!(q.get_str(), "");
+    assert_eq!(q.as_str(), "");
 }
 #[test]
-fn get_fail() {
+fn as_fail() {
     let q = Qualifier::Fail;
-    assert_eq!(q.get_str(), "-");
+    assert_eq!(q.as_str(), "-");
 }
 #[test]
-fn get_softfail() {
+fn as_softfail() {
     let q = Qualifier::SoftFail;
-    assert_eq!(q.get_str(), "~");
+    assert_eq!(q.as_str(), "~");
 }
 #[test]
-fn get_neutral() {
+fn as_neutral() {
     let q = Qualifier::Neutral;
-    assert_eq!(q.get_str(), "?");
+    assert_eq!(q.as_str(), "?");
 }
