@@ -1,5 +1,6 @@
-/// Defines the supported SPF Mechanisms  
+//! Defines the supported SPF Mechanisms  
 
+/// This enum defines the possible mechanisms.
 #[derive(Debug, Clone, PartialEq)]
 pub enum MechanismKind {
     /// Represents a Mechanism of type redirect=  

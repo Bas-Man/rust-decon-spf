@@ -9,15 +9,11 @@ pub mod qualifier;
 #[doc(hidden)]
 mod tests;
 
-const MECHANISM_A_PATTERN: &str = r"^(?P<qualifier>[+?~-])?a(?P<mechanism>[:/]{0,1}.+)?";
-const MECHANISM_MX_PATTERN: &str = r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?";
-const MECHANISM_PTR_PATTERN: &str = r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?";
-
 use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
-use regex::Regex;
 
+/// Some command to go here.
 #[derive(Debug)]
 pub struct Spf {
     source: String,
@@ -56,6 +52,7 @@ impl Default for Spf {
 }
 
 impl Spf {
+    /// Create a new empty Spf struct.
     pub fn new() -> Self {
         Spf::default()
     }
@@ -101,10 +98,6 @@ impl Spf {
         let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
         for record in records {
-            // Make this lazy.
-            let a_pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
-            let mx_pattern = Regex::new(MECHANISM_MX_PATTERN).unwrap();
-            let ptr_pattern = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 self.version = record.to_string();
             } else if record.contains("redirect=") {
@@ -158,15 +151,15 @@ impl Spf {
                     return_and_remove_qualifier(record, 'a').0,
                 ))
             } else if let Some(a_mechanism) =
-                helpers::capture_matches(a_pattern, record, kinds::MechanismKind::A)
+                helpers::capture_matches(record, kinds::MechanismKind::A)
             {
                 vec_of_a.push(a_mechanism);
             } else if let Some(mx_mechanism) =
-                helpers::capture_matches(mx_pattern, record, kinds::MechanismKind::MX)
+                helpers::capture_matches(record, kinds::MechanismKind::MX)
             {
                 vec_of_mx.push(mx_mechanism);
             } else if let Some(ptr_mechanism) =
-                helpers::capture_matches(ptr_pattern, record, kinds::MechanismKind::Ptr)
+                helpers::capture_matches(record, kinds::MechanismKind::Ptr)
             {
                 self.ptr = Some(ptr_mechanism);
             }
@@ -191,30 +184,44 @@ impl Spf {
         }
     }
 
+    /// Set version to `v=spf1`
+    #[doc(hidden)]
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
     }
+    /// Set version to `spf2.0/pra`
+    #[doc(hidden)]
     pub fn set_v2_pra(&mut self) {
         self.version = String::from("spf2.0/pra");
     }
+    /// Set version to `spf2.0/mfrom`
+    #[doc(hidden)]
     pub fn set_v2_mfrom(&mut self) {
         self.version = String::from("spf2.0/mfrom");
     }
+    /// Set version to `spf2.0/pra,mfrom`
+    #[doc(hidden)]
     pub fn set_v2_pra_mfrom(&mut self) {
         self.version = String::from("spf2.0/pra,mfrom");
     }
+    /// Set version to `spf2.0/mfrom,pra`
+    #[doc(hidden)]
     pub fn set_v2_mfrom_pra(&mut self) {
         self.version = String::from("spf2.0/mfrom,pra");
     }
+    /// Check that version is v1
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
     }
+    /// Check that version os v2
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0")
     }
+    /// return a reference to version
     pub fn version(&self) -> &String {
         &self.version
     }
+    #[doc(hidden)]
     pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
@@ -224,6 +231,10 @@ impl Spf {
             self.a.as_mut().unwrap().append(&mut vec);
         }
     }
+    /// Very rudementary validation check.
+    /// Will fail if the length of `source` is more than 255 characters
+    /// Will fail if there are more than 10 include mechanisms.
+    /// (This will change given new information)
     pub fn is_valid(&self) -> bool {
         if self.from_src {
             if self.includes().unwrap().len() > 10 {
@@ -235,6 +246,8 @@ impl Spf {
         };
         true
     }
+    /// Returns a new string representation of the spf record if possible.
+    /// This does not use the `source` attribute.
     pub fn as_spf(&self) -> Option<String> {
         if !self.is_valid() {
             None
@@ -274,37 +287,48 @@ impl Spf {
             return Some(spf);
         }
     }
+    /// Returns a reference to the string stored in `source`
     pub fn source(&self) -> &String {
         // Source is set to "" by default.
         &self.source
     }
+    /// True if there is a redirect present in the spf record.
     pub fn is_redirect(&self) -> bool {
         self.is_redirected
     }
+    /// Returns a reference to the redurect Mechanism
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         self.redirect.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Include`
     pub fn includes(&self) -> Option<&Vec<Mechanism<String>>> {
         self.include.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `A`
     pub fn a(&self) -> Option<&Vec<Mechanism<String>>> {
         self.a.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `MX`
     pub fn mx(&self) -> Option<&Vec<Mechanism<String>>> {
         self.mx.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP4`
     pub fn ip4(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip4.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP6`
     pub fn ip6(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip6.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Exists`
     pub fn exists(&self) -> Option<&Vec<Mechanism<String>>> {
         self.exists.as_ref()
     }
+    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Ptr`
     pub fn ptr(&self) -> Option<&Mechanism<String>> {
         self.ptr.as_ref()
     }
+    /// Returns a reference to Mechanism<String> for `All`
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
     }

@@ -5,16 +5,13 @@ mod capture {
     use crate::spf::helpers;
     use crate::spf::kinds;
     use crate::spf::mechanism::Mechanism;
-    use crate::spf::MECHANISM_A_PATTERN;
-    use regex::Regex;
 
     #[test]
     fn test_match_on_a_only() {
         let string = "a";
-        let pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
@@ -24,10 +21,9 @@ mod capture {
     #[test]
     fn test_match_on_a_colon() {
         let string = "-a:example.com";
-        let pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_fail(), true);
@@ -37,10 +33,9 @@ mod capture {
     #[test]
     fn test_match_on_a_slash() {
         let string = "~a/24";
-        let pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_softfail(), true);
@@ -50,10 +45,9 @@ mod capture {
     #[test]
     fn test_match_on_a_colon_slash() {
         let string = "+a:example.com/24";
-        let pattern = Regex::new(MECHANISM_A_PATTERN).unwrap();
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(pattern, &string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);

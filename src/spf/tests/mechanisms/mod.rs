@@ -16,6 +16,16 @@ mod A {
         assert_eq!(a_mechanism.raw(), "a");
         assert_eq!(a_mechanism.string(), "-a");
     }
+    // Todo This needs review. How do I want to use new_a
+    #[test]
+    fn new_a_colon() {
+        let a_mechanism = Mechanism::new_a(Qualifier::Fail, ":example.com".to_string());
+        assert_eq!(a_mechanism.is_fail(), true);
+        assert_eq!(*a_mechanism.kind(), MechanismKind::A);
+        assert_eq!(a_mechanism.raw(), ":example.com");
+        assert_eq!(a_mechanism.test(), "example.com");
+        assert_eq!(a_mechanism.string(), "-a:example.com");
+    }
 }
 
 #[cfg(test)]

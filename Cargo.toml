@@ -31,9 +31,9 @@ path = "src/lib.rs"
 name = "trust-dns-demo"
 path = "examples/trust-dns-resolver.rs"
 [dependencies]
-#trust-dns-resolver = "0.20.1"
 ipnetwork = "0.17.0"
 regex = "1"
+lazy_static = "1.4.0"
 
 [dev-dependencies]
 trust-dns-resolver = "0.20.1"

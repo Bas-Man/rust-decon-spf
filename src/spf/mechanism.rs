@@ -1,8 +1,8 @@
+//! A struct created either by having an existing SPF record `parsed` or programmatically created.
+
 use crate::spf::kinds::MechanismKind;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
-
-/// A struct created either by having an existing SPF record `parsed` or programmatically created.
 
 /// Stores its `kind`, `Qualifier` and its `mechanism`
 #[derive(Debug, Clone)]
@@ -23,15 +23,19 @@ impl<T> Mechanism<T> {
             mechanism,
         }
     }
+    /// check is mechanism is pass
     pub fn is_pass(&self) -> bool {
         self.qualifier == Qualifier::Pass
     }
+    /// check is mechanism is fail
     pub fn is_fail(&self) -> bool {
         self.qualifier == Qualifier::Fail
     }
+    /// check is mechanism is softfail
     pub fn is_softfail(&self) -> bool {
         self.qualifier == Qualifier::SoftFail
     }
+    /// check is mechanism is neutral
     pub fn is_neutral(&self) -> bool {
         self.qualifier == Qualifier::Neutral
     }
@@ -66,6 +70,7 @@ impl<T> Mechanism<T> {
 
 impl Mechanism<String> {
     /// create a new Mechanism struct of `Redirect`
+    #[doc(hidden)]
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
@@ -79,36 +84,54 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_of_a.raw(), ":example.com");
     /// assert_eq!(mechanism_of_a.string(), "a:example.com")
     /// ```
+    #[doc(hidden)]
     pub fn new_a(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, mechanism)
     }
     /// create a new Mechanism struct of `MX`
+    #[doc(hidden)]
     pub fn new_mx(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, mechanism)
     }
     /// create a new Mechanism struct of `Include`
+    #[doc(hidden)]
     pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Include, qualifier, mechanism)
     }
     /// create a new Mechanism struct of `Ptr`
+    #[doc(hidden)]
     pub fn new_ptr(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, mechanism)
     }
     /// create a new Mechanism struct of `Ptr` with no value
+    #[doc(hidden)]
     pub fn new_ptr_blank(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, String::new())
     }
     /// create a new Mechanism struct of `Exists`
+    #[doc(hidden)]
     pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Exists, qualifier, mechanism)
     }
     /// create a new Mechanism struct of `All`
+    #[doc(hidden)]
     pub fn new_all(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::All, qualifier, String::from("all"))
     }
     /// Return the string stored inthe attribute `mechanism`
     pub fn raw(&self) -> &String {
         &self.mechanism
+    }
+    // Possible replacement for raw function
+    #[doc(hidden)]
+    pub fn test(&self) -> &str {
+        if self.mechanism.starts_with(":") {
+            let mut char = self.mechanism.chars();
+            char.next();
+            char.as_str()
+        } else {
+            &self.mechanism
+        }
     }
     /// Rebuild and return the string representation of the given mechanism
     pub fn string(&self) -> String {
@@ -131,6 +154,8 @@ impl Mechanism<String> {
 }
 
 impl Mechanism<IpNetwork> {
+    /// Create a new Mechanism<IpNetwork>
+    /// Will correctly set its `kind` based on the `IpNetwork` type.
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         if mechanism.is_ipv4() {
             Mechanism::new_ip4(qualifier, mechanism)
@@ -138,9 +163,11 @@ impl Mechanism<IpNetwork> {
             Mechanism::new_ip6(qualifier, mechanism)
         }
     }
+    /// Create a new Mechanism<IpNetwork> of IP4
     pub fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV4, qualifier, mechanism)
     }
+    /// Create a new Mechanism<IpNetwork> of IP6
     pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV6, qualifier, mechanism)
     }

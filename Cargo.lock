@@ -49,6 +49,7 @@ name = "decon-spf"
 version = "0.1.0"
 dependencies = [
  "ipnetwork",
+ "lazy_static",
  "regex",
  "trust-dns-resolver",
 ]
