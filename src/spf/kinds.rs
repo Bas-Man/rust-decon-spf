@@ -11,7 +11,8 @@ pub enum MechanismKind {
     /// ```bash
     /// a   
     /// a/24  
-    /// a:example.com/24 (/prefix is optional)
+    /// a:example.com  
+    /// a:example.com/24  
     /// ```
     A,
     /// Represents a Mechanism of type mx
@@ -74,6 +75,18 @@ impl MechanismKind {
     pub fn is_all(&self) -> bool {
         matches!(self, Self::All)
     }
+    /// Returns a reference to the str for kind enums.
+    ///
+    /// Examples
+    ///
+    /// ```rust
+    /// # use decon_spf::spf::kinds;
+    /// let a = kinds::MechanismKind::A;
+    /// let mx = kinds::MechanismKind::MX;
+    /// assert_eq!(a.as_str(), "a");
+    /// assert_eq!(mx.as_str(), "mx");
+    /// ```
+    ///
     pub fn as_str(&self) -> &str {
         let push_str = match self {
             MechanismKind::Redirect => "redirect=",
