@@ -74,10 +74,70 @@ impl MechanismKind {
     pub fn is_all(&self) -> bool {
         matches!(self, Self::All)
     }
+    pub fn as_str(&self) -> &str {
+        let push_str = match self {
+            MechanismKind::Redirect => "redirect=",
+            MechanismKind::Include => "include:",
+            MechanismKind::A => "a",
+            MechanismKind::MX => "mx",
+            MechanismKind::IpV4 => "ip4:",
+            MechanismKind::IpV6 => "ip6:",
+            MechanismKind::Ptr => "ptr",
+            MechanismKind::Exists => "exists:",
+            MechanismKind::All => "all",
+        };
+        push_str
+    }
 }
 
 impl Default for MechanismKind {
     fn default() -> Self {
         Self::A
     }
+}
+
+#[test]
+fn test_kind_a() {
+    let a = MechanismKind::A;
+    assert_eq!(a.as_str(), "a");
+}
+#[test]
+fn test_kind_mx() {
+    let a = MechanismKind::MX;
+    assert_eq!(a.as_str(), "mx");
+}
+#[test]
+fn test_kind_redirect() {
+    let a = MechanismKind::Redirect;
+    assert_eq!(a.as_str(), "redirect=");
+}
+#[test]
+fn test_kind_include() {
+    let a = MechanismKind::Include;
+    assert_eq!(a.as_str(), "include:");
+}
+#[test]
+fn test_kind_ip4() {
+    let a = MechanismKind::IpV4;
+    assert_eq!(a.as_str(), "ip4:");
+}
+#[test]
+fn test_kind_ip6() {
+    let a = MechanismKind::IpV6;
+    assert_eq!(a.as_str(), "ip6:");
+}
+#[test]
+fn test_kind_ptr() {
+    let a = MechanismKind::Ptr;
+    assert_eq!(a.as_str(), "ptr");
+}
+#[test]
+fn test_kind_exists() {
+    let a = MechanismKind::Exists;
+    assert_eq!(a.as_str(), "exists:");
+}
+#[test]
+fn test_kind_all() {
+    let a = MechanismKind::All;
+    assert_eq!(a.as_str(), "all");
 }
