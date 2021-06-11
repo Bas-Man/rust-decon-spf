@@ -48,6 +48,7 @@ impl<T> Mechanism<T> {
         &self.qualifier
     }
     /// Returns a reference to the Mechanism's Value.
+    /// This could return a `String` or `IpNetwork`
     pub fn mechanism(&self) -> &T {
         &self.mechanism
     }
@@ -141,6 +142,7 @@ impl Mechanism<String> {
 impl Mechanism<IpNetwork> {
     /// Create a new Mechanism<IpNetwork>
     /// Will correctly set its `kind` based on the `IpNetwork` type.
+    #[doc(hidden)]
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         if mechanism.is_ipv4() {
             Mechanism::new_ip4(qualifier, mechanism)
@@ -149,10 +151,12 @@ impl Mechanism<IpNetwork> {
         }
     }
     /// Create a new Mechanism<IpNetwork> of IP4
+    #[doc(hidden)]
     pub fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV4, qualifier, mechanism)
     }
     /// Create a new Mechanism<IpNetwork> of IP6
+    #[doc(hidden)]
     pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV6, qualifier, mechanism)
     }
