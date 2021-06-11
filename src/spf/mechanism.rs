@@ -67,7 +67,7 @@ impl Mechanism<String> {
     /// use decon_spf::spf::mechanism::Mechanism;
     /// let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from(":example.com"));
     /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
-    /// assert_eq!(mechanism_of_a.raw(), ":example.com");
+    /// assert_eq!(mechanism_of_a.raw(), "example.com");
     /// assert_eq!(mechanism_of_a.string(), "a:example.com")
     /// ```
     #[doc(hidden)]
@@ -102,16 +102,13 @@ impl Mechanism<String> {
     /// create a new Mechanism struct of `All`
     #[doc(hidden)]
     pub fn new_all(qualifier: Qualifier) -> Self {
-        Mechanism::new(MechanismKind::All, qualifier, String::from("all"))
+        Mechanism::new(MechanismKind::All, qualifier, String::new())
     }
     /// Return the string stored inthe attribute `mechanism`
-    pub fn raw(&self) -> &String {
-        &self.mechanism
-    }
-    // Possible replacement for raw function
-    #[doc(hidden)]
-    pub fn test(&self) -> &str {
-        if self.mechanism.starts_with(":") {
+    pub fn raw(&self) -> &str {
+        if self.mechanism == "" {
+            self.kind().as_str()
+        } else if self.mechanism.starts_with(":") {
             let mut char = self.mechanism.chars();
             char.next();
             char.as_str()
@@ -125,15 +122,7 @@ impl Mechanism<String> {
         if self.qualifier != Qualifier::Pass {
             mechanism_str.push_str(self.qualifier.as_str());
         };
-        match self.kind {
-            MechanismKind::A | MechanismKind::MX | MechanismKind::Ptr | MechanismKind::All => {
-                if self.mechanism.starts_with(":") || self.mechanism.starts_with("/") {
-                    mechanism_str.push_str(self.kind().as_str());
-                }
-                // If there is no ":" or "/" we dont want to add A, MX, Ptr or All.
-            }
-            _ => mechanism_str.push_str(self.kind().as_str()),
-        };
+        mechanism_str.push_str(self.kind().as_str());
         mechanism_str.push_str(self.mechanism.as_str());
         mechanism_str
     }
@@ -186,6 +175,7 @@ impl Mechanism<IpNetwork> {
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.string(), "ip4:192.168.11.0/24");
+    /// assert_eq!(ip_mechanism.as_network(), &ip);
     /// ```
     ///
     pub fn string(&self) -> String {
@@ -197,7 +187,7 @@ impl Mechanism<IpNetwork> {
         ip_mechanism_str.push_str(self.mechanism.to_string().as_str());
         ip_mechanism_str
     }
-    /// returns the mechanbism as an `IpNetwork`
+    /// Returns the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         &self.mechanism
     }

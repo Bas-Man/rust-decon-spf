@@ -42,8 +42,8 @@ fn main() {
         for i in data.ip4().unwrap().iter() {
             println!(
                 "IP: {} prefix: {}",
-                i.mechanism().network(),
-                i.mechanism().prefix()
+                i.as_network().network(),
+                i.as_network().prefix()
             );
             println!("spf: {}", i.string());
         }
@@ -53,8 +53,8 @@ fn main() {
         for i in data.ip6().unwrap().iter() {
             println!(
                 "IP: {} prefix: {}",
-                i.mechanism().network(),
-                i.mechanism().prefix()
+                i.as_network().network(),
+                i.as_network().prefix()
             );
             println!("spf: {}", i.string());
         }

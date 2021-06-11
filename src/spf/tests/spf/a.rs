@@ -27,7 +27,7 @@ mod capture {
 
         let test = option_test.unwrap();
         assert_eq!(test.is_fail(), true);
-        assert_eq!(test.raw(), ":example.com");
+        assert_eq!(test.raw(), "example.com");
         assert_eq!(test.string(), "-a:example.com");
     }
     #[test]
@@ -51,7 +51,7 @@ mod capture {
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
-        assert_eq!(test.raw(), ":example.com/24");
+        assert_eq!(test.raw(), "example.com/24");
         assert_eq!(test.string(), "a:example.com/24");
         //assert!(test.kind.is_a());
     }
@@ -71,10 +71,8 @@ mod parse {
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_pass(), true);
-        assert_eq!(spf.a().unwrap()[0].mechanism(), "a");
         assert_eq!(spf.a().unwrap()[0].string(), "a");
         assert_eq!(spf.all().unwrap().is_softfail(), true);
-        //assert_eq!(spf.all().unwrap().mechanism(), "all");
         assert_eq!(spf.all().unwrap().string(), "~all");
     }
     #[test]
@@ -85,7 +83,6 @@ mod parse {
         spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_fail(), true);
-        assert_eq!(spf.a().unwrap()[0].mechanism(), "/24");
         assert_eq!(spf.a().unwrap()[0].string(), "-a/24");
     }
     #[test]
@@ -96,7 +93,6 @@ mod parse {
         spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
-        assert_eq!(spf.a().unwrap()[0].mechanism(), ":example.com");
         assert_eq!(spf.a().unwrap()[0].string(), "?a:example.com");
     }
     #[test]
@@ -107,7 +103,6 @@ mod parse {
         spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
-        assert_eq!(spf.a().unwrap()[0].mechanism(), ":example.com/24");
         assert_eq!(spf.a().unwrap()[0].string(), "~a:example.com/24");
     }
 }

@@ -47,12 +47,14 @@ pub(crate) fn capture_matches(
                 mechanism_string = caps.name("mechanism").unwrap().as_str().to_string();
                 mechanism = Mechanism::new(kind, qualifier_result, (*mechanism_string).to_string());
             } else {
-                mechanism_string = match kind {
-                    kinds::MechanismKind::A => "a".to_string(),
-                    kinds::MechanismKind::MX => "mx".to_string(),
-                    kinds::MechanismKind::Ptr => "ptr".to_string(),
-                    _ => unreachable!(),
-                };
+                //mechanism_string = match kind {
+                //    kinds::MechanismKind::A => "a".to_string(),
+                //    kinds::MechanismKind::MX => "mx".to_string(),
+                //    kinds::MechanismKind::Ptr => "ptr".to_string(),
+                //    _ => unreachable!(),
+                //};
+                // These values will be blank.
+                mechanism_string = String::new();
                 mechanism = Mechanism::new(kind, qualifier_result, mechanism_string);
             }
 

@@ -28,7 +28,6 @@ mod test_spf {
         assert_eq!(spf.ip4.is_none(), true);
         assert_eq!(spf.ip6.is_none(), true);
         assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
-        assert_eq!(spf.redirect().unwrap().mechanism(), "_spf.google.com");
         assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
         assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com")
     }
@@ -62,7 +61,7 @@ mod test_spf {
         assert_eq!(spf.ip6().unwrap().len(), 6);
         assert_eq!(spf.ip6().unwrap()[0].string(), "ip6:2001:4860:4000::/36");
         assert_eq!(
-            spf.ip6().unwrap()[0].mechanism().to_string(),
+            spf.ip6().unwrap()[0].as_network().to_string(),
             "2001:4860:4000::/36"
         );
         assert_eq!(spf.all().unwrap().string(), "~all");

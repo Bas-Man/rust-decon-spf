@@ -29,7 +29,7 @@ mod capture {
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
-        assert_eq!(test.raw(), ":example.com");
+        assert_eq!(test.raw(), "example.com");
     }
 }
 #[cfg(test)]
@@ -45,7 +45,6 @@ mod parse {
         let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
-        assert_eq!(spf.ptr().unwrap().mechanism(), "ptr");
         assert_eq!(spf.ptr().unwrap().string(), "ptr");
     }
     #[test]
@@ -55,7 +54,6 @@ mod parse {
         let mut spf = Spf::from_str(&input.to_string());
         spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
-        assert_eq!(spf.ptr().unwrap().mechanism(), ":host.example.com");
         assert_eq!(spf.ptr().unwrap().string(), "ptr:host.example.com");
     }
 }

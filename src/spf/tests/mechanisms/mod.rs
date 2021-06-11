@@ -10,9 +10,9 @@ mod A {
 
     #[test]
     fn new_a() {
-        let a_mechanism = Mechanism::new_a(Qualifier::Fail, "a".to_string());
+        let a_mechanism = Mechanism::new_a(Qualifier::Fail, String::new());
         assert_eq!(a_mechanism.is_fail(), true);
-        assert_eq!(*a_mechanism.kind(), MechanismKind::A);
+        assert_eq!(a_mechanism.kind(), &MechanismKind::A);
         assert_eq!(a_mechanism.raw(), "a");
         assert_eq!(a_mechanism.string(), "-a");
     }
@@ -21,9 +21,8 @@ mod A {
     fn new_a_colon() {
         let a_mechanism = Mechanism::new_a(Qualifier::Fail, ":example.com".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
-        assert_eq!(*a_mechanism.kind(), MechanismKind::A);
-        assert_eq!(a_mechanism.raw(), ":example.com");
-        assert_eq!(a_mechanism.test(), "example.com");
+        assert_eq!(a_mechanism.kind(), &MechanismKind::A);
+        assert_eq!(a_mechanism.raw(), "example.com");
         assert_eq!(a_mechanism.string(), "-a:example.com");
     }
 }
@@ -39,7 +38,7 @@ mod Include {
     fn test_include_pass() {
         let include = Mechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
         assert_eq!(include.is_pass(), true);
-        assert_eq!(*include.kind(), MechanismKind::Include);
+        assert_eq!(include.kind(), &MechanismKind::Include);
         assert_eq!(include.raw(), "_spf.test.com");
         assert_eq!(include.string(), "include:_spf.test.com");
     }
@@ -90,9 +89,9 @@ mod Ip4 {
         assert_eq!(ip4_pass.is_pass(), true);
         assert_eq!(ip4_pass.raw(), "203.32.160.10/32");
         assert_eq!(ip4_pass.string(), "ip4:203.32.160.10/32");
-        assert_eq!(ip4_pass.mechanism().ip().to_string(), "203.32.160.10");
-        assert_eq!(ip4_pass.mechanism().prefix().to_string(), "32");
-        assert_eq!(ip4_pass.mechanism().network().to_string(), "203.32.160.10");
+        assert_eq!(ip4_pass.as_network().ip().to_string(), "203.32.160.10");
+        assert_eq!(ip4_pass.as_network().prefix().to_string(), "32");
+        assert_eq!(ip4_pass.as_network().network().to_string(), "203.32.160.10");
     }
     #[test]
     fn ip4_fail() {
