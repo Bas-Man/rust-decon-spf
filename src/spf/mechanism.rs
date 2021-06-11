@@ -39,21 +39,6 @@ impl<T> Mechanism<T> {
     pub fn is_neutral(&self) -> bool {
         self.qualifier == Qualifier::Neutral
     }
-    #[doc(hidden)]
-    fn mechanism_prefix_from_kind(&self) -> String {
-        let push_str = match self.kind {
-            MechanismKind::Redirect => "redirect=",
-            MechanismKind::Include => "include:",
-            MechanismKind::A => "a",
-            MechanismKind::MX => "mx",
-            MechanismKind::IpV4 => "ip4:",
-            MechanismKind::IpV6 => "ip6:",
-            MechanismKind::Ptr => "ptr",
-            MechanismKind::Exists => "exists:",
-            MechanismKind::All => "all",
-        };
-        push_str.to_string()
-    }
     /// Returns a reference to the Mechanism's MechanismKind
     pub fn kind(&self) -> &MechanismKind {
         &self.kind
@@ -142,11 +127,11 @@ impl Mechanism<String> {
         match self.kind {
             MechanismKind::A | MechanismKind::MX | MechanismKind::Ptr | MechanismKind::All => {
                 if self.mechanism.starts_with(":") || self.mechanism.starts_with("/") {
-                    mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str());
+                    mechanism_str.push_str(self.kind().as_str());
                 }
                 // If there is no ":" or "/" we dont want to add A, MX, Ptr or All.
             }
-            _ => mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str()),
+            _ => mechanism_str.push_str(self.kind().as_str()),
         };
         mechanism_str.push_str(self.mechanism.as_str());
         mechanism_str
@@ -204,7 +189,7 @@ impl Mechanism<IpNetwork> {
         if self.qualifier != Qualifier::Pass {
             ip_mechanism_str.push_str(self.qualifier.as_str());
         };
-        ip_mechanism_str.push_str(self.mechanism_prefix_from_kind().as_str());
+        ip_mechanism_str.push_str(self.kind().as_str());
         ip_mechanism_str.push_str(self.mechanism.to_string().as_str());
         ip_mechanism_str
     }
