@@ -2,7 +2,16 @@
 
 This crate allows you to deconstruct an existing SPF record that might be retrieved with a dns query of type TXT.
 
-An example program can be found in the **Example** directory.
+An example program can be found in the **Examples** directory.
+### Run example
+To see a list of available examples.
+```bash
+$ cargo run --example
+```
+
+```bash
+$ cargo run --example trust-dns-demo
+```
 
 ## Syntax Validation
 
