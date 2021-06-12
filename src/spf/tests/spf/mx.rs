@@ -65,7 +65,7 @@ mod parse {
         let input = "v=spf1 mx ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_pass(), true);
         assert_eq!(spf.mx().unwrap()[0].string(), "mx");
@@ -75,7 +75,7 @@ mod parse {
         let input = "v=spf1 -mx/24 ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_fail(), true);
         assert_eq!(spf.mx().unwrap()[0].string(), "-mx/24");
@@ -85,7 +85,7 @@ mod parse {
         let input = "v=spf1 ?mx:example.com ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_neutral(), true);
         assert_eq!(spf.mx().unwrap()[0].string(), "?mx:example.com");
@@ -95,7 +95,7 @@ mod parse {
         let input = "v=spf1 ~mx:example.com/24 ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_softfail(), true);
         assert_eq!(spf.mx().unwrap()[0].string(), "~mx:example.com/24");

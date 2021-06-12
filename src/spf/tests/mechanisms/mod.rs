@@ -19,7 +19,7 @@ mod A {
     // Todo This needs review. How do I want to use new_a
     #[test]
     fn new_a_colon() {
-        let a_mechanism = Mechanism::new_a(Qualifier::Fail, ":example.com".to_string());
+        let a_mechanism = Mechanism::new_a(Qualifier::Fail, "example.com".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
         assert_eq!(a_mechanism.kind(), &MechanismKind::A);
         assert_eq!(a_mechanism.raw(), "example.com");

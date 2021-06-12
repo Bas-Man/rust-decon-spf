@@ -67,7 +67,8 @@ mod parse {
         let input = "v=spf1 a ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let result = spf.parse();
+        assert_eq!(result.unwrap(), "v=spf1");
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_pass(), true);
@@ -80,7 +81,7 @@ mod parse {
         let input = "v=spf1 -a/24 ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_fail(), true);
         assert_eq!(spf.a().unwrap()[0].string(), "-a/24");
@@ -90,7 +91,7 @@ mod parse {
         let input = "v=spf1 ?a:example.com ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].string(), "?a:example.com");
@@ -100,7 +101,7 @@ mod parse {
         let input = "v=spf1 ~a:example.com/24 ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
         assert_eq!(spf.a().unwrap()[0].string(), "~a:example.com/24");

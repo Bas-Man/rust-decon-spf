@@ -65,7 +65,7 @@ impl Mechanism<String> {
     /// ```
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from(":example.com"));
+    /// let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from("example.com"));
     /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_a.raw(), "example.com");
     /// assert_eq!(mechanism_of_a.string(), "a:example.com")
@@ -108,10 +108,6 @@ impl Mechanism<String> {
     pub fn raw(&self) -> &str {
         if self.mechanism == "" {
             self.kind().as_str()
-        } else if self.mechanism.starts_with(":") {
-            let mut char = self.mechanism.chars();
-            char.next();
-            char.as_str()
         } else {
             &self.mechanism
         }
@@ -119,11 +115,29 @@ impl Mechanism<String> {
     /// Rebuild and return the string representation of the given mechanism
     pub fn string(&self) -> String {
         let mut mechanism_str = String::new();
+        let tmp_mechanism_str;
         if self.qualifier != Qualifier::Pass {
             mechanism_str.push_str(self.qualifier.as_str());
         };
         mechanism_str.push_str(self.kind().as_str());
-        mechanism_str.push_str(self.mechanism.as_str());
+        tmp_mechanism_str = self.mechanism.as_str();
+        match self.kind {
+            MechanismKind::A | MechanismKind::MX => {
+                // This must be starting with 'domain.com' So prepend ":"
+                if !tmp_mechanism_str.starts_with("/") && tmp_mechanism_str != "" {
+                    mechanism_str.push_str(":")
+                }
+            }
+            MechanismKind::Ptr => {
+                // This Ptr has a domain. Prepend ":"
+                if tmp_mechanism_str != "" {
+                    mechanism_str.push_str(":")
+                }
+            }
+            // Do nothing in all other cases.
+            _ => {}
+        }
+        mechanism_str.push_str(tmp_mechanism_str);
         mechanism_str
     }
 }

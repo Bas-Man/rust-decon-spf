@@ -86,10 +86,14 @@ impl Spf {
             all: None,
         }
     }
-    /// Parse the contents of `source` and populate the internal structure of `Spf`
-    pub fn parse(&mut self) {
-        // # TODO: This needs to have a test for emtpy source. return a Result?
-        // initialises required variables.
+    /// Parse the contents of `source` and populate the internal structure of `Spf`  
+    /// Returns a Result<&str, &str>  
+    /// On Ok() returns the version string.  
+    /// On Err() May return "Invalid Source"  
+    pub fn parse(&mut self) -> Result<&str, &str> {
+        if !self.from_src {
+            return Err("Invalid Source");
+        }
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
@@ -182,6 +186,7 @@ impl Spf {
         if !vec_of_exists.is_empty() {
             self.exists = Some(vec_of_exists);
         }
+        Ok(self.version.as_str())
     }
 
     /// Set version to `v=spf1`

@@ -43,7 +43,7 @@ mod parse {
         let input = "v=spf1 ptr ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
         assert_eq!(spf.ptr().unwrap().string(), "ptr");
     }
@@ -52,7 +52,7 @@ mod parse {
         let input = "v=spf1 ptr:host.example.com ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
         assert_eq!(spf.ptr().unwrap().string(), "ptr:host.example.com");
     }

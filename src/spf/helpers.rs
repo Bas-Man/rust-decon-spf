@@ -4,11 +4,12 @@ use crate::spf::qualifier::Qualifier;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-pub(crate) const MECHANISM_A_PATTERN: &str = r"^(?P<qualifier>[+?~-])?a(?P<mechanism>[:/]{0,1}.+)?";
+pub(crate) const MECHANISM_A_PATTERN: &str =
+    r"^(?P<qualifier>[+?~-])?a[:]{0,1}(?P<mechanism>[/]{0,1}.+)?";
 pub(crate) const MECHANISM_MX_PATTERN: &str =
-    r"^(?P<qualifier>[+?~-])?mx(?P<mechanism>[:/]{0,1}.+)?";
+    r"^(?P<qualifier>[+?~-])?mx[:]{0,1}(?P<mechanism>[/]{0,1}.+)?";
 pub(crate) const MECHANISM_PTR_PATTERN: &str =
-    r"^(?P<qualifier>[+?~-])?ptr(?P<mechanism>[:]{0,1}.+)?";
+    r"^(?P<qualifier>[+?~-])?ptr[:]{0,1}(?P<mechanism>.+)?";
 
 pub(crate) fn capture_matches(
     string: &str,

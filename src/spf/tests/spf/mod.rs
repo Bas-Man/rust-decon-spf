@@ -20,7 +20,7 @@ mod test_spf {
 
         let mut spf = Spf::from_str(&input.to_string());
         assert_eq!(input, spf.source());
-        spf.parse();
+        let _ = spf.parse();
         assert_eq!(spf.is_redirect(), true);
         assert_eq!(spf.include.is_none(), true);
         assert_eq!(spf.a.is_none(), true);
@@ -37,7 +37,7 @@ mod test_spf {
 
         let mut spf = Spf::from_str(&input.to_string());
         assert_eq!(input, spf.source());
-        spf.parse();
+        let _ = spf.parse();
         assert_eq!(spf.is_redirect(), false);
         assert_eq!(!spf.includes().unwrap().is_empty(), true);
         assert_eq!(spf.includes().unwrap().len(), 6);
@@ -54,7 +54,7 @@ mod test_spf {
         let input = "v=spf1 ip6:2001:4860:4000::/36 ip6:2404:6800:4000::/36 ip6:2607:f8b0:4000::/36 ip6:2800:3f0:4000::/36 ip6:2a00:1450:4000::/36 ip6:2c0f:fb50:4000::/36 ~all";
 
         let mut spf = Spf::from_str(&input.to_string());
-        spf.parse();
+        let _ = spf.parse();
         assert_eq!(spf.includes().is_none(), true);
         assert_eq!(spf.ip4().is_none(), true);
         assert_eq!(!spf.ip6().is_none(), true);
