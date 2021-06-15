@@ -13,6 +13,16 @@ use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 
+/// A list of expected possible errors for SPF records.
+pub enum SpfErrorType {
+    /// Source is invalid, SPF struct was not created using `from_str()`
+    InvalidSource,
+    /// Source string length exceeds 255 Characters
+    SourceLength,
+    /// Exceeds RFC lookup limit.
+    ExceedLookup,
+}
+
 /// The Definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug)]
@@ -88,12 +98,15 @@ impl Spf {
         }
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`  
-    /// Returns a Result<&str, &str>  
-    /// On Ok() returns the version string.  
-    /// On Err() May return "Invalid Source"  
-    pub fn parse(&mut self) -> Result<&str, &str> {
+    /// Returns a Result<(), SpfErrorType>  
+    /// On Ok() returns ().  
+    /// On Err() Returns an invariant of SpfErrorType:
+    /// - [`InvalidSource`](SpfErrorType::InvalidSource)
+    /// - [`SourceLength`](SpfErrorType::SourceLength)
+    /// - [`ExceedLookup`](SpfErrorType::ExceedLookup)
+    pub fn parse(&mut self) -> Result<(), SpfErrorType> {
         if !self.from_src {
-            return Err("Invalid Source");
+            return Err(SpfErrorType::InvalidSource);
         }
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
@@ -187,7 +200,7 @@ impl Spf {
         if !vec_of_exists.is_empty() {
             self.exists = Some(vec_of_exists);
         }
-        Ok(self.version.as_str())
+        Ok(())
     }
 
     /// Set version to `v=spf1`
@@ -237,25 +250,26 @@ impl Spf {
             self.a.as_mut().unwrap().append(&mut vec);
         }
     }
+    /// # Note: Experimential
     /// Very rudementary validation check.
-    /// Will fail if the length of `source` is more than 255 characters
-    /// Will fail if there are more than 10 include mechanisms.
-    /// (This will change given new information)
-    pub fn is_valid(&self) -> bool {
+    /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLength`](SpfErrorType::SourceLength)
+    /// - Will fail if there are more than 10 include mechanisms. See: [`ExceedLookup`](SpfErrorType::ExceedLookup)
+    /// (This will change given new information)  
+    pub fn try_validate(&self) -> Result<(), SpfErrorType> {
         if self.from_src {
-            if self.includes().unwrap().len() > 10 {
-                return false;
+            if self.includes().is_some() && self.includes().unwrap().len() > 10 {
+                return Err(SpfErrorType::ExceedLookup);
             };
             if self.source.len() > 255 {
-                return false;
+                return Err(SpfErrorType::SourceLength);
             };
         };
-        true
+        Ok(())
     }
     /// Returns a new string representation of the spf record if possible.
     /// This does not use the `source` attribute.
     pub fn as_spf(&self) -> Option<String> {
-        if !self.is_valid() {
+        if self.try_validate().is_err() {
             None
         } else {
             let mut spf = String::new();

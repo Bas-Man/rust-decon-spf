@@ -68,7 +68,7 @@ mod parse {
 
         let mut spf = Spf::from_str(&input.to_string());
         let result = spf.parse();
-        assert_eq!(result.unwrap(), "v=spf1");
+        assert_eq!(result.is_ok(), true);
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_pass(), true);
