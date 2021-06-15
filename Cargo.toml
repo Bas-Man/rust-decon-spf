@@ -1,6 +1,6 @@
 [package]
 name = "decon-spf"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Adam.S <Bas-Man@users.noreply.github.com>"]
 edition = "2018"
 
@@ -21,7 +21,7 @@ keywords = ["DNS", "SPF"]
 categories = ["network-programming"]
 
 #license = "MIT"
-license-file = "LICENSE"
+license = "MIT"
 
 [lib]
 name = "decon_spf"
@@ -30,6 +30,7 @@ path = "src/lib.rs"
 [[example]]
 name = "trust-dns-demo"
 path = "examples/trust-dns-resolver.rs"
+
 [dependencies]
 ipnetwork = "0.17.0"
 regex = "1"
