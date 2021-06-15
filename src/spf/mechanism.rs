@@ -60,16 +60,16 @@ impl Mechanism<String> {
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Redirect, qualifier, mechanism)
     }
-    /// create a new Mechanism struct of `A`
-    /// # Example:
-    /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from("example.com"));
-    /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
-    /// assert_eq!(mechanism_of_a.raw(), "example.com");
-    /// assert_eq!(mechanism_of_a.string(), "a:example.com")
-    /// ```
+    // create a new Mechanism struct of `A`
+    // # Example:
+    // ```text
+    // use decon_spf::spf::qualifier::Qualifier;
+    // use decon_spf::spf::mechanism::Mechanism;
+    // let mechanism_of_a = Mechanism::new_a(Qualifier::Pass, String::from("example.com"));
+    // assert_eq!(mechanism_of_a.qualifier().as_str(), "");
+    // assert_eq!(mechanism_of_a.raw(), "example.com");
+    // assert_eq!(mechanism_of_a.string(), "a:example.com")
+    // ```
     #[doc(hidden)]
     pub fn new_a(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, mechanism)
