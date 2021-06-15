@@ -19,55 +19,58 @@ fn main() {
     //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
 
-    //let query = "gmail.com.";
-    let query = "hotmail.com.";
+    // This is a list of servers you can test the code against. Feel free to edit
+    // the query
+
+    let query = "gmail.com.";
+    //let query = "hotmail.com.";
     //let query = "_netblocks.google.com."; // ip4
     //let query = "_netblocks2.google.com."; // ip6
 
     let txt_response = resolver.txt_lookup(query);
 
-    let mut data = display_txt(&query, &txt_response);
+    let mut spf_record = display_txt(&query, &txt_response);
     println!("\nDecontructing SPF Record");
-    data.parse();
-    println!("{:?}", data);
-    println!("SPF1: {}\n", data.source());
-    if data.includes().is_some() {
+    let _ = spf_record.parse();
+    println!("{:?}", spf_record);
+    println!("SPF1: {}\n", spf_record.source());
+    if spf_record.includes().is_some() {
         println!("Include list");
-        for i in data.includes().unwrap().iter() {
-            println!("spf: {}", i.string());
+        for mechanism in spf_record.includes().unwrap().iter() {
+            println!("spf: {}", mechanism.string());
         }
     }
-    if data.ip4().is_some() {
+    if spf_record.ip4().is_some() {
         println!("IP4 Address Ranges");
-        for i in data.ip4().unwrap().iter() {
+        for mechanism in spf_record.ip4().unwrap().iter() {
             println!(
                 "IP: {} prefix: {}",
-                i.as_network().network(),
-                i.as_network().prefix()
+                mechanism.as_network().network(),
+                mechanism.as_network().prefix()
             );
-            println!("spf: {}", i.string());
+            println!("spf: {}", mechanism.string());
         }
     }
-    if data.ip6().is_some() {
+    if spf_record.ip6().is_some() {
         println!("IP6 Address Ranges");
-        for i in data.ip6().unwrap().iter() {
+        for mechanism in spf_record.ip6().unwrap().iter() {
             println!(
                 "IP: {} prefix: {}",
-                i.as_network().network(),
-                i.as_network().prefix()
+                mechanism.as_network().network(),
+                mechanism.as_network().prefix()
             );
-            println!("spf: {}", i.string());
+            println!("spf: {}", mechanism.string());
         }
     }
-    println!("\nIs a redirect: {}", data.is_redirect());
-    if data.is_redirect() {
-        println!("\nredirect: {}", data.redirect().unwrap().raw());
-        println!("mechanism: {}", data.redirect().unwrap().string());
+    println!("\nIs a redirect: {}", spf_record.is_redirect());
+    if spf_record.is_redirect() {
+        println!("\nredirect: {}", spf_record.redirect().unwrap().raw());
+        println!("mechanism: {}", spf_record.redirect().unwrap().string());
     }
 }
 
 fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
-    let mut data = Spf::default();
+    let mut spf_record = Spf::default();
     match txt_response {
         Err(_) => println!("No TXT Records."),
         Ok(txt_response) => {
@@ -77,13 +80,13 @@ fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
                 println!("TXT Record {}:", i);
                 println!("{}", &record.to_string());
                 if record.to_string().starts_with("v=spf1") {
-                    data = Spf::from_str(&record.to_string());
+                    spf_record = Spf::from_str(&record.to_string());
                 }
                 i = i + 1;
             }
         }
     }
-    data
+    spf_record
 }
 ```
 
