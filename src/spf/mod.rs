@@ -13,7 +13,8 @@ use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 
-/// Some command to go here.
+/// The Definition of the Spf struct which contains all information related a single
+/// SPF record.
 #[derive(Debug)]
 pub struct Spf {
     source: String,
@@ -222,7 +223,7 @@ impl Spf {
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0")
     }
-    /// return a reference to version
+    /// Return a reference to version
     pub fn version(&self) -> &String {
         &self.version
     }
