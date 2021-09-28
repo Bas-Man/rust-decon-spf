@@ -46,7 +46,11 @@ pub(crate) fn capture_matches(
             };
             if caps.name("mechanism").is_some() {
                 mechanism_string = caps.name("mechanism").unwrap().as_str().to_string();
-                mechanism = Mechanism::new(kind, qualifier_result, (*mechanism_string).to_string());
+                mechanism = Mechanism::new(
+                    kind,
+                    qualifier_result,
+                    Some((*mechanism_string).to_string()),
+                );
             } else {
                 //mechanism_string = match kind {
                 //    kinds::MechanismKind::A => "a".to_string(),
@@ -54,9 +58,7 @@ pub(crate) fn capture_matches(
                 //    kinds::MechanismKind::Ptr => "ptr".to_string(),
                 //    _ => unreachable!(),
                 //};
-                // These values will be blank.
-                mechanism_string = String::new();
-                mechanism = Mechanism::new(kind, qualifier_result, mechanism_string);
+                mechanism = Mechanism::new(kind, qualifier_result, None);
             }
 
             Some(mechanism)

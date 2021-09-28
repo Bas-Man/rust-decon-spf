@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[allow(non_snake_case)]
 
-// Todo: MX, PTR, Exists
+// Todo: PTR, Exists
 mod A {
 
     use crate::spf::kinds::MechanismKind;
@@ -9,8 +9,8 @@ mod A {
     use crate::spf::Qualifier;
 
     #[test]
-    fn new_a() {
-        let a_mechanism = Mechanism::new_a(Qualifier::Fail, String::new());
+    fn new_a_without_mechanism() {
+        let a_mechanism = Mechanism::new_a_without_mechanism(Qualifier::Fail);
         assert_eq!(a_mechanism.is_fail(), true);
         assert_eq!(a_mechanism.kind(), &MechanismKind::A);
         assert_eq!(a_mechanism.raw(), "a");
@@ -18,8 +18,9 @@ mod A {
     }
     // Todo This needs review. How do I want to use new_a
     #[test]
-    fn new_a_colon() {
-        let a_mechanism = Mechanism::new_a(Qualifier::Fail, "example.com".to_string());
+    fn new_a_with_mechanism() {
+        let a_mechanism =
+            Mechanism::new_a_with_mechanism(Qualifier::Fail, "example.com".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
         assert_eq!(a_mechanism.kind(), &MechanismKind::A);
         assert_eq!(a_mechanism.raw(), "example.com");
@@ -27,6 +28,34 @@ mod A {
     }
 }
 
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod MX {
+
+    use crate::spf::Mechanism;
+    use crate::spf::Qualifier;
+    #[test]
+    fn new_mx_without_mechanism() {
+        let mx = Mechanism::new_mx_without_mechanism(Qualifier::Pass);
+        assert_eq!(mx.is_pass(), true);
+        assert_eq!(mx.raw(), "mx");
+        assert_eq!(mx.string(), "mx");
+    }
+    #[test]
+    fn new_mx_without_mechanism_softfail() {
+        let mx = Mechanism::new_mx_without_mechanism(Qualifier::SoftFail);
+        assert_eq!(mx.is_softfail(), true);
+        assert_eq!(mx.raw(), "mx");
+        assert_eq!(mx.string(), "~mx");
+    }
+    #[test]
+    fn new_mx_with_mechanism() {
+        let mx = Mechanism::new_mx_with_mechanism(Qualifier::Neutral, String::from("example.com"));
+        assert_eq!(mx.is_neutral(), true);
+        assert_eq!(mx.raw(), "example.com");
+        assert_eq!(mx.string(), "?mx:example.com");
+    }
+}
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod Include {
