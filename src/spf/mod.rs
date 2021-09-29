@@ -18,7 +18,7 @@ pub enum SpfErrorType {
     /// Source is invalid, SPF struct was not created using `from_str()`
     InvalidSource,
     /// Source string length exceeds 255 Characters
-    SourceLength,
+    SourceLengthExceeded,
     /// Exceeds RFC lookup limit.
     ExceedLookup,
 }
@@ -102,7 +102,7 @@ impl Spf {
     /// On Ok() returns ().  
     /// On Err() Returns an invariant of SpfErrorType:
     /// - [`InvalidSource`](SpfErrorType::InvalidSource)
-    /// - [`SourceLength`](SpfErrorType::SourceLength)
+    /// - [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
     /// - [`ExceedLookup`](SpfErrorType::ExceedLookup)
     pub fn parse(&mut self) -> Result<(), SpfErrorType> {
         if !self.from_src {
@@ -204,27 +204,22 @@ impl Spf {
     }
 
     /// Set version to `v=spf1`
-    #[doc(hidden)]
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
     }
     /// Set version to `spf2.0/pra`
-    #[doc(hidden)]
     pub fn set_v2_pra(&mut self) {
         self.version = String::from("spf2.0/pra");
     }
     /// Set version to `spf2.0/mfrom`
-    #[doc(hidden)]
     pub fn set_v2_mfrom(&mut self) {
         self.version = String::from("spf2.0/mfrom");
     }
     /// Set version to `spf2.0/pra,mfrom`
-    #[doc(hidden)]
     pub fn set_v2_pra_mfrom(&mut self) {
         self.version = String::from("spf2.0/pra,mfrom");
     }
     /// Set version to `spf2.0/mfrom,pra`
-    #[doc(hidden)]
     pub fn set_v2_mfrom_pra(&mut self) {
         self.version = String::from("spf2.0/mfrom,pra");
     }
@@ -232,7 +227,7 @@ impl Spf {
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
     }
-    /// Check that version os v2
+    /// Check that version is v2
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0")
     }
@@ -240,7 +235,7 @@ impl Spf {
     pub fn version(&self) -> &String {
         &self.version
     }
-    #[doc(hidden)]
+    /// Document me
     pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
@@ -250,9 +245,25 @@ impl Spf {
             self.a.as_mut().unwrap().append(&mut vec);
         }
     }
+    /// document me
+    pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
+        self.all = Some(mechanism);
+    }
+    /// document me
+    pub fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) {
+        self.redirect = Some(mechanism);
+        self.is_redirected = true;
+    }
+    /// document me
+    pub fn remove_mechanism_redirect(&mut self) {
+        if self.is_redirected == true && self.redirect.is_some() {
+            self.is_redirected = false;
+            self.redirect = None;
+        }
+    }
     /// # Note: Experimential
     /// Very rudementary validation check.
-    /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLength`](SpfErrorType::SourceLength)
+    /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
     /// - Will fail if there are more than 10 include mechanisms. See: [`ExceedLookup`](SpfErrorType::ExceedLookup)
     /// (This will change given new information)  
     pub fn try_validate(&self) -> Result<(), SpfErrorType> {
@@ -261,7 +272,7 @@ impl Spf {
                 return Err(SpfErrorType::ExceedLookup);
             };
             if self.source.len() > 255 {
-                return Err(SpfErrorType::SourceLength);
+                return Err(SpfErrorType::SourceLengthExceeded);
             };
         };
         Ok(())
@@ -316,7 +327,7 @@ impl Spf {
     pub fn is_redirect(&self) -> bool {
         self.is_redirected
     }
-    /// Returns a reference to the redurect Mechanism
+    /// Returns a reference to the redirect Mechanism
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         self.redirect.as_ref()
     }

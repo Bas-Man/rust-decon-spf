@@ -2,11 +2,8 @@
 mod a;
 mod as_spf;
 mod construct;
-#[doc(hidden)]
 mod exists;
-#[doc(hidden)]
 mod mx;
-#[doc(hidden)]
 mod ptr;
 #[cfg(test)]
 

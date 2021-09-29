@@ -12,6 +12,26 @@ mod build {
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
         spf.append_mechanism_of_a(Mechanism::new_a_without_mechanism(Qualifier::Pass));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a".to_string()));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Fail));
+        assert_eq!(spf.as_spf(), Some("v=spf1 a -all".to_string()));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(spf.as_spf(), Some("v=spf1 a all".to_string()));
+    }
+    #[test]
+    fn make_redirect() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        spf.append_mechanism_of_redirect(Mechanism::new_redirect(
+            Qualifier::Pass,
+            String::from("_spf.example.com"),
+        ));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 redirect=_spf.example.com".to_string())
+        );
+        assert_eq!(spf.is_redirect(), true);
+        spf.remove_mechanism_redirect();
+        assert_eq!(spf.is_redirect(), false);
+        assert_eq!(spf.redirect.is_none(), true);
     }
 }

@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod construct {
+mod spf1 {
 
     use crate::spf::Spf;
 
@@ -11,6 +11,12 @@ mod construct {
         assert_eq!(spf.version(), "v=spf1");
         assert_eq!(spf.is_v1(), true);
     }
+}
+#[cfg(test)]
+mod spf2 {
+
+    use crate::spf::Spf;
+
     #[test]
     fn make_v2_pra() {
         let mut spf = Spf::new();
