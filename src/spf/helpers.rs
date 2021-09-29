@@ -10,6 +10,8 @@ pub(crate) const MECHANISM_MX_PATTERN: &str =
     r"^(?P<qualifier>[+?~-])?mx[:]{0,1}(?P<mechanism>[/]{0,1}.+)?";
 pub(crate) const MECHANISM_PTR_PATTERN: &str =
     r"^(?P<qualifier>[+?~-])?ptr[:]{0,1}(?P<mechanism>.+)?";
+pub(crate) const MECHANISM_EXISTS_PATTERN: &str =
+    r"^(?P<qualifier>[+?~-])?exists[:]{0,1}(?P<mechanism>.+)?";
 
 pub(crate) fn capture_matches(
     string: &str,
@@ -19,11 +21,13 @@ pub(crate) fn capture_matches(
         static ref A_RE: Regex = Regex::new(MECHANISM_A_PATTERN).unwrap();
         static ref MX_RE: Regex = Regex::new(MECHANISM_MX_PATTERN).unwrap();
         static ref PTR_RE: Regex = Regex::new(MECHANISM_PTR_PATTERN).unwrap();
+        static ref EXISTS_RE: Regex = Regex::new(MECHANISM_EXISTS_PATTERN).unwrap();
     }
     let caps = match kind {
         kinds::MechanismKind::A => A_RE.captures(string),
         kinds::MechanismKind::MX => MX_RE.captures(string),
         kinds::MechanismKind::Ptr => PTR_RE.captures(string),
+        kinds::MechanismKind::Exists => EXISTS_RE.captures(string),
         _ => unreachable!(),
     };
     let qualifier_char: char;
@@ -52,12 +56,6 @@ pub(crate) fn capture_matches(
                     Some((*mechanism_string).to_string()),
                 );
             } else {
-                //mechanism_string = match kind {
-                //    kinds::MechanismKind::A => "a".to_string(),
-                //    kinds::MechanismKind::MX => "mx".to_string(),
-                //    kinds::MechanismKind::Ptr => "ptr".to_string(),
-                //    _ => unreachable!(),
-                //};
                 mechanism = Mechanism::new(kind, qualifier_result, None);
             }
 
