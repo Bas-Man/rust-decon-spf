@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[allow(non_snake_case)]
 
-// Todo: PTR, Exists
+// Todo: Exists
 mod A {
 
     use crate::spf::kinds::MechanismKind;
@@ -56,9 +56,24 @@ mod MX {
         assert_eq!(mx.string(), "?mx:example.com");
     }
 }
+
 #[cfg(test)]
 #[allow(non_snake_case)]
-mod Include {
+mod EXISTS {
+
+    use crate::spf::Mechanism;
+    use crate::spf::Qualifier;
+    #[test]
+    fn exists_pass() {
+        let exists = Mechanism::new_exists(Qualifier::Neutral, String::from("bogus.com"));
+        assert_eq!(exists.is_neutral(), true);
+        assert_eq!(exists.string(), "?exists:bogus.com");
+    }
+}
+
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod INCLUDE {
 
     use crate::spf::kinds::MechanismKind;
     use crate::spf::Mechanism;
@@ -88,6 +103,29 @@ mod Include {
         let include = Mechanism::new_include(Qualifier::Neutral, String::from("_spf.test.com"));
         assert_eq!(include.is_neutral(), true);
         assert_eq!(include.string(), "?include:_spf.test.com");
+    }
+}
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod PTR {
+
+    use crate::spf::Mechanism;
+    use crate::spf::Qualifier;
+
+    #[test]
+    fn test_ptr_without_mechanism() {
+        let ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Pass);
+        assert_eq!(ptr.is_pass(), true);
+        assert_eq!(ptr.raw(), "ptr");
+        assert_eq!(ptr.string(), "ptr");
+    }
+    #[test]
+    fn test_ptr_with_mechanism() {
+        let ptr =
+            Mechanism::new_ptr_with_mechanism(Qualifier::Neutral, String::from("example.com"));
+        assert_eq!(ptr.is_neutral(), true);
+        assert_eq!(ptr.raw(), "example.com");
+        assert_eq!(ptr.string(), "?ptr:example.com");
     }
 }
 #[cfg(test)]
