@@ -235,20 +235,6 @@ impl Spf {
     pub fn version(&self) -> &String {
         &self.version
     }
-    /// Document me
-    pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
-        let mut vec: Vec<Mechanism<String>> = Vec::new();
-        vec.push(mechanism);
-        if self.a.is_none() {
-            self.a = Some(vec);
-        } else {
-            self.a.as_mut().unwrap().append(&mut vec);
-        }
-    }
-    /// document me
-    pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
-        self.all = Some(mechanism);
-    }
     /// document me
     pub fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) {
         self.redirect = Some(mechanism);
@@ -261,6 +247,34 @@ impl Spf {
             self.redirect = None;
         }
     }
+
+    /// Document me
+    pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
+        let mut vec: Vec<Mechanism<String>> = Vec::new();
+        vec.push(mechanism);
+        if self.a.is_none() {
+            self.a = Some(vec);
+        } else {
+            self.a.as_mut().unwrap().append(&mut vec);
+        }
+    }
+    /// document me MX
+    pub fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) {
+        let mut vec: Vec<Mechanism<String>> = Vec::new();
+        vec.push(mechanism);
+        if self.mx.is_none() {
+            // Empty vec. Just attach the new vec
+            self.mx = Some(vec);
+        } else {
+            // Already has a vec of values. Append to it.
+            self.mx.as_mut().unwrap().append(&mut vec);
+        }
+    }
+    /// document me
+    pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
+        self.all = Some(mechanism);
+    }
+
     /// # Note: Experimential
     /// Very rudementary validation check.
     /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)

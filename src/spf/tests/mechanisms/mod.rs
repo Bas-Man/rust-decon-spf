@@ -79,7 +79,7 @@ mod INCLUDE {
     use crate::spf::Mechanism;
     use crate::spf::Qualifier;
     #[test]
-    fn test_include_pass() {
+    fn include_pass() {
         let include = Mechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
         assert_eq!(include.is_pass(), true);
         assert_eq!(include.kind(), &MechanismKind::Include);
@@ -87,19 +87,19 @@ mod INCLUDE {
         assert_eq!(include.string(), "include:_spf.test.com");
     }
     #[test]
-    fn test_include_fail() {
+    fn include_fail() {
         let include = Mechanism::new_include(Qualifier::Fail, String::from("_spf.test.com"));
         assert_eq!(include.is_fail(), true);
         assert_eq!(include.string(), "-include:_spf.test.com");
     }
     #[test]
-    fn test_include_softfail() {
+    fn include_softfail() {
         let include = Mechanism::new_include(Qualifier::SoftFail, String::from("_spf.test.com"));
         assert_eq!(include.is_softfail(), true);
         assert_eq!(include.string(), "~include:_spf.test.com");
     }
     #[test]
-    fn test_include_neutral() {
+    fn include_neutral() {
         let include = Mechanism::new_include(Qualifier::Neutral, String::from("_spf.test.com"));
         assert_eq!(include.is_neutral(), true);
         assert_eq!(include.string(), "?include:_spf.test.com");
