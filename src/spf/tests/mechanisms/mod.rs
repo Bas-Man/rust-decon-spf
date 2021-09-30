@@ -113,14 +113,14 @@ mod PTR {
     use crate::spf::Qualifier;
 
     #[test]
-    fn test_ptr_without_mechanism() {
+    fn ptr_without_mechanism() {
         let ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Pass);
         assert_eq!(ptr.is_pass(), true);
         assert_eq!(ptr.raw(), "ptr");
         assert_eq!(ptr.string(), "ptr");
     }
     #[test]
-    fn test_ptr_with_mechanism() {
+    fn ptr_with_mechanism() {
         let ptr =
             Mechanism::new_ptr_with_mechanism(Qualifier::Neutral, String::from("example.com"));
         assert_eq!(ptr.is_neutral(), true);
