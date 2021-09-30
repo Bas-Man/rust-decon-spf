@@ -56,14 +56,15 @@ impl<T> Mechanism<T> {
 
 impl Mechanism<String> {
     /// create a new Mechanism struct of `Redirect`
-    #[doc(hidden)]
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Redirect, qualifier, Some(mechanism))
     }
+
     /// Document me.
     pub fn new_a_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, None)
     }
+
     /// create a new Mechanism struct of `A`
     /// # Example:
     /// ```rust
@@ -80,10 +81,12 @@ impl Mechanism<String> {
     pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, Some(mechanism))
     }
+
     /// Document me
     pub fn new_mx_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, None)
     }
+
     /// create a new Mechanism struct of `MX`
     /// # Example:
     /// ```rust
@@ -97,6 +100,7 @@ impl Mechanism<String> {
     pub fn new_mx_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, Some(mechanism))
     }
+
     /// create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
@@ -112,6 +116,18 @@ impl Mechanism<String> {
     pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Include, qualifier, Some(mechanism))
     }
+
+    /// create a new Mechanism struct of `Ptr` with no value
+    /// # Example:
+    /// ```rust
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_of_ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Fail);
+    /// assert_eq!(mechanism_of_ptr.string(), "-ptr");
+    pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
+        Mechanism::new(MechanismKind::Ptr, qualifier, None)
+    }
+
     /// create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
@@ -124,26 +140,17 @@ impl Mechanism<String> {
     pub fn new_ptr_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, Some(mechanism))
     }
-    /// create a new Mechanism struct of `Ptr` with no value
-    /// # Example:
-    /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Fail);
-    /// assert_eq!(mechanism_of_ptr.string(), "-ptr");
-    pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
-        Mechanism::new(MechanismKind::Ptr, qualifier, None)
-    }
+
     /// create a new Mechanism struct of `Exists`
-    #[doc(hidden)]
     pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Exists, qualifier, Some(mechanism))
     }
+
     /// create a new Mechanism struct of `All`
-    #[doc(hidden)]
     pub fn new_all(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::All, qualifier, None)
     }
+
     /// Return the string stored in the attribute `mechanism`
     pub fn raw(&self) -> &str {
         if self.rr_value.is_none() {
@@ -152,6 +159,7 @@ impl Mechanism<String> {
             self.rr_value.as_ref().unwrap()
         }
     }
+
     /// Rebuild and return the string representation of the given mechanism
     pub fn string(&self) -> String {
         let mut mechanism_str = String::new();
@@ -197,16 +205,19 @@ impl Mechanism<IpNetwork> {
             Mechanism::new_ip6(qualifier, mechanism)
         }
     }
+
     /// Create a new Mechanism<IpNetwork> of IP4
     #[doc(hidden)]
     pub fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV4, qualifier, Some(mechanism))
     }
+
     /// Create a new Mechanism<IpNetwork> of IP6
     #[doc(hidden)]
     pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(MechanismKind::IpV6, qualifier, Some(mechanism))
     }
+
     /// Returns the simple string representation of the mechanism
     /// # Example
     ///
@@ -223,6 +234,7 @@ impl Mechanism<IpNetwork> {
         // Consider striping ":" and "/" if they are the first characters.
         self.rr_value.unwrap().to_string()
     }
+
     /// Returns the mechanism string representation of an IP4/6 mechanism.
     /// # Example
     ///
@@ -245,6 +257,7 @@ impl Mechanism<IpNetwork> {
         ip_mechanism_str.push_str(self.rr_value.unwrap().to_string().as_str());
         ip_mechanism_str
     }
+
     /// Returns the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         &self.rr_value.as_ref().unwrap()
