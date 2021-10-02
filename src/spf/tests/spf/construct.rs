@@ -135,4 +135,148 @@ mod build {
             Some("v=spf1 a mx:test.com mx:example.com all".to_string())
         );
     }
+    #[test]
+    fn make_include_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_mx(Mechanism::new_include(
+            Qualifier::Pass,
+            "test.com".to_string(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 include:test.com all".to_string())
+        );
+    }
+    #[test]
+    fn make_include_x2_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_mx(Mechanism::new_include(
+            Qualifier::Pass,
+            "test.com".to_string(),
+        ));
+        spf.append_mechanism_of_mx(Mechanism::new_include(
+            Qualifier::Pass,
+            "example.com".to_string(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 include:test.com include:example.com all".to_string())
+        );
+    }
+    #[test]
+    fn make_ip4_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ip4(Mechanism::new_ip(
+            Qualifier::Pass,
+            "203.32.160.0/24".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip4:203.32.160.0/24 all".to_string())
+        );
+    }
+    #[test]
+    fn make_ip4_x2_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ip4(Mechanism::new_ip(
+            Qualifier::Pass,
+            "10.0.0.0/23".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_ip4(Mechanism::new_ip(
+            Qualifier::Pass,
+            "203.32.160.0/24".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/24 all".to_string())
+        );
+    }
+    #[test]
+    fn make_ip6_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ip6(Mechanism::new_ip(
+            Qualifier::Pass,
+            "2001:4860:4000::/36".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip6:2001:4860:4000::/36 all".to_string())
+        );
+    }
+    #[test]
+    fn make_ip6_x2_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ip6(Mechanism::new_ip(
+            Qualifier::Pass,
+            "2001:4860:4000::/36".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_ip6(Mechanism::new_ip(
+            Qualifier::Pass,
+            "2001:5160:4000::/36".parse().unwrap(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip6:2001:4860:4000::/36 ip6:2001:5160:4000::/36 all".to_string())
+        );
+    }
+    #[test]
+    fn make_exists_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_exists(Mechanism::new_exists(
+            Qualifier::Pass,
+            "example.com".to_string(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 exists:example.com all".to_string())
+        );
+    }
+    #[test]
+    fn make_exists_x2_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_exists(Mechanism::new_exists(
+            Qualifier::Pass,
+            "example.com".to_string(),
+        ));
+        spf.append_mechanism_of_exists(Mechanism::new_exists(
+            Qualifier::Neutral,
+            "test.com".to_string(),
+        ));
+        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 exists:example.com ?exists:test.com all".to_string())
+        );
+    }
 }

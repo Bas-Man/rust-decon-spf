@@ -30,11 +30,11 @@ pub struct Spf {
     source: String,
     version: String,
     from_src: bool,
-    include: Option<Vec<Mechanism<String>>>,
     redirect: Option<Mechanism<String>>,
     is_redirected: bool,
     a: Option<Vec<Mechanism<String>>>,
     mx: Option<Vec<Mechanism<String>>>,
+    include: Option<Vec<Mechanism<String>>>,
     ip4: Option<Vec<Mechanism<IpNetwork>>>,
     ip6: Option<Vec<Mechanism<IpNetwork>>>,
     ptr: Option<Mechanism<String>>,
@@ -48,11 +48,11 @@ impl Default for Spf {
             source: String::new(),
             version: String::new(),
             from_src: false,
-            include: None,
             redirect: None,
             is_redirected: false,
             a: None,
             mx: None,
+            include: None,
             ip4: None,
             ip6: None,
             ptr: None,
@@ -85,11 +85,11 @@ impl Spf {
             source: str.clone().to_string(),
             version: String::new(),
             from_src: true,
-            include: None,
             redirect: None,
             is_redirected: false,
             a: None,
             mx: None,
+            include: None,
             ip4: None,
             ip6: None,
             ptr: None,
@@ -270,6 +270,56 @@ impl Spf {
             self.mx.as_mut().unwrap().append(&mut vec);
         }
     }
+    /// document me Include
+    pub fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) {
+        let mut vec: Vec<Mechanism<String>> = Vec::new();
+        vec.push(mechanism);
+        if self.include.is_none() {
+            // Empty vec. Just attach the new vec
+            self.include = Some(vec);
+        } else {
+            // Already has a vec of values. Append to it.
+            self.include.as_mut().unwrap().append(&mut vec);
+        }
+    }
+    /// document me IP4
+    pub fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) {
+        let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
+        vec.push(mechanism);
+        if self.ip4.is_none() {
+            // Empty vec. Just attach the new vec
+            self.ip4 = Some(vec);
+        } else {
+            // Already has a vec of values. Append to it.
+            self.ip4.as_mut().unwrap().append(&mut vec);
+        }
+    }
+    /// document me IP6
+    pub fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) {
+        let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
+        vec.push(mechanism);
+        if self.ip6.is_none() {
+            // Empty vec. Just attach the new vec
+            self.ip6 = Some(vec);
+        } else {
+            // Already has a vec of values. Append to it.
+            self.ip6.as_mut().unwrap().append(&mut vec);
+        }
+    }
+    // Possible wrapper to make single call beteween ip4 and ip6 cango here.
+    // pub fn append_mechanism_of_ip(&mut self, mechanism: Mechanism<IpNetwork>)
+    /// document me exists
+    pub fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) {
+        let mut vec: Vec<Mechanism<String>> = Vec::new();
+        vec.push(mechanism);
+        if self.exists.is_none() {
+            // Empty vec. Just attach the new vec
+            self.exists = Some(vec);
+        } else {
+            // Already has a vec of values. Append to it.
+            self.exists.as_mut().unwrap().append(&mut vec);
+        }
+    }
     /// document me
     pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
         self.all = Some(mechanism);
@@ -321,6 +371,29 @@ impl Spf {
                         spf.push_str(i.string().as_str());
                     }
                 }
+                if self.ip4().is_some() {
+                    for i in self.ip4().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                }
+                if self.ip6().is_some() {
+                    for i in self.ip6().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                }
+                if self.exists().is_some() {
+                    for i in self.exists().unwrap().iter() {
+                        spf.push_str(" ");
+                        spf.push_str(i.string().as_str());
+                    }
+                }
+                if self.ptr().is_some() {
+                    spf.push_str(" ");
+                    spf.push_str(self.ptr().unwrap().string().as_str());
+                }
+                // needs ptr
                 // All can only be used if this is not a redirect.
                 if !self.is_redirected {
                     if self.all().is_some() {
