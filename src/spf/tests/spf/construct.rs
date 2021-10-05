@@ -279,4 +279,25 @@ mod build {
             Some("v=spf1 exists:example.com ?exists:test.com all".to_string())
         );
     }
+    #[test]
+    fn make_ptr_without_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ptr(Mechanism::new_ptr_without_mechanism(Qualifier::Pass));
+        assert_eq!(spf.as_spf(), Some("v=spf1 ptr".to_string()));
+    }
+    #[test]
+    fn make_ptr_with_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ptr(Mechanism::new_ptr_with_mechanism(
+            Qualifier::Pass,
+            "test.com".to_string(),
+        ));
+        assert_eq!(spf.as_spf(), Some("v=spf1 ptr:test.com".to_string()));
+    }
 }

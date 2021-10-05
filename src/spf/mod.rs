@@ -320,6 +320,10 @@ impl Spf {
             self.exists.as_mut().unwrap().append(&mut vec);
         }
     }
+    /// Document me ptr
+    fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) {
+        self.ptr = Some(mechanism);
+    }
     /// document me
     pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
         self.all = Some(mechanism);
