@@ -51,6 +51,7 @@ mod spf2 {
 #[cfg(test)]
 mod build {
 
+    use crate::spf::kinds::MechanismKind;
     use crate::spf::Mechanism;
     use crate::spf::Qualifier;
     use crate::spf::Spf;
@@ -68,7 +69,9 @@ mod build {
             Some("v=spf1 redirect=_spf.example.com".to_string())
         );
         assert_eq!(spf.is_redirect(), true);
-        spf.remove_mechanism_redirect();
+        spf.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+        assert_eq!(spf.all().is_none(), true);
+        spf.clear_mechanism(MechanismKind::Redirect);
         assert_eq!(spf.is_redirect(), false);
         assert_eq!(spf.redirect.is_none(), true);
     }
@@ -299,5 +302,77 @@ mod build {
             "test.com".to_string(),
         ));
         assert_eq!(spf.as_spf(), Some("v=spf1 ptr:test.com".to_string()));
+    }
+    #[test]
+    fn make_ip4_by_append_ip_mechanism() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_ip_mechanism(Mechanism::new_ip(
+            Qualifier::Pass,
+            "10.0.0.0/23".parse().unwrap(),
+        ));
+        assert_eq!(spf.as_spf(), Some("v=spf1 ip4:10.0.0.0/23".to_string()));
+    }
+    #[test]
+    fn make_ip4_x2_by_append_ip_mechanism() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_ip_mechanism(Mechanism::new_ip(
+            Qualifier::Pass,
+            "10.0.0.0/23".parse().unwrap(),
+        ));
+        spf.append_ip_mechanism(Mechanism::new_ip(
+            Qualifier::Pass,
+            "203.32.160.0/23".parse().unwrap(),
+        ));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/23".to_string())
+        );
+    }
+    #[test]
+    fn make_ip6_by_append_ip_mechanism() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.is_v1(), true);
+        spf.append_mechanism_of_ip6(Mechanism::new_ip(
+            Qualifier::Pass,
+            "2001:5160:4000::/36".parse().unwrap(),
+        ));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip6:2001:5160:4000::/36".to_string())
+        );
+    }
+    #[test]
+    fn make_v1_a_mx_all() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        spf.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
+        spf.append_mechanism(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
+        spf.append_mechanism(Mechanism::new_all(Qualifier::Fail));
+        assert_eq!(spf.as_spf(), Some("v=spf1 a mx -all".to_string()));
+    }
+    #[test]
+    fn make_v1_ip4_ip6() {
+        let mut spf = Spf::new();
+        spf.set_v1();
+        spf.append_ip_mechanism(Mechanism::new_ip(
+            Qualifier::Pass,
+            "203.32.160.0/23".parse().unwrap(),
+        ));
+        spf.append_ip_mechanism(Mechanism::new_ip(
+            Qualifier::Pass,
+            "2001:5160:4000::/36".parse().unwrap(),
+        ));
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string())
+        );
     }
 }

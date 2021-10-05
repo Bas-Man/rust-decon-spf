@@ -70,6 +70,6 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
         '-' => return Qualifier::Fail,
         '~' => return Qualifier::SoftFail,
         '?' => return Qualifier::Neutral,
-        _ => return Qualifier::Pass, // This should probably be Neutral
+        _ => return Qualifier::Pass,
     }
 }

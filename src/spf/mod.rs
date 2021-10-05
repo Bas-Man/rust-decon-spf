@@ -40,6 +40,10 @@ pub struct Spf {
     ptr: Option<Mechanism<String>>,
     exists: Option<Vec<Mechanism<String>>>,
     all: Option<Mechanism<String>>,
+    source_is_valid: bool,
+    spf_is_valid: bool,
+    source_needs_valdation: bool,
+    spf_needs_validation: bool,
 }
 
 impl Default for Spf {
@@ -58,6 +62,10 @@ impl Default for Spf {
             ptr: None,
             exists: None,
             all: None,
+            source_is_valid: false,
+            spf_is_valid: false,
+            source_needs_valdation: true,
+            spf_needs_validation: true,
         }
     }
 }
@@ -69,7 +77,7 @@ impl Spf {
     }
     /// Create a new Spf with the provided `str`
     ///
-    /// # Arguments
+    /// # Arguments:
     /// * `str` - a reference to a string slice, which is the SPF record.
     ///
     /// # Example
@@ -95,9 +103,14 @@ impl Spf {
             ptr: None,
             exists: None,
             all: None,
+            source_is_valid: false,
+            spf_is_valid: false,
+            source_needs_valdation: true,
+            spf_needs_validation: true,
         }
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`  
+    ///
     /// Returns a Result<(), SpfErrorType>  
     /// On Ok() returns ().  
     /// On Err() Returns an invariant of SpfErrorType:
@@ -115,6 +128,7 @@ impl Spf {
         let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+        // Implement ptr type
         for record in records {
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 self.version = record.to_string();
@@ -202,7 +216,16 @@ impl Spf {
         }
         Ok(())
     }
-
+    /// document me
+    pub fn source_is_vaid(&self) -> bool {
+        // Should I check was validated?
+        self.source_is_valid
+    }
+    /// document me
+    pub fn is_valid(&self) -> bool {
+        // Should I check was validated?
+        self.spf_is_valid
+    }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
@@ -236,20 +259,50 @@ impl Spf {
         &self.version
     }
     /// document me
-    pub fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) {
         self.redirect = Some(mechanism);
         self.is_redirected = true;
+        if self.a.is_some() {
+            self.a = None;
+        }
     }
-    /// document me
-    pub fn remove_mechanism_redirect(&mut self) {
-        if self.is_redirected == true && self.redirect.is_some() {
-            self.is_redirected = false;
-            self.redirect = None;
+    /// Clear the passed MechanismKind which has been passed.
+    /// Sets the passed mechanism to `None`
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::kinds::MechanismKind;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Spf;
+    /// let mut new_spf_record = Spf::new();
+    /// new_spf_record.set_v1();
+    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
+    /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
+    ///                                                      "203.32.160.0/23".parse().unwrap()));
+    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 a ip4:203.32.160.0/23 all".to_string()));
+    /// // Remove ip4 Mechanism
+    /// new_spf_record.clear_mechanism(MechanismKind::IpV4);
+    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 a all".to_string()));
+    pub fn clear_mechanism(&mut self, kind: kinds::MechanismKind) {
+        match kind {
+            kinds::MechanismKind::Redirect => {
+                self.redirect = None;
+                self.is_redirected = false;
+            }
+            kinds::MechanismKind::A => self.a = None,
+            kinds::MechanismKind::MX => self.mx = None,
+            kinds::MechanismKind::Include => self.include = None,
+            kinds::MechanismKind::IpV4 => self.ip4 = None,
+            kinds::MechanismKind::IpV6 => self.ip6 = None,
+            kinds::MechanismKind::Exists => self.exists = None,
+            kinds::MechanismKind::Ptr => self.ptr = None,
+            kinds::MechanismKind::All => self.all = None,
         }
     }
 
-    /// Document me
-    pub fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
         if self.a.is_none() {
@@ -258,8 +311,7 @@ impl Spf {
             self.a.as_mut().unwrap().append(&mut vec);
         }
     }
-    /// document me MX
-    pub fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
         if self.mx.is_none() {
@@ -270,8 +322,7 @@ impl Spf {
             self.mx.as_mut().unwrap().append(&mut vec);
         }
     }
-    /// document me Include
-    pub fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
         if self.include.is_none() {
@@ -282,8 +333,7 @@ impl Spf {
             self.include.as_mut().unwrap().append(&mut vec);
         }
     }
-    /// document me IP4
-    pub fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) {
+    fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) {
         let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
         vec.push(mechanism);
         if self.ip4.is_none() {
@@ -294,8 +344,7 @@ impl Spf {
             self.ip4.as_mut().unwrap().append(&mut vec);
         }
     }
-    /// document me IP6
-    pub fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) {
+    fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) {
         let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
         vec.push(mechanism);
         if self.ip6.is_none() {
@@ -306,10 +355,7 @@ impl Spf {
             self.ip6.as_mut().unwrap().append(&mut vec);
         }
     }
-    // Possible wrapper to make single call beteween ip4 and ip6 cango here.
-    // pub fn append_mechanism_of_ip(&mut self, mechanism: Mechanism<IpNetwork>)
-    /// document me exists
-    pub fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) {
         let mut vec: Vec<Mechanism<String>> = Vec::new();
         vec.push(mechanism);
         if self.exists.is_none() {
@@ -320,20 +366,73 @@ impl Spf {
             self.exists.as_mut().unwrap().append(&mut vec);
         }
     }
-    /// Document me ptr
     fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) {
         self.ptr = Some(mechanism);
     }
-    /// document me
-    pub fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
-        self.all = Some(mechanism);
+    fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
+        if self.redirect.is_none() {
+            self.all = Some(mechanism);
+        }
     }
-
+    /// Appends the passed Mechanism<String> to the SPF struct.
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Spf;
+    /// let mut new_spf_record = Spf::new();
+    /// new_spf_record.set_v1();
+    /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
+    ///                                 String::from("_spf.example.com")));
+    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 redirect=_spf.example.com".to_string()));
+    /// ```
+    ///
+    /// # Note:
+    /// If The Spf is already set as `Redirect` trying to append a `All`
+    /// Mechanism will have no affect.
+    pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
+        match mechanism.kind() {
+            kinds::MechanismKind::Redirect => self.append_mechanism_of_redirect(mechanism),
+            kinds::MechanismKind::A => self.append_mechanism_of_a(mechanism),
+            kinds::MechanismKind::MX => self.append_mechanism_of_mx(mechanism),
+            kinds::MechanismKind::Include => self.append_mechanism_of_include(mechanism),
+            kinds::MechanismKind::Exists => self.append_mechanism_of_exists(mechanism),
+            kinds::MechanismKind::Ptr => self.append_mechanism_of_ptr(mechanism),
+            kinds::MechanismKind::All => self.append_mechanism_of_all(mechanism),
+            _ => unreachable!(),
+        }
+    }
+    /// Appends the passed Mechanism<IpNetwork> to the SPF struct.
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Spf;
+    /// let mut new_spf_record = Spf::new();
+    /// new_spf_record.set_v1();
+    /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
+    ///                                 ("203.32.160.0/23").parse().unwrap()));
+    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 ip4:203.32.160.0/23 all".to_string()));
+    /// ```    
+    pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
+        match mechanism.kind() {
+            kinds::MechanismKind::IpV4 => self.append_mechanism_of_ip4(mechanism),
+            kinds::MechanismKind::IpV6 => self.append_mechanism_of_ip6(mechanism),
+            _ => {
+                unreachable!()
+            }
+        }
+    }
     /// # Note: Experimential
+    /// Do not use.
     /// Very rudementary validation check.
     /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
     /// - Will fail if there are more than 10 include mechanisms. See: [`ExceedLookup`](SpfErrorType::ExceedLookup)
-    /// (This will change given new information)  
+    /// (This will change given new information)
     pub fn try_validate(&self) -> Result<(), SpfErrorType> {
         if self.from_src {
             if self.includes().is_some() && self.includes().unwrap().len() > 10 {
@@ -418,7 +517,7 @@ impl Spf {
     pub fn is_redirect(&self) -> bool {
         self.is_redirected
     }
-    /// Returns a reference to the redirect Mechanism
+    /// Returns a reference to the `Redirect` Mechanism
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         self.redirect.as_ref()
     }
@@ -450,7 +549,7 @@ impl Spf {
     pub fn ptr(&self) -> Option<&Mechanism<String>> {
         self.ptr.as_ref()
     }
-    /// Returns a reference to Mechanism<String> for `All`
+    /// Returns a reference to `Mechanism<String>` for `All`
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
     }

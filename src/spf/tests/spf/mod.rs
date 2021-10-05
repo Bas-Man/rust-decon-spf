@@ -27,9 +27,17 @@ mod test_spf {
         assert_eq!(spf.mx.is_none(), true);
         assert_eq!(spf.ip4.is_none(), true);
         assert_eq!(spf.ip6.is_none(), true);
+        assert_eq!(spf.ptr.is_none(), true);
+        assert_eq!(spf.exists.is_none(), true);
+        assert_eq!(spf.all.is_none(), true);
         assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
         assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
-        assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com")
+        assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com");
+        assert_eq!(
+            spf.as_spf(),
+            Some("v=spf1 redirect=_spf.google.com".to_string())
+        );
+        assert_eq!(spf.source, spf.as_spf().unwrap());
     }
     #[test]
     fn test_hotmail() {
