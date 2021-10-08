@@ -65,8 +65,8 @@ mod build {
             String::from("_spf.example.com"),
         ));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 redirect=_spf.example.com".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 redirect=_spf.example.com".to_string()
         );
         assert_eq!(spf.is_redirect(), true);
         spf.append_mechanism(Mechanism::new_all(Qualifier::Pass));
@@ -84,9 +84,9 @@ mod build {
         assert_eq!(spf.is_v1(), true);
         spf.append_mechanism_of_a(Mechanism::new_a_without_mechanism(Qualifier::Pass));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Fail));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a -all".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 a -all".to_string());
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a all".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 a all".to_string());
     }
     #[test]
     fn make_a_with_mx_all() {
@@ -97,9 +97,9 @@ mod build {
         spf.append_mechanism_of_a(Mechanism::new_a_without_mechanism(Qualifier::Pass));
         spf.append_mechanism_of_mx(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Fail));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a mx -all".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 a mx -all".to_string());
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a mx all".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 a mx all".to_string());
     }
     #[test]
     fn make_a_with_mx_with_value_all() {
@@ -113,9 +113,15 @@ mod build {
             "test.com".to_string(),
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Fail));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a mx:test.com -all".to_string()));
+        assert_eq!(
+            spf.as_spf().unwrap(),
+            "v=spf1 a mx:test.com -all".to_string()
+        );
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a mx:test.com all".to_string()));
+        assert_eq!(
+            spf.as_spf().unwrap(),
+            "v=spf1 a mx:test.com all".to_string()
+        );
     }
     #[test]
     fn make_a_with_mx_with_value_x2_all() {
@@ -134,8 +140,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 a mx:test.com mx:example.com all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 a mx:test.com mx:example.com all".to_string()
         );
     }
     #[test]
@@ -150,8 +156,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 include:test.com all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 include:test.com all".to_string()
         );
     }
     #[test]
@@ -170,8 +176,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 include:test.com include:example.com all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 include:test.com include:example.com all".to_string()
         );
     }
     #[test]
@@ -186,8 +192,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip4:203.32.160.0/24 all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip4:203.32.160.0/24 all".to_string()
         );
     }
     #[test]
@@ -206,8 +212,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/24 all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/24 all".to_string()
         );
     }
     #[test]
@@ -222,8 +228,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip6:2001:4860:4000::/36 all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip6:2001:4860:4000::/36 all".to_string()
         );
     }
     #[test]
@@ -242,8 +248,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip6:2001:4860:4000::/36 ip6:2001:5160:4000::/36 all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip6:2001:4860:4000::/36 ip6:2001:5160:4000::/36 all".to_string()
         );
     }
     #[test]
@@ -258,8 +264,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 exists:example.com all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 exists:example.com all".to_string()
         );
     }
     #[test]
@@ -278,8 +284,8 @@ mod build {
         ));
         spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 exists:example.com ?exists:test.com all".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 exists:example.com ?exists:test.com all".to_string()
         );
     }
     #[test]
@@ -289,7 +295,7 @@ mod build {
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
         spf.append_mechanism_of_ptr(Mechanism::new_ptr_without_mechanism(Qualifier::Pass));
-        assert_eq!(spf.as_spf(), Some("v=spf1 ptr".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 ptr".to_string());
     }
     #[test]
     fn make_ptr_with_all() {
@@ -301,7 +307,7 @@ mod build {
             Qualifier::Pass,
             "test.com".to_string(),
         ));
-        assert_eq!(spf.as_spf(), Some("v=spf1 ptr:test.com".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 ptr:test.com".to_string());
     }
     #[test]
     fn make_ip4_by_append_ip_mechanism() {
@@ -313,7 +319,7 @@ mod build {
             Qualifier::Pass,
             "10.0.0.0/23".parse().unwrap(),
         ));
-        assert_eq!(spf.as_spf(), Some("v=spf1 ip4:10.0.0.0/23".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 ip4:10.0.0.0/23".to_string());
     }
     #[test]
     fn make_ip4_x2_by_append_ip_mechanism() {
@@ -330,8 +336,8 @@ mod build {
             "203.32.160.0/23".parse().unwrap(),
         ));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/23".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/23".to_string()
         );
     }
     #[test]
@@ -345,8 +351,8 @@ mod build {
             "2001:5160:4000::/36".parse().unwrap(),
         ));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip6:2001:5160:4000::/36".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip6:2001:5160:4000::/36".to_string()
         );
     }
     #[test]
@@ -356,7 +362,7 @@ mod build {
         spf.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
         spf.append_mechanism(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
         spf.append_mechanism(Mechanism::new_all(Qualifier::Fail));
-        assert_eq!(spf.as_spf(), Some("v=spf1 a mx -all".to_string()));
+        assert_eq!(spf.as_spf().unwrap(), "v=spf1 a mx -all".to_string());
     }
     #[test]
     fn make_v1_ip4_ip6() {
@@ -371,8 +377,8 @@ mod build {
             "2001:5160:4000::/36".parse().unwrap(),
         ));
         assert_eq!(
-            spf.as_spf(),
-            Some("v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string())
+            spf.as_spf().unwrap(),
+            "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()
         );
     }
 }

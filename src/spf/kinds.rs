@@ -15,11 +15,10 @@ pub enum MechanismKind {
     /// a:example.com/24  
     /// ```
     A,
-    /// Represents a Mechanism of type mx
+    /// Represents a Mechanism of type mx  
     /// Possible values follow the same loyout as for [`A`](MechanismKind::A)
     MX,
     /// Represents a Mechanism of type include:
-    /// **Note**: There should only be a maximum of 10 Includes.
     Include,
     /// Represents a Mechanism of type ip4:  
     /// # Example Values:  
@@ -30,7 +29,9 @@ pub enum MechanismKind {
     IpV4,
     /// Represents a Mechanism of type ip6:
     IpV6,
-    /// Represents a Mechanism of type ptr: Note: This is rarely use.
+    /// Represents a Mechanism of type ptr:
+    /// # Note:
+    /// This is rarely use.
     Ptr,
     /// Represents a Mechanism of type exists:
     Exists,
@@ -55,6 +56,24 @@ impl MechanismKind {
     pub fn is_include(&self) -> bool {
         matches!(self, Self::Include)
     }
+    /// Returns `true` if it is of any ip. V4 or V6
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// # use decon_spf::spf::kinds;
+    /// let ip4 = kinds::MechanismKind::IpV4;
+    /// let ip6 = kinds::MechanismKind::IpV6;
+    /// assert_eq!(ip4.is_ip_v4(), true);
+    /// assert_eq!(ip4.is_ip_v6(), false);
+    /// assert_eq!(ip4.is_ip(), true);
+    /// assert_eq!(ip6.is_ip_v6(), true);
+    /// assert_eq!(ip6.is_ip_v4(), false);
+    /// assert_eq!(ip6.is_ip(), true);
+    /// ```
+    pub fn is_ip(&self) -> bool {
+        matches!(self, Self::IpV4) || matches!(self, Self::IpV6)
+    }
     /// Returns `true` if the mechanism is [`IpV4`](MechanismKind::IpV4).
     pub fn is_ip_v4(&self) -> bool {
         matches!(self, Self::IpV4)
@@ -77,14 +96,16 @@ impl MechanismKind {
     }
     /// Returns a reference to the str for kind enums.
     ///
-    /// Examples
+    /// # Examples:
     ///
     /// ```rust
     /// # use decon_spf::spf::kinds;
     /// let a = kinds::MechanismKind::A;
     /// let mx = kinds::MechanismKind::MX;
     /// assert_eq!(a.as_str(), "a");
+    /// assert_eq!(a.is_a(), true);
     /// assert_eq!(mx.as_str(), "mx");
+    /// assert_eq!(mx.is_mx(), true);
     /// ```
     ///
     pub fn as_str(&self) -> &str {

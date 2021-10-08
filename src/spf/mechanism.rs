@@ -4,7 +4,7 @@ use crate::spf::kinds::MechanismKind;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
 
-/// Stores its `kind`, `Qualifier` and its `mechanism`
+/// Stores its `MechanismKind`, `Qualifier` and its `Value`
 #[derive(Debug, Clone)]
 pub struct Mechanism<T> {
     kind: MechanismKind,
@@ -23,19 +23,19 @@ impl<T> Mechanism<T> {
             rr_value: mechanism,
         }
     }
-    /// check is mechanism is pass
+    /// check mechanism is pass
     pub fn is_pass(&self) -> bool {
         self.qualifier == Qualifier::Pass
     }
-    /// check is mechanism is fail
+    /// check mechanism is fail
     pub fn is_fail(&self) -> bool {
         self.qualifier == Qualifier::Fail
     }
-    /// check is mechanism is softfail
+    /// check mechanism is softfail
     pub fn is_softfail(&self) -> bool {
         self.qualifier == Qualifier::SoftFail
     }
-    /// check is mechanism is neutral
+    /// check mechanism is neutral
     pub fn is_neutral(&self) -> bool {
         self.qualifier == Qualifier::Neutral
     }
@@ -48,76 +48,95 @@ impl<T> Mechanism<T> {
         &self.qualifier
     }
     /// Returns a reference to the Mechanism's Value.
-    /// This could return a `String` or `IpNetwork`
+    /// This could return a `String`, `IpNetwork`, or `None`
     pub fn mechanism(&self) -> &Option<T> {
         &self.rr_value
     }
 }
 
 impl Mechanism<String> {
-    /// create a new Mechanism struct of `Redirect`
+    /// Create a new Mechanism struct of `Redirect`
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Redirect, qualifier, Some(mechanism))
     }
 
-    /// Document me.
+    /// Create a new Mechanism struct of `A` with no string value.
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Pass);
+    /// assert_eq!(mechanism_a.kind().is_a(), true);
+    /// assert_eq!(mechanism_a.raw(), "a".to_string());
+    /// assert_eq!(mechanism_a.mechanism().is_none(), true);
     pub fn new_a_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, None)
     }
 
-    /// create a new Mechanism struct of `A`
+    /// Create a new Mechanism struct of `A` with string value.
+    ///
     /// # Example:
     /// ```rust
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_a = Mechanism::new_a_with_mechanism(Qualifier::Pass, String::from("example.com"));
+    /// let mechanism_of_a = Mechanism::new_a_with_mechanism(Qualifier::Pass,
+    ///                                                      String::from("example.com"));
     /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_a.raw(), "example.com");
     /// assert_eq!(mechanism_of_a.string(), "a:example.com");
-    /// let blank_a = Mechanism::new_a_without_mechanism(Qualifier::SoftFail);
-    /// assert_eq!(blank_a.qualifier().as_str(), "~");
-    /// assert_eq!(blank_a.string(), "~a");
     /// ```
     pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, Some(mechanism))
     }
 
-    /// Document me
-    pub fn new_mx_without_mechanism(qualifier: Qualifier) -> Self {
-        Mechanism::new(MechanismKind::MX, qualifier, None)
-    }
-
-    /// create a new Mechanism struct of `MX`
+    /// Create a new Mechanism struct of `MX` without string value.
+    ///
     /// # Example:
     /// ```rust
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_mx = Mechanism::new_mx_with_mechanism(Qualifier::Pass, String::from("example.com"));
-    /// assert_eq!(mechanism_of_mx.qualifier().as_str(), "");
-    /// assert_eq!(mechanism_of_mx.raw(), "example.com");
-    /// assert_eq!(mechanism_of_mx.string(), "mx:example.com")
+    /// let mechanism_mx = Mechanism::new_mx_without_mechanism(Qualifier::Pass);
+    /// assert_eq!(mechanism_mx.kind().is_mx(), true);
+    /// assert_eq!(mechanism_mx.raw(), "mx");
+    /// ```
+    pub fn new_mx_without_mechanism(qualifier: Qualifier) -> Self {
+        Mechanism::new(MechanismKind::MX, qualifier, None)
+    }
+
+    /// Create a new Mechanism struct of `MX`
+    /// # Example:
+    /// ```rust
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_mx = Mechanism::new_mx_with_mechanism(Qualifier::Pass,
+    ///                                                     String::from("example.com"));
+    /// assert_eq!(mechanism_mx.raw(), "example.com");
+    /// assert_eq!(mechanism_mx.string(), "mx:example.com")
     /// ```
     pub fn new_mx_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, Some(mechanism))
     }
 
-    /// create a new Mechanism struct of `Include`
+    /// Create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_include = Mechanism::new_include(Qualifier::Pass, String::from("example.com"));
+    /// let mechanism_of_include = Mechanism::new_include(Qualifier::Pass,
+    ///                                                   String::from("example.com"));
     /// assert_eq!(mechanism_of_include.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_include.raw(), "example.com");
     /// assert_eq!(mechanism_of_include.string(), "include:example.com");
-    /// let mechanism_of_include2 = Mechanism::new_include(Qualifier::SoftFail, String::from("example.com"));
+    /// let mechanism_of_include2 = Mechanism::new_include(Qualifier::SoftFail,
+    ///                                                    String::from("example.com"));
     /// assert_eq!(mechanism_of_include2.string(), "~include:example.com")
     /// ```
     pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Include, qualifier, Some(mechanism))
     }
 
-    /// create a new Mechanism struct of `Ptr` with no value
+    /// Create a new Mechanism struct of `Ptr` with no value
     /// # Example:
     /// ```rust
     /// use decon_spf::spf::qualifier::Qualifier;
@@ -128,12 +147,13 @@ impl Mechanism<String> {
         Mechanism::new(MechanismKind::Ptr, qualifier, None)
     }
 
-    /// create a new Mechanism struct of `Ptr`
+    /// Create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
-    /// let mechanism_of_ptr = Mechanism::new_ptr_with_mechanism(Qualifier::Pass, String::from("example.com"));
+    /// let mechanism_of_ptr = Mechanism::new_ptr_with_mechanism(Qualifier::Pass,
+    ///                                                          String::from("example.com"));
     /// assert_eq!(mechanism_of_ptr.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_ptr.raw(), "example.com");
     /// assert_eq!(mechanism_of_ptr.string(), "ptr:example.com");
@@ -141,17 +161,27 @@ impl Mechanism<String> {
         Mechanism::new(MechanismKind::Ptr, qualifier, Some(mechanism))
     }
 
-    /// create a new Mechanism struct of `Exists`
+    /// Create a new Mechanism struct of `Exists`
     pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Exists, qualifier, Some(mechanism))
     }
 
-    /// create a new Mechanism struct of `All`
+    /// Create a new Mechanism struct of `All`
     pub fn new_all(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::All, qualifier, None)
     }
 
-    /// Return the string stored in the attribute `mechanism`
+    /// Return the mechanism string stored in the `Mechanism`
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
+    /// assert_eq!(mechanism_a.raw(), "a");
+    /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Neutral,
+    ///                                                          String::from("example.com"));
+    /// assert_eq!(mechanism_a_string.raw(), "example.com");
     pub fn raw(&self) -> &str {
         if self.rr_value.is_none() {
             self.kind().as_str()
@@ -161,6 +191,16 @@ impl Mechanism<String> {
     }
 
     /// Rebuild and return the string representation of the given mechanism
+    ///
+    /// # Example:
+    /// ```
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
+    /// assert_eq!(mechanism_a.string(), "?a");
+    /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Pass,
+    ///                                                          String::from("example.com"));
+    /// assert_eq!(mechanism_a_string.string(), "a:example.com");
     pub fn string(&self) -> String {
         let mut mechanism_str = String::new();
         let tmp_mechanism_str;
@@ -195,9 +235,33 @@ impl Mechanism<String> {
 }
 
 impl Mechanism<IpNetwork> {
-    /// Create a new Mechanism<IpNetwork>
+    /// Create a new V4 or V6 Mechanism<IpNetwork>  
     /// Will correctly set its `kind` based on the `IpNetwork` type.
-    #[doc(hidden)]
+    ///
+    /// # Examples:
+    /// ```
+    /// # use ipnetwork::IpNetwork;
+    /// use decon_spf::spf::qualifier::Qualifier;
+    /// use decon_spf::spf::mechanism::Mechanism;
+    ///
+    /// // Requires: use ipnetwork::IpNetwork;
+    /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
+    /// let mechanism = Mechanism::new_ip(Qualifier::Pass, ip);
+    /// assert_eq!(mechanism.kind().is_ip_v4(), true);
+    /// assert_eq!(mechanism.raw(), "192.168.11.0/24".to_string());
+    /// assert_eq!(mechanism.as_network().to_string(), "192.168.11.0/24".to_string());
+    /// assert_eq!(mechanism.as_network().prefix(), 24);
+    ///
+    /// // This section does not require use of ipnetwork::IpNetwork;
+    /// let mechanism_ip4 = Mechanism::new_ip(Qualifier::Pass,
+    ///                                       "203.32.160.0/23".parse().unwrap());
+    /// assert_eq!(mechanism_ip4.kind().is_ip(), true);
+    /// assert_eq!(mechanism_ip4.string(), "ip4:203.32.160.0/23".to_string());
+    /// let mechanism_ip6 = Mechanism::new_ip(Qualifier::Pass,
+    ///                                       "2001:4860:4000::/36".parse().unwrap());
+    /// assert_eq!(mechanism_ip6.kind().is_ip(), true);
+    /// assert_eq!(mechanism_ip6.string(), "ip6:2001:4860:4000::/36".to_string());
+    ///```
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         if mechanism.is_ipv4() {
             Mechanism::new_ip4(qualifier, mechanism)
@@ -228,6 +292,7 @@ impl Mechanism<IpNetwork> {
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
+    /// assert_eq!(ip_mechanism.kind().is_ip(), true);
     /// ```
     ///
     pub fn raw(&self) -> String {

@@ -12,8 +12,9 @@ mod tests;
 use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
 use ipnetwork::IpNetwork;
-
+use ipnetwork::IpNetworkError;
 /// A list of expected possible errors for SPF records.
+#[derive(Debug, PartialEq)]
 pub enum SpfErrorType {
     /// Source is invalid, SPF struct was not created using `from_str()`
     InvalidSource,
@@ -21,7 +22,30 @@ pub enum SpfErrorType {
     SourceLengthExceeded,
     /// Exceeds RFC lookup limit.
     ExceedLookup,
+    /// Invalid SPF
+    InvalidSPF,
+    /// Network Address is not valid Error.
+    InvalidIPAddr(IpNetworkError),
 }
+impl std::fmt::Display for SpfErrorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SpfErrorType::InvalidSource => write!(f, "Source string not valid."),
+            SpfErrorType::SourceLengthExceeded => write!(f, "Spf record exceeds 255 characters."),
+            SpfErrorType::ExceedLookup => write!(f, "Too many DNS lookups."),
+            SpfErrorType::InvalidSPF => write!(f, "Spf record is invalid."),
+            SpfErrorType::InvalidIPAddr(err) => write!(f, "{}", err.to_string()),
+        }
+    }
+}
+
+impl From<IpNetworkError> for SpfErrorType {
+    fn from(err: IpNetworkError) -> Self {
+        SpfErrorType::InvalidIPAddr(err)
+    }
+}
+
+impl std::error::Error for SpfErrorType {}
 
 /// The Definition of the Spf struct which contains all information related a single
 /// SPF record.
@@ -111,16 +135,20 @@ impl Spf {
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`  
     ///
-    /// Returns a Result<(), SpfErrorType>  
+    /// # Returns: Result<(), SpfErrorType>  
     /// On Ok() returns ().  
     /// On Err() Returns an invariant of SpfErrorType:
     /// - [`InvalidSource`](SpfErrorType::InvalidSource)
     /// - [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
-    /// - [`ExceedLookup`](SpfErrorType::ExceedLookup)
     pub fn parse(&mut self) -> Result<(), SpfErrorType> {
-        if !self.from_src {
+        if !self.from_src
+            || !self.source.starts_with("v=spf1") && !self.source.starts_with("spf2.0")
+        {
             return Err(SpfErrorType::InvalidSource);
-        }
+        };
+        if self.source.len() > 255 {
+            return Err(SpfErrorType::SourceLengthExceeded);
+        };
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
@@ -130,6 +158,7 @@ impl Spf {
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
         // Implement ptr type
         for record in records {
+            // Consider ensuring we do this once at least and then skip
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 self.version = record.to_string();
             } else if record.contains("redirect=") {
@@ -165,17 +194,27 @@ impl Spf {
                 // Match an ip4
                 let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
-                    let network =
-                        Mechanism::new_ip4(qualifier_and_modified_str.0, raw_ip4.parse().unwrap());
-                    vec_of_ip4.push(network);
+                    let valid_ip4 = raw_ip4.parse();
+                    if valid_ip4.is_ok() {
+                        let network =
+                            Mechanism::new_ip4(qualifier_and_modified_str.0, valid_ip4.unwrap());
+                        vec_of_ip4.push(network);
+                    } else {
+                        return Err(SpfErrorType::InvalidIPAddr(valid_ip4.unwrap_err()));
+                    }
                 }
             } else if record.contains("ip6:") {
                 // Match an ip6
                 let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
-                    let network =
-                        Mechanism::new_ip6(qualifier_and_modified_str.0, raw_ip6.parse().unwrap());
-                    vec_of_ip6.push(network);
+                    let valid_ip6 = raw_ip6.parse();
+                    if valid_ip6.is_ok() {
+                        let network =
+                            Mechanism::new_ip6(qualifier_and_modified_str.0, valid_ip6.unwrap());
+                        vec_of_ip6.push(network);
+                    } else {
+                        return Err(SpfErrorType::InvalidIPAddr(valid_ip6.unwrap_err()));
+                    }
                 }
             } else if record.ends_with("all") {
                 // deal with all if present
@@ -214,6 +253,8 @@ impl Spf {
         if !vec_of_exists.is_empty() {
             self.exists = Some(vec_of_exists);
         }
+        self.source_is_valid = true;
+        self.source_needs_valdation = false;
         Ok(())
     }
     /// document me
@@ -281,10 +322,10 @@ impl Spf {
     /// new_spf_record.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                                      "203.32.160.0/23".parse().unwrap()));
-    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 a ip4:203.32.160.0/23 all".to_string()));
+    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
     /// // Remove ip4 Mechanism
     /// new_spf_record.clear_mechanism(MechanismKind::IpV4);
-    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 a all".to_string()));
+    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 a all".to_string());
     pub fn clear_mechanism(&mut self, kind: kinds::MechanismKind) {
         match kind {
             kinds::MechanismKind::Redirect => {
@@ -386,11 +427,11 @@ impl Spf {
     /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
     ///                                 String::from("_spf.example.com")));
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 redirect=_spf.example.com".to_string()));
+    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
     ///
     /// # Note:
-    /// If The Spf is already set as `Redirect` trying to append a `All`
+    /// If The Spf is already set as `Redirect` trying to append an `All`
     /// Mechanism will have no affect.
     pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
         match mechanism.kind() {
@@ -416,7 +457,7 @@ impl Spf {
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                 ("203.32.160.0/23").parse().unwrap()));
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.as_spf(), Some("v=spf1 ip4:203.32.160.0/23 all".to_string()));
+    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
         match mechanism.kind() {
@@ -446,9 +487,9 @@ impl Spf {
     }
     /// Returns a new string representation of the spf record if possible.
     /// This does not use the `source` attribute.
-    pub fn as_spf(&self) -> Option<String> {
+    pub fn as_spf(&self) -> Result<String, SpfErrorType> {
         if self.try_validate().is_err() {
-            None
+            Err(SpfErrorType::InvalidSPF)
         } else {
             let mut spf = String::new();
             spf.push_str(self.version());
@@ -457,46 +498,27 @@ impl Spf {
                 spf.push_str(self.redirect().unwrap().string().as_str());
             } else {
                 if self.a().is_some() {
-                    for i in self.a().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str(self.a()).as_str());
                 };
                 if self.mx().is_some() {
-                    for i in self.mx().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str(self.mx()).as_str());
                 };
                 if self.includes().is_some() {
-                    for i in self.includes().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str(self.includes()).as_str());
                 }
                 if self.ip4().is_some() {
-                    for i in self.ip4().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str_from_ip(self.ip4()).as_str());
                 }
                 if self.ip6().is_some() {
-                    for i in self.ip6().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str_from_ip(self.ip6()).as_str());
                 }
                 if self.exists().is_some() {
-                    for i in self.exists().unwrap().iter() {
-                        spf.push_str(" ");
-                        spf.push_str(i.string().as_str());
-                    }
+                    spf.push_str(helpers::build_spf_str(self.exists()).as_str());
                 }
                 if self.ptr().is_some() {
                     spf.push_str(" ");
                     spf.push_str(self.ptr().unwrap().string().as_str());
                 }
-                // needs ptr
                 // All can only be used if this is not a redirect.
                 if !self.is_redirected {
                     if self.all().is_some() {
@@ -505,7 +527,7 @@ impl Spf {
                     }
                 }
             }
-            return Some(spf);
+            return Ok(spf);
         }
     }
     /// Returns a reference to the string stored in `source`

@@ -1,6 +1,7 @@
 use crate::spf::kinds;
 use crate::spf::mechanism::Mechanism;
 use crate::spf::qualifier::Qualifier;
+use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -72,4 +73,21 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
         '?' => return Qualifier::Neutral,
         _ => return Qualifier::Pass,
     }
+}
+
+pub(crate) fn build_spf_str(str: Option<&Vec<Mechanism<String>>>) -> String {
+    let mut partial_spf = String::new();
+    for i in str.unwrap().iter() {
+        partial_spf.push_str(" ");
+        partial_spf.push_str(i.string().as_str());
+    }
+    partial_spf
+}
+pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> String {
+    let mut partial_spf = String::new();
+    for i in str.unwrap().iter() {
+        partial_spf.push_str(" ");
+        partial_spf.push_str(i.string().as_str());
+    }
+    partial_spf
 }
