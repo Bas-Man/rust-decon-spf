@@ -70,6 +70,14 @@ pub struct Spf {
     spf_needs_validation: bool,
 }
 
+impl std::fmt::Display for Spf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.as_spf() {
+            Ok(txt) => write!(f, "{}", txt),
+            Err(_) => write!(f, "The Spf record is not valid."),
+        }
+    }
+}
 impl Default for Spf {
     fn default() -> Self {
         Self {
