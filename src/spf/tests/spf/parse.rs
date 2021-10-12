@@ -23,7 +23,10 @@ mod valid_spf_from_str {
         assert_eq!(spf.all.is_none(), true);
         assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
         assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
-        assert_eq!(spf.redirect().unwrap().string(), "redirect=_spf.google.com");
+        assert_eq!(
+            spf.redirect().unwrap().to_string(),
+            "redirect=_spf.google.com"
+        );
         assert_eq!(
             spf.as_spf().unwrap(),
             "v=spf1 redirect=_spf.google.com".to_string()
@@ -41,12 +44,12 @@ mod valid_spf_from_str {
         assert_eq!(!spf.includes().unwrap().is_empty(), true);
         assert_eq!(spf.includes().unwrap().len(), 6);
         assert_eq!(
-            spf.includes().unwrap()[0].string(),
+            spf.includes().unwrap()[0].to_string(),
             "include:spf.protection.outlook.com"
         );
         assert_eq!(spf.ip4().unwrap().len(), 1);
-        assert_eq!(spf.ip4().unwrap()[0].string(), "ip4:157.55.9.128/25");
-        assert_eq!(spf.all().unwrap().string(), "~all");
+        assert_eq!(spf.ip4().unwrap()[0].to_string(), "ip4:157.55.9.128/25");
+        assert_eq!(spf.all().unwrap().to_string(), "~all");
     }
     #[test]
     fn test_netblocks2_google_com() {
@@ -58,12 +61,12 @@ mod valid_spf_from_str {
         assert_eq!(spf.ip4().is_none(), true);
         assert_eq!(!spf.ip6().is_none(), true);
         assert_eq!(spf.ip6().unwrap().len(), 6);
-        assert_eq!(spf.ip6().unwrap()[0].string(), "ip6:2001:4860:4000::/36");
+        assert_eq!(spf.ip6().unwrap()[0].to_string(), "ip6:2001:4860:4000::/36");
         assert_eq!(
             spf.ip6().unwrap()[0].as_network().to_string(),
             "2001:4860:4000::/36"
         );
-        assert_eq!(spf.all().unwrap().string(), "~all");
+        assert_eq!(spf.all().unwrap().to_string(), "~all");
     }
     #[test]
     fn valid_spf1() {

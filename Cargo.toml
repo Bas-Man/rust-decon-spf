@@ -20,7 +20,6 @@ readme = "README.md"
 keywords = ["DNS", "SPF"]
 categories = ["network-programming"]
 
-#license = "MIT"
 license = "MIT"
 
 [lib]
@@ -30,6 +29,10 @@ path = "src/lib.rs"
 [[example]]
 name = "trust-dns-demo"
 path = "examples/trust-dns-resolver.rs"
+
+[[example]]
+name = "build-new-spf"
+path = "examples/build-new-spf.rs"
 
 [dependencies]
 ipnetwork = "0.17.0"

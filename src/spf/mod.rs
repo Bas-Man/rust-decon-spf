@@ -330,10 +330,10 @@ impl Spf {
     /// new_spf_record.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                                      "203.32.160.0/23".parse().unwrap()));
-    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
+    /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
     /// // Remove ip4 Mechanism
     /// new_spf_record.clear_mechanism(MechanismKind::IpV4);
-    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 a all".to_string());
+    /// assert_eq!(new_spf_record.to_string(), "v=spf1 a all".to_string());
     pub fn clear_mechanism(&mut self, kind: kinds::MechanismKind) {
         match kind {
             kinds::MechanismKind::Redirect => {
@@ -435,7 +435,7 @@ impl Spf {
     /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
     ///                                 String::from("_spf.example.com")));
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 redirect=_spf.example.com".to_string());
+    /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
     ///
     /// # Note:
@@ -465,7 +465,7 @@ impl Spf {
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                 ("203.32.160.0/23").parse().unwrap()));
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.as_spf().unwrap(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
+    /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
         match mechanism.kind() {
@@ -495,7 +495,7 @@ impl Spf {
     }
     /// Returns a new string representation of the spf record if possible.
     /// This does not use the `source` attribute.
-    pub fn as_spf(&self) -> Result<String, SpfErrorType> {
+    fn as_spf(&self) -> Result<String, SpfErrorType> {
         if self.try_validate().is_err() {
             Err(SpfErrorType::InvalidSPF)
         } else {
@@ -503,7 +503,7 @@ impl Spf {
             spf.push_str(self.version());
             if self.is_redirected {
                 spf.push_str(" ");
-                spf.push_str(self.redirect().unwrap().string().as_str());
+                spf.push_str(self.redirect().unwrap().to_string().as_str());
             } else {
                 if self.a().is_some() {
                     spf.push_str(helpers::build_spf_str(self.a()).as_str());
@@ -525,13 +525,13 @@ impl Spf {
                 }
                 if self.ptr().is_some() {
                     spf.push_str(" ");
-                    spf.push_str(self.ptr().unwrap().string().as_str());
+                    spf.push_str(self.ptr().unwrap().to_string().as_str());
                 }
                 // All can only be used if this is not a redirect.
                 if !self.is_redirected {
                     if self.all().is_some() {
                         spf.push_str(" ");
-                        spf.push_str(self.all().unwrap().string().as_str());
+                        spf.push_str(self.all().unwrap().to_string().as_str());
                     }
                 }
             }

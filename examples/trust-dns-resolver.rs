@@ -30,7 +30,7 @@ fn main() {
     if spf_record.includes().is_some() {
         println!("Include list");
         for mechanism in spf_record.includes().unwrap().iter() {
-            println!("spf: {}", mechanism.string());
+            println!("spf: {}", mechanism);
         }
     }
     if spf_record.ip4().is_some() {
@@ -41,7 +41,7 @@ fn main() {
                 mechanism.as_network().network(),
                 mechanism.as_network().prefix()
             );
-            println!("spf: {}", mechanism.string());
+            println!("spf: {}", mechanism);
         }
     }
     if spf_record.ip6().is_some() {
@@ -52,13 +52,13 @@ fn main() {
                 mechanism.as_network().network(),
                 mechanism.as_network().prefix()
             );
-            println!("spf: {}", mechanism.string());
+            println!("spf: {}", mechanism);
         }
     }
     println!("\nIs a redirect: {}", spf_record.is_redirect());
     if spf_record.is_redirect() {
         println!("\nredirect: {}", spf_record.redirect().unwrap().raw());
-        println!("mechanism: {}", spf_record.redirect().unwrap().string());
+        println!("mechanism: {}", spf_record.redirect().unwrap());
     }
 }
 

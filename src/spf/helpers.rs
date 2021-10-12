@@ -79,7 +79,7 @@ pub(crate) fn build_spf_str(str: Option<&Vec<Mechanism<String>>>) -> String {
     let mut partial_spf = String::new();
     for i in str.unwrap().iter() {
         partial_spf.push_str(" ");
-        partial_spf.push_str(i.string().as_str());
+        partial_spf.push_str(i.to_string().as_str());
     }
     partial_spf
 }
@@ -87,7 +87,7 @@ pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> 
     let mut partial_spf = String::new();
     for i in str.unwrap().iter() {
         partial_spf.push_str(" ");
-        partial_spf.push_str(i.string().as_str());
+        partial_spf.push_str(i.to_string().as_str());
     }
     partial_spf
 }

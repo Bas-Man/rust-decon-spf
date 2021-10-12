@@ -1,8 +1,9 @@
 # Overview
 
-This crate allows you to deconstruct an existing SPF record that might be retrieved with a dns query of type TXT.
+This crate allows you to deconstruct an existing SPF record that might be retrieved with a dns query of type TXT.  
 
-An example program can be found in the **Examples** directory.
+With 0.2.0. You now have the ability to create SPF records programmatically. Check in the **Examples** directory for sample code.
+
 ### Example Code
 ```rust
 use decon_spf::spf::Spf;
@@ -98,6 +99,7 @@ $ cargo run --example
 
 ```bash
 $ cargo run --example trust-dns-demo
+$ cargo run --example build-new-spf.rs
 ```
 
 ## Syntax Validation

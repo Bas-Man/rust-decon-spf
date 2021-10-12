@@ -14,9 +14,9 @@ mod parse {
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_pass(), true);
-        assert_eq!(spf.a().unwrap()[0].string(), "a");
+        assert_eq!(spf.a().unwrap()[0].to_string(), "a");
         assert_eq!(spf.all().unwrap().is_softfail(), true);
-        assert_eq!(spf.all().unwrap().string(), "~all");
+        assert_eq!(spf.all().unwrap().to_string(), "~all");
     }
     #[test]
     fn test_a_mechanism_slash() {
@@ -26,7 +26,7 @@ mod parse {
         let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_fail(), true);
-        assert_eq!(spf.a().unwrap()[0].string(), "-a/24");
+        assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
     }
     #[test]
     fn test_a_mechanism_colon() {
@@ -36,7 +36,7 @@ mod parse {
         let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
-        assert_eq!(spf.a().unwrap()[0].string(), "?a:example.com");
+        assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");
     }
     #[test]
     fn test_a_mechanism_colon_slash() {
@@ -46,6 +46,6 @@ mod parse {
         let _ = spf.parse();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
-        assert_eq!(spf.a().unwrap()[0].string(), "~a:example.com/24");
+        assert_eq!(spf.a().unwrap()[0].to_string(), "~a:example.com/24");
     }
 }

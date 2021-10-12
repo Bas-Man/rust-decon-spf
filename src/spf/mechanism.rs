@@ -84,7 +84,7 @@ impl Mechanism<String> {
     ///                                                      String::from("example.com"));
     /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_a.raw(), "example.com");
-    /// assert_eq!(mechanism_of_a.string(), "a:example.com");
+    /// assert_eq!(mechanism_of_a.to_string(), "a:example.com");
     /// ```
     pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::A, qualifier, Some(mechanism))
@@ -112,7 +112,7 @@ impl Mechanism<String> {
     /// let mechanism_mx = Mechanism::new_mx_with_mechanism(Qualifier::Pass,
     ///                                                     String::from("example.com"));
     /// assert_eq!(mechanism_mx.raw(), "example.com");
-    /// assert_eq!(mechanism_mx.string(), "mx:example.com")
+    /// assert_eq!(mechanism_mx.to_string(), "mx:example.com")
     /// ```
     pub fn new_mx_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::MX, qualifier, Some(mechanism))
@@ -127,10 +127,10 @@ impl Mechanism<String> {
     ///                                                   String::from("example.com"));
     /// assert_eq!(mechanism_of_include.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_include.raw(), "example.com");
-    /// assert_eq!(mechanism_of_include.string(), "include:example.com");
+    /// assert_eq!(mechanism_of_include.to_string(), "include:example.com");
     /// let mechanism_of_include2 = Mechanism::new_include(Qualifier::SoftFail,
     ///                                                    String::from("example.com"));
-    /// assert_eq!(mechanism_of_include2.string(), "~include:example.com")
+    /// assert_eq!(mechanism_of_include2.to_string(), "~include:example.com")
     /// ```
     pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Include, qualifier, Some(mechanism))
@@ -142,7 +142,7 @@ impl Mechanism<String> {
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
     /// let mechanism_of_ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Fail);
-    /// assert_eq!(mechanism_of_ptr.string(), "-ptr");
+    /// assert_eq!(mechanism_of_ptr.to_string(), "-ptr");
     pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, None)
     }
@@ -156,7 +156,7 @@ impl Mechanism<String> {
     ///                                                          String::from("example.com"));
     /// assert_eq!(mechanism_of_ptr.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_ptr.raw(), "example.com");
-    /// assert_eq!(mechanism_of_ptr.string(), "ptr:example.com");
+    /// assert_eq!(mechanism_of_ptr.to_string(), "ptr:example.com");
     pub fn new_ptr_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(MechanismKind::Ptr, qualifier, Some(mechanism))
     }
@@ -197,11 +197,18 @@ impl Mechanism<String> {
     /// use decon_spf::spf::qualifier::Qualifier;
     /// use decon_spf::spf::mechanism::Mechanism;
     /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
-    /// assert_eq!(mechanism_a.string(), "?a");
+    /// assert_eq!(mechanism_a.to_string(), "?a");
     /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Pass,
     ///                                                          String::from("example.com"));
-    /// assert_eq!(mechanism_a_string.string(), "a:example.com");
+    /// assert_eq!(mechanism_a_string.to_string(), "a:example.com");
+    #[deprecated(
+        since = "0.2.0",
+        note = "This will be removed in a future release. Use to_string() which is implemented through Display trait."
+    )]
     pub fn string(&self) -> String {
+        self.build_string()
+    }
+    fn build_string(&self) -> String {
         let mut mechanism_str = String::new();
         let tmp_mechanism_str;
         if self.qualifier != Qualifier::Pass {
@@ -234,6 +241,12 @@ impl Mechanism<String> {
     }
 }
 
+impl std::fmt::Display for Mechanism<String> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build_string())
+    }
+}
+
 impl Mechanism<IpNetwork> {
     /// Create a new V4 or V6 Mechanism<IpNetwork>  
     /// Will correctly set its `kind` based on the `IpNetwork` type.
@@ -256,11 +269,11 @@ impl Mechanism<IpNetwork> {
     /// let mechanism_ip4 = Mechanism::new_ip(Qualifier::Pass,
     ///                                       "203.32.160.0/23".parse().unwrap());
     /// assert_eq!(mechanism_ip4.kind().is_ip(), true);
-    /// assert_eq!(mechanism_ip4.string(), "ip4:203.32.160.0/23".to_string());
+    /// assert_eq!(mechanism_ip4.to_string(), "ip4:203.32.160.0/23".to_string());
     /// let mechanism_ip6 = Mechanism::new_ip(Qualifier::Pass,
     ///                                       "2001:4860:4000::/36".parse().unwrap());
     /// assert_eq!(mechanism_ip6.kind().is_ip(), true);
-    /// assert_eq!(mechanism_ip6.string(), "ip6:2001:4860:4000::/36".to_string());
+    /// assert_eq!(mechanism_ip6.to_string(), "ip6:2001:4860:4000::/36".to_string());
     ///```
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         if mechanism.is_ipv4() {
@@ -309,11 +322,18 @@ impl Mechanism<IpNetwork> {
     /// use decon_spf::spf::mechanism::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
-    /// assert_eq!(ip_mechanism.string(), "ip4:192.168.11.0/24");
+    /// assert_eq!(ip_mechanism.to_string(), "ip4:192.168.11.0/24");
     /// assert_eq!(ip_mechanism.as_network(), &ip);
     /// ```
     ///
+    #[deprecated(
+        since = "0.2.0",
+        note = "This will be removed in a future release. Use to_string() which is implemented through Display trait."
+    )]
     pub fn string(&self) -> String {
+        self.build_string()
+    }
+    fn build_string(&self) -> String {
         let mut ip_mechanism_str = String::new();
         if self.qualifier != Qualifier::Pass {
             ip_mechanism_str.push_str(self.qualifier.as_str());
@@ -326,5 +346,11 @@ impl Mechanism<IpNetwork> {
     /// Returns the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         &self.rr_value.as_ref().unwrap()
+    }
+}
+
+impl std::fmt::Display for Mechanism<IpNetwork> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build_string())
     }
 }

@@ -11,7 +11,7 @@ mod parse {
         let mut spf = Spf::from_str(&input.to_string());
         let _ = spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
-        assert_eq!(spf.ptr().unwrap().string(), "ptr");
+        assert_eq!(spf.ptr().unwrap().to_string(), "ptr");
     }
     #[test]
     fn test_exist_colon() {
@@ -20,6 +20,6 @@ mod parse {
         let mut spf = Spf::from_str(&input.to_string());
         let _ = spf.parse();
         assert_eq!(spf.ptr().unwrap().is_pass(), true);
-        assert_eq!(spf.ptr().unwrap().string(), "ptr:host.example.com");
+        assert_eq!(spf.ptr().unwrap().to_string(), "ptr:host.example.com");
     }
 }

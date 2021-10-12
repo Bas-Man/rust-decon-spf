@@ -14,7 +14,7 @@ mod parse {
         assert_eq!(spf.includes().unwrap()[0].is_pass(), true);
         assert_eq!(spf.includes().unwrap()[0].raw(), "_spf.example.com");
         assert_eq!(
-            spf.includes().unwrap()[0].string(),
+            spf.includes().unwrap()[0].to_string(),
             "include:_spf.example.com"
         );
     }

@@ -17,7 +17,7 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
         assert_eq!(test.raw(), "ptr");
-        assert_eq!(test.string(), "ptr");
+        assert_eq!(test.to_string(), "ptr");
     }
     #[test]
     fn test_match_on_ptr_colon() {

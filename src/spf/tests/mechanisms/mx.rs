@@ -15,7 +15,7 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
         assert_eq!(test.raw(), "mx");
-        assert_eq!(test.string(), "mx");
+        assert_eq!(test.to_string(), "mx");
     }
     #[test]
     fn test_match_on_mx_colon() {
@@ -27,7 +27,7 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_fail(), true);
         assert_eq!(test.raw(), "example.com");
-        assert_eq!(test.string(), "-mx:example.com");
+        assert_eq!(test.to_string(), "-mx:example.com");
     }
     #[test]
     fn test_match_on_mx_slash() {
@@ -39,7 +39,7 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_softfail(), true);
         assert_eq!(test.raw(), "/24");
-        assert_eq!(test.string(), "~mx/24");
+        assert_eq!(test.to_string(), "~mx/24");
     }
     #[test]
     fn test_match_on_mx_colon_slash() {
@@ -51,6 +51,6 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
         assert_eq!(test.raw(), "example.com/24");
-        assert_eq!(test.string(), "mx:example.com/24");
+        assert_eq!(test.to_string(), "mx:example.com/24");
     }
 }

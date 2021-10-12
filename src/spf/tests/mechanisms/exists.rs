@@ -16,6 +16,6 @@ mod capture {
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
         assert_eq!(test.raw(), "a.example.com");
-        assert_eq!(test.string(), "exists:a.example.com");
+        assert_eq!(test.to_string(), "exists:a.example.com");
     }
 }
