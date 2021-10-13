@@ -26,7 +26,6 @@
 //!
 //! See [mechanism::Mechanism].
 //!
-#[doc(hidden)]
-pub mod helpers;
+mod helpers;
 pub mod mechanism;
 pub mod spf;

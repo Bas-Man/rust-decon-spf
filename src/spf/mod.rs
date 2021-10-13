@@ -3,9 +3,7 @@
 //! It is not intended to validate the spf record.
 
 #[doc(hidden)]
-mod tests;
-#[doc(hidden)]
-pub use crate::helpers;
+use crate::helpers;
 
 pub use crate::mechanism::Mechanism;
 pub use crate::mechanism::MechanismKind;
