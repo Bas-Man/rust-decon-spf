@@ -2,16 +2,16 @@
 
 mod capture {
 
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::MechanismKind;
     use crate::spf::helpers;
-    use crate::spf::kinds;
-    use crate::spf::mechanism::Mechanism;
 
     #[test]
     fn test_match_on_a_only() {
         let string = "a";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
@@ -23,7 +23,7 @@ mod capture {
         let string = "-a:example.com";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_fail(), true);
@@ -35,7 +35,7 @@ mod capture {
         let string = "~a/24";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_softfail(), true);
@@ -47,7 +47,7 @@ mod capture {
         let string = "+a:example.com/24";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, kinds::MechanismKind::A);
+        option_test = helpers::capture_matches(&string, MechanismKind::A);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);

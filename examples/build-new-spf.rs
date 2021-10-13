@@ -1,6 +1,6 @@
-use decon_spf::spf::kinds::MechanismKind;
-use decon_spf::spf::mechanism::Mechanism;
-use decon_spf::spf::qualifier::Qualifier;
+use decon_spf::mechanism::Mechanism;
+use decon_spf::mechanism::MechanismKind;
+use decon_spf::mechanism::Qualifier;
 use decon_spf::spf::Spf;
 
 fn main() {

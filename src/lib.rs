@@ -1,5 +1,6 @@
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
-//! The Spf Module is responsible for providing information about spf records
+//! The deconf-spf crate is responsible for providing tooks to access and modify information about spf records
 //! that have been parsed.  
 //! It provides the ability to access information about Spf mechanisms.  
 //! Provides methods for building spf records programmatically.  
@@ -20,10 +21,12 @@
 //! - Check its *Kind*
 //!     - `kind().is_a()`, `kind().is_mx()` and more.
 //!
-//! For **IP4/6** we can access it as an [IpNetwork](spf::mechanism::Mechanism::as_network())
-//! as well as access its [String](spf::mechanism::Mechanism<IpNetwork>::string()) representation.
+//! For **IP4/6** we can access it as an [IpNetwork](mechanism::Mechanism::as_network())
+//! as well as access its [String]mechanism::Mechanism<IpNetwork>::string()) representation.
 //!
-//! See [spf::mechanism::Mechanism].
+//! See [mechanism::Mechanism].
 //!
-#![forbid(unsafe_code)]
+#[doc(hidden)]
+pub mod helpers;
+pub mod mechanism;
 pub mod spf;

@@ -2,15 +2,14 @@
 //! constituent parts.  
 //! It is not intended to validate the spf record.
 
-mod helpers;
-pub mod kinds;
-pub mod mechanism;
-pub mod qualifier;
 #[doc(hidden)]
 mod tests;
+#[doc(hidden)]
+pub use crate::helpers;
 
-use crate::spf::mechanism::Mechanism;
-use crate::spf::qualifier::Qualifier;
+pub use crate::mechanism::Mechanism;
+pub use crate::mechanism::MechanismKind;
+pub use crate::mechanism::Qualifier;
 use ipnetwork::IpNetwork;
 use ipnetwork::IpNetworkError;
 /// A list of expected possible errors for SPF records.
@@ -229,16 +228,11 @@ impl Spf {
                 self.all = Some(Mechanism::new_all(
                     return_and_remove_qualifier(record, 'a').0,
                 ))
-            } else if let Some(a_mechanism) =
-                helpers::capture_matches(record, kinds::MechanismKind::A)
-            {
+            } else if let Some(a_mechanism) = helpers::capture_matches(record, MechanismKind::A) {
                 vec_of_a.push(a_mechanism);
-            } else if let Some(mx_mechanism) =
-                helpers::capture_matches(record, kinds::MechanismKind::MX)
-            {
+            } else if let Some(mx_mechanism) = helpers::capture_matches(record, MechanismKind::MX) {
                 vec_of_mx.push(mx_mechanism);
-            } else if let Some(ptr_mechanism) =
-                helpers::capture_matches(record, kinds::MechanismKind::Ptr)
+            } else if let Some(ptr_mechanism) = helpers::capture_matches(record, MechanismKind::Ptr)
             {
                 self.ptr = Some(ptr_mechanism);
             }
@@ -320,9 +314,9 @@ impl Spf {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::kinds::MechanismKind;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Qualifier;
+    /// use decon_spf::spf::MechanismKind;
+    /// use decon_spf::spf::Mechanism;
     /// use decon_spf::spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
@@ -334,20 +328,20 @@ impl Spf {
     /// // Remove ip4 Mechanism
     /// new_spf_record.clear_mechanism(MechanismKind::IpV4);
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a all".to_string());
-    pub fn clear_mechanism(&mut self, kind: kinds::MechanismKind) {
+    pub fn clear_mechanism(&mut self, kind: MechanismKind) {
         match kind {
-            kinds::MechanismKind::Redirect => {
+            MechanismKind::Redirect => {
                 self.redirect = None;
                 self.is_redirected = false;
             }
-            kinds::MechanismKind::A => self.a = None,
-            kinds::MechanismKind::MX => self.mx = None,
-            kinds::MechanismKind::Include => self.include = None,
-            kinds::MechanismKind::IpV4 => self.ip4 = None,
-            kinds::MechanismKind::IpV6 => self.ip6 = None,
-            kinds::MechanismKind::Exists => self.exists = None,
-            kinds::MechanismKind::Ptr => self.ptr = None,
-            kinds::MechanismKind::All => self.all = None,
+            MechanismKind::A => self.a = None,
+            MechanismKind::MX => self.mx = None,
+            MechanismKind::Include => self.include = None,
+            MechanismKind::IpV4 => self.ip4 = None,
+            MechanismKind::IpV6 => self.ip6 = None,
+            MechanismKind::Exists => self.exists = None,
+            MechanismKind::Ptr => self.ptr = None,
+            MechanismKind::All => self.all = None,
         }
     }
 
@@ -427,8 +421,8 @@ impl Spf {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Qualifier;
+    /// use decon_spf::spf::Mechanism;
     /// use decon_spf::spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
@@ -443,13 +437,13 @@ impl Spf {
     /// Mechanism will have no affect.
     pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
         match mechanism.kind() {
-            kinds::MechanismKind::Redirect => self.append_mechanism_of_redirect(mechanism),
-            kinds::MechanismKind::A => self.append_mechanism_of_a(mechanism),
-            kinds::MechanismKind::MX => self.append_mechanism_of_mx(mechanism),
-            kinds::MechanismKind::Include => self.append_mechanism_of_include(mechanism),
-            kinds::MechanismKind::Exists => self.append_mechanism_of_exists(mechanism),
-            kinds::MechanismKind::Ptr => self.append_mechanism_of_ptr(mechanism),
-            kinds::MechanismKind::All => self.append_mechanism_of_all(mechanism),
+            MechanismKind::Redirect => self.append_mechanism_of_redirect(mechanism),
+            MechanismKind::A => self.append_mechanism_of_a(mechanism),
+            MechanismKind::MX => self.append_mechanism_of_mx(mechanism),
+            MechanismKind::Include => self.append_mechanism_of_include(mechanism),
+            MechanismKind::Exists => self.append_mechanism_of_exists(mechanism),
+            MechanismKind::Ptr => self.append_mechanism_of_ptr(mechanism),
+            MechanismKind::All => self.append_mechanism_of_all(mechanism),
             _ => unreachable!(),
         }
     }
@@ -457,8 +451,8 @@ impl Spf {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::spf::Qualifier;
+    /// use decon_spf::spf::Mechanism;
     /// use decon_spf::spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
@@ -469,8 +463,8 @@ impl Spf {
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
         match mechanism.kind() {
-            kinds::MechanismKind::IpV4 => self.append_mechanism_of_ip4(mechanism),
-            kinds::MechanismKind::IpV6 => self.append_mechanism_of_ip6(mechanism),
+            MechanismKind::IpV4 => self.append_mechanism_of_ip4(mechanism),
+            MechanismKind::IpV6 => self.append_mechanism_of_ip6(mechanism),
             _ => {
                 unreachable!()
             }

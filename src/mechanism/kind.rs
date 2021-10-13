@@ -61,9 +61,9 @@ impl MechanismKind {
     /// # Examples:
     ///
     /// ```
-    /// # use decon_spf::spf::kinds;
-    /// let ip4 = kinds::MechanismKind::IpV4;
-    /// let ip6 = kinds::MechanismKind::IpV6;
+    /// # use decon_spf::mechanism::MechanismKind;
+    /// let ip4 = MechanismKind::IpV4;
+    /// let ip6 = MechanismKind::IpV6;
     /// assert_eq!(ip4.is_ip_v4(), true);
     /// assert_eq!(ip4.is_ip_v6(), false);
     /// assert_eq!(ip4.is_ip(), true);
@@ -99,9 +99,9 @@ impl MechanismKind {
     /// # Examples:
     ///
     /// ```rust
-    /// # use decon_spf::spf::kinds;
-    /// let a = kinds::MechanismKind::A;
-    /// let mx = kinds::MechanismKind::MX;
+    /// # use decon_spf::mechanism::MechanismKind;
+    /// let a = MechanismKind::A;
+    /// let mx = MechanismKind::MX;
     /// assert_eq!(a.as_str(), "a");
     /// assert_eq!(a.is_a(), true);
     /// assert_eq!(mx.as_str(), "mx");

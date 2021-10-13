@@ -1,7 +1,7 @@
 //! A struct created either by having an existing SPF record `parsed` or programmatically created.
 
-use crate::spf::kinds::MechanismKind;
-use crate::spf::qualifier::Qualifier;
+use crate::mechanism::MechanismKind;
+use crate::mechanism::Qualifier;
 use ipnetwork::IpNetwork;
 
 /// Stores its `MechanismKind`, `Qualifier` and its `Value`
@@ -64,8 +64,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Pass);
     /// assert_eq!(mechanism_a.kind().is_a(), true);
     /// assert_eq!(mechanism_a.raw(), "a".to_string());
@@ -78,8 +78,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_of_a = Mechanism::new_a_with_mechanism(Qualifier::Pass,
     ///                                                      String::from("example.com"));
     /// assert_eq!(mechanism_of_a.qualifier().as_str(), "");
@@ -94,8 +94,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_mx = Mechanism::new_mx_without_mechanism(Qualifier::Pass);
     /// assert_eq!(mechanism_mx.kind().is_mx(), true);
     /// assert_eq!(mechanism_mx.raw(), "mx");
@@ -107,8 +107,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `MX`
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_mx = Mechanism::new_mx_with_mechanism(Qualifier::Pass,
     ///                                                     String::from("example.com"));
     /// assert_eq!(mechanism_mx.raw(), "example.com");
@@ -121,8 +121,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_of_include = Mechanism::new_include(Qualifier::Pass,
     ///                                                   String::from("example.com"));
     /// assert_eq!(mechanism_of_include.qualifier().as_str(), "");
@@ -139,8 +139,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Ptr` with no value
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_of_ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Fail);
     /// assert_eq!(mechanism_of_ptr.to_string(), "-ptr");
     pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
@@ -150,8 +150,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_of_ptr = Mechanism::new_ptr_with_mechanism(Qualifier::Pass,
     ///                                                          String::from("example.com"));
     /// assert_eq!(mechanism_of_ptr.qualifier().as_str(), "");
@@ -175,8 +175,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
     /// assert_eq!(mechanism_a.raw(), "a");
     /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Neutral,
@@ -194,8 +194,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
     /// assert_eq!(mechanism_a.to_string(), "?a");
     /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Pass,
@@ -254,8 +254,8 @@ impl Mechanism<IpNetwork> {
     /// # Examples:
     /// ```
     /// # use ipnetwork::IpNetwork;
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     ///
     /// // Requires: use ipnetwork::IpNetwork;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
@@ -300,8 +300,8 @@ impl Mechanism<IpNetwork> {
     ///
     /// ```
     /// use ipnetwork::IpNetwork;
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
@@ -318,8 +318,8 @@ impl Mechanism<IpNetwork> {
     ///
     /// ```
     /// use ipnetwork::IpNetwork;
-    /// use decon_spf::spf::qualifier::Qualifier;
-    /// use decon_spf::spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.to_string(), "ip4:192.168.11.0/24");

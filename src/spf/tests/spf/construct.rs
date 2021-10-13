@@ -51,9 +51,9 @@ mod spf2 {
 #[cfg(test)]
 mod build {
 
-    use crate::spf::kinds::MechanismKind;
+    use crate::mechanism::MechanismKind;
+    use crate::mechanism::Qualifier;
     use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
     use crate::spf::Spf;
 
     #[test]

@@ -2,9 +2,9 @@
 #[allow(non_snake_case)]
 mod A {
 
-    use crate::spf::kinds::MechanismKind;
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::MechanismKind;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn new_a_without_mechanism() {
@@ -30,8 +30,8 @@ mod A {
 #[allow(non_snake_case)]
 mod MX {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
     #[test]
     fn new_mx_without_mechanism() {
         let mx = Mechanism::new_mx_without_mechanism(Qualifier::Pass);
@@ -59,8 +59,8 @@ mod MX {
 #[allow(non_snake_case)]
 mod EXISTS {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
     #[test]
     fn exists_pass() {
         let exists = Mechanism::new_exists(Qualifier::Neutral, String::from("bogus.com"));
@@ -73,9 +73,9 @@ mod EXISTS {
 #[allow(non_snake_case)]
 mod INCLUDE {
 
-    use crate::spf::kinds::MechanismKind;
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::MechanismKind;
+    use crate::mechanism::Qualifier;
     #[test]
     fn include_pass() {
         let include = Mechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
@@ -107,8 +107,8 @@ mod INCLUDE {
 #[allow(non_snake_case)]
 mod PTR {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn ptr_without_mechanism() {
@@ -129,8 +129,8 @@ mod PTR {
 #[cfg(test)]
 mod redirect {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn test_redirect() {
@@ -145,8 +145,8 @@ mod redirect {
 #[allow(non_snake_case)]
 mod Ip4 {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn ip4_pass() {
@@ -185,8 +185,8 @@ mod Ip4 {
 #[allow(non_snake_case)]
 mod ip6 {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn ip6_pass() {
@@ -220,8 +220,8 @@ mod ip6 {
 #[allow(non_snake_case)]
 mod all {
 
-    use crate::spf::Mechanism;
-    use crate::spf::Qualifier;
+    use crate::mechanism::Mechanism;
+    use crate::mechanism::Qualifier;
 
     #[test]
     fn new_all() {
