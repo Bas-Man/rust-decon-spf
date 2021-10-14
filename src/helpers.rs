@@ -5,6 +5,7 @@ use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use regex::Regex;
 
+// List of Regular Expressions used to parse Spf Mechanisms.
 pub(crate) const MECHANISM_A_PATTERN: &str =
     r"^(?P<qualifier>[+?~-])?a[:]{0,1}(?P<mechanism>[/]{0,1}.+)?";
 pub(crate) const MECHANISM_MX_PATTERN: &str =
@@ -14,6 +15,7 @@ pub(crate) const MECHANISM_PTR_PATTERN: &str =
 pub(crate) const MECHANISM_EXISTS_PATTERN: &str =
     r"^(?P<qualifier>[+?~-])?exists[:]{0,1}(?P<mechanism>.+)?";
 
+// Create a new mechanism for a matched regular expression.
 pub(crate) fn capture_matches(string: &str, kind: MechanismKind) -> Option<Mechanism<String>> {
     lazy_static! {
         static ref A_RE: Regex = Regex::new(MECHANISM_A_PATTERN).unwrap();
@@ -72,6 +74,7 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
     }
 }
 
+// builds a string representation of of the mechanisms stored in the Vec<Mechanism<String>>
 pub(crate) fn build_spf_str(str: Option<&Vec<Mechanism<String>>>) -> String {
     let mut partial_spf = String::new();
     for i in str.unwrap().iter() {
@@ -80,6 +83,7 @@ pub(crate) fn build_spf_str(str: Option<&Vec<Mechanism<String>>>) -> String {
     }
     partial_spf
 }
+// builds a string representation of of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
 pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> String {
     let mut partial_spf = String::new();
     for i in str.unwrap().iter() {
