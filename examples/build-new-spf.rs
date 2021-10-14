@@ -1,6 +1,4 @@
-use decon_spf::mechanism::Mechanism;
-use decon_spf::mechanism::MechanismKind;
-use decon_spf::mechanism::Qualifier;
+use decon_spf::mechanism::{Mechanism, MechanismKind, Qualifier};
 use decon_spf::spf::Spf;
 
 fn main() {
