@@ -2,7 +2,8 @@
 
 This crate allows you to deconstruct an existing SPF record that might be retrieved with a dns query of type TXT.  
 
-With 0.2.0. You now have the ability to create SPF records programmatically. Check in the **Examples** directory for sample code.
+With 0.2.0. You now have the ability to create SPF records programmatically. 
+Check the **Examples** directory for sample code.
 
 ### Example Code
 ```rust

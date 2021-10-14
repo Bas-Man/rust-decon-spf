@@ -2,9 +2,9 @@
 
 mod capture {
 
+    use crate::helpers;
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismKind;
-    use crate::spf::helpers;
 
     #[test]
     fn test_match_on_exists() {

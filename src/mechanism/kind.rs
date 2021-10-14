@@ -131,47 +131,47 @@ impl Default for MechanismKind {
 }
 
 #[test]
-fn test_kind_a() {
+fn a() {
     let a = MechanismKind::A;
     assert_eq!(a.as_str(), "a");
 }
 #[test]
-fn test_kind_mx() {
+fn mx() {
     let a = MechanismKind::MX;
     assert_eq!(a.as_str(), "mx");
 }
 #[test]
-fn test_kind_redirect() {
+fn redirect() {
     let a = MechanismKind::Redirect;
     assert_eq!(a.as_str(), "redirect=");
 }
 #[test]
-fn test_kind_include() {
+fn include() {
     let a = MechanismKind::Include;
     assert_eq!(a.as_str(), "include:");
 }
 #[test]
-fn test_kind_ip4() {
+fn ip4() {
     let a = MechanismKind::IpV4;
     assert_eq!(a.as_str(), "ip4:");
 }
 #[test]
-fn test_kind_ip6() {
+fn ip6() {
     let a = MechanismKind::IpV6;
     assert_eq!(a.as_str(), "ip6:");
 }
 #[test]
-fn test_kind_ptr() {
+fn ptr() {
     let a = MechanismKind::Ptr;
     assert_eq!(a.as_str(), "ptr");
 }
 #[test]
-fn test_kind_exists() {
+fn exists() {
     let a = MechanismKind::Exists;
     assert_eq!(a.as_str(), "exists:");
 }
 #[test]
-fn test_kind_all() {
+fn all() {
     let a = MechanismKind::All;
     assert_eq!(a.as_str(), "all");
 }

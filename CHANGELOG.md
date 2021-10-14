@@ -4,9 +4,8 @@
 - Bump Version to 0.2.0
 - Add this CHANGELOG.md file.
 - Complete re-orginisation of the crate's module layout.
-  - note that spf::{qualifier::Qualifer, kinds::MechanismKind, mechanism::Mechanism} no longer exist. These can now be accessed more simply as: 
+  - Note that spf::{qualifier::Qualifer, kinds::MechanismKind, mechanism::Mechanism} no longer exist. These can now be accessed more simply as: 
     -  mechanism::{Qualifer, MechanismKind, Mechanism} 
-    - spf::{Qualifer, MechanismKind, Mechanism}
 - Correct license reference to correctly show as MIT license
 - Introduce ability to build SPF records programmatically. 
   - See examples/build-new-spf.rs
