@@ -64,6 +64,13 @@ pub(crate) fn capture_matches(string: &str, kind: MechanismKind) -> Option<Mecha
     }
 }
 
+pub(crate) fn spf_has_consecutive_whitespace(spf: &str) -> bool {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"\s{2,}").unwrap();
+    }
+    RE.is_match(spf)
+}
+
 pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
     match c {
         '+' => return Qualifier::Pass,
