@@ -67,15 +67,11 @@ pub struct Spf {
     ptr: Option<Mechanism<String>>,
     exists: Option<Vec<Mechanism<String>>>,
     all: Option<Mechanism<String>>,
-    source_is_valid: bool,
-    spf_is_valid: bool,
-    source_needs_valdation: bool,
-    spf_needs_validation: bool,
 }
 
 impl std::fmt::Display for Spf {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.as_spf() {
+        match self.build_spf_string() {
             Ok(txt) => write!(f, "{}", txt),
             Err(_) => write!(f, "The Spf record is not valid."),
         }
@@ -97,10 +93,6 @@ impl Default for Spf {
             ptr: None,
             exists: None,
             all: None,
-            source_is_valid: false,
-            spf_is_valid: false,
-            source_needs_valdation: true,
-            spf_needs_validation: true,
         }
     }
 }
@@ -138,10 +130,6 @@ impl Spf {
             ptr: None,
             exists: None,
             all: None,
-            source_is_valid: false,
-            spf_is_valid: false,
-            source_needs_valdation: true,
-            spf_needs_validation: true,
         }
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`  
@@ -160,6 +148,9 @@ impl Spf {
         if self.source.len() > 255 {
             return Err(SpfErrorType::SourceLengthExceeded);
         };
+        if helpers::spf_has_consecutive_whitespace(self.source.as_str()) {
+            return Err(SpfErrorType::InvalidSource);
+        }
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
@@ -264,21 +255,18 @@ impl Spf {
         if !vec_of_exists.is_empty() {
             self.exists = Some(vec_of_exists);
         }
-        // Everything seems ok so note source is valid and that we don't need to do more validation.
-        self.source_is_valid = true;
-        self.source_needs_valdation = false;
         Ok(())
     }
     /// Check that the source string was parsed and was valid.
-    pub fn source_is_vaid(&self) -> bool {
-        // Should I check was validated?
-        self.source_is_valid
-    }
+    //pub fn source_is_vaid(&self) -> bool {
+    //  // Should I check was validated?
+    //    self.source_is_valid
+    //}
     /// Check that data stored in the Spf Struct is considered a valid Spf Record.
-    pub fn is_valid(&self) -> bool {
-        // Should I check was validated?
-        self.spf_is_valid
-    }
+    //pub fn is_valid(&self) -> bool {
+    //   // Should I check was validated?
+    //  self.spf_is_valid
+    //}
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
@@ -522,9 +510,7 @@ impl Spf {
         }
         Ok(())
     }
-    /// Returns a new string representation of the spf record if possible.
-    /// This does not use the `source` attribute.
-    fn as_spf(&self) -> Result<String, SpfErrorType> {
+    fn build_spf_string(&self) -> Result<String, SpfErrorType> {
         let valid = self.try_validate();
         if valid.is_err() {
             Err(valid.err().unwrap())
@@ -567,6 +553,12 @@ impl Spf {
             }
             return Ok(spf);
         }
+    }
+    /// Returns a new string representation of the spf record if possible.
+    /// This does not use the `source` attribute.
+    #[deprecated(note = "This will be deprecated in the future. Use to_string() instead.")]
+    pub fn as_spf(&self) -> Result<String, SpfErrorType> {
+        self.build_spf_string()
     }
     /// Returns a reference to the string stored in `source`
     pub fn source(&self) -> &String {

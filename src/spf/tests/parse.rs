@@ -28,10 +28,10 @@ mod valid_spf_from_str {
             "redirect=_spf.google.com"
         );
         assert_eq!(
-            spf.as_spf().unwrap(),
+            spf.to_string(),
             "v=spf1 redirect=_spf.google.com".to_string()
         );
-        assert_eq!(spf.source, spf.as_spf().unwrap());
+        assert_eq!(spf.source, spf.to_string());
     }
     #[test]
     fn test_hotmail() {
