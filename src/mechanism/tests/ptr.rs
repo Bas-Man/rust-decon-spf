@@ -3,15 +3,15 @@
 mod capture {
 
     use crate::helpers;
+    use crate::mechanism::Kind;
     use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismKind;
 
     #[test]
     fn test_match_on_ptr() {
         let string = "ptr";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::Ptr);
+        option_test = helpers::capture_matches(&string, Kind::Ptr);
         assert!(option_test.is_some());
 
         let test = option_test.unwrap();
@@ -24,7 +24,7 @@ mod capture {
         let string = "ptr:example.com";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::Ptr);
+        option_test = helpers::capture_matches(&string, Kind::Ptr);
         assert!(option_test.is_some());
 
         let test = option_test.unwrap();

@@ -1,5 +1,5 @@
+use crate::mechanism::Kind;
 use crate::mechanism::Mechanism;
-use crate::mechanism::MechanismKind;
 use crate::mechanism::Qualifier;
 use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
@@ -16,7 +16,7 @@ pub(crate) const MECHANISM_EXISTS_PATTERN: &str =
     r"^(?P<qualifier>[+?~-])?exists[:]{0,1}(?P<mechanism>.+)?";
 
 // Create a new mechanism for a matched regular expression.
-pub(crate) fn capture_matches(string: &str, kind: MechanismKind) -> Option<Mechanism<String>> {
+pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<String>> {
     lazy_static! {
         static ref A_RE: Regex = Regex::new(MECHANISM_A_PATTERN).unwrap();
         static ref MX_RE: Regex = Regex::new(MECHANISM_MX_PATTERN).unwrap();
@@ -24,10 +24,10 @@ pub(crate) fn capture_matches(string: &str, kind: MechanismKind) -> Option<Mecha
         static ref EXISTS_RE: Regex = Regex::new(MECHANISM_EXISTS_PATTERN).unwrap();
     }
     let caps = match kind {
-        MechanismKind::A => A_RE.captures(string),
-        MechanismKind::MX => MX_RE.captures(string),
-        MechanismKind::Ptr => PTR_RE.captures(string),
-        MechanismKind::Exists => EXISTS_RE.captures(string),
+        Kind::A => A_RE.captures(string),
+        Kind::MX => MX_RE.captures(string),
+        Kind::Ptr => PTR_RE.captures(string),
+        Kind::Exists => EXISTS_RE.captures(string),
         _ => unreachable!(),
     };
     let qualifier_char: char;

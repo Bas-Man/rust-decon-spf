@@ -51,7 +51,7 @@ mod spf2 {
 #[cfg(test)]
 mod build {
 
-    use crate::mechanism::MechanismKind;
+    use crate::mechanism::Kind;
     use crate::mechanism::Qualifier;
     use crate::spf::Mechanism;
     use crate::spf::Spf;
@@ -71,7 +71,7 @@ mod build {
         assert_eq!(spf.is_redirect(), true);
         spf.append_mechanism(Mechanism::new_all(Qualifier::Pass));
         assert_eq!(spf.all().is_none(), true);
-        spf.clear_mechanism(MechanismKind::Redirect);
+        spf.clear_mechanism(Kind::Redirect);
         assert_eq!(spf.is_redirect(), false);
         assert_eq!(spf.redirect.is_none(), true);
     }

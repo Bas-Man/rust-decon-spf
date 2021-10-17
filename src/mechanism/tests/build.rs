@@ -2,15 +2,15 @@
 #[allow(non_snake_case)]
 mod A {
 
+    use crate::mechanism::Kind;
     use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismKind;
     use crate::mechanism::Qualifier;
 
     #[test]
     fn new_a_without_mechanism() {
         let a_mechanism = Mechanism::new_a_without_mechanism(Qualifier::Fail);
         assert_eq!(a_mechanism.is_fail(), true);
-        assert_eq!(a_mechanism.kind(), &MechanismKind::A);
+        assert_eq!(a_mechanism.kind(), &Kind::A);
         assert_eq!(a_mechanism.raw(), "a");
         assert_eq!(a_mechanism.to_string(), "-a");
     }
@@ -20,7 +20,7 @@ mod A {
         let a_mechanism =
             Mechanism::new_a_with_mechanism(Qualifier::Fail, "example.com".to_string());
         assert_eq!(a_mechanism.is_fail(), true);
-        assert_eq!(a_mechanism.kind(), &MechanismKind::A);
+        assert_eq!(a_mechanism.kind(), &Kind::A);
         assert_eq!(a_mechanism.raw(), "example.com");
         assert_eq!(a_mechanism.to_string(), "-a:example.com");
     }
@@ -73,14 +73,14 @@ mod EXISTS {
 #[allow(non_snake_case)]
 mod INCLUDE {
 
+    use crate::mechanism::Kind;
     use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismKind;
     use crate::mechanism::Qualifier;
     #[test]
     fn include_pass() {
         let include = Mechanism::new_include(Qualifier::Pass, String::from("_spf.test.com"));
         assert_eq!(include.is_pass(), true);
-        assert_eq!(include.kind(), &MechanismKind::Include);
+        assert_eq!(include.kind(), &Kind::Include);
         assert_eq!(include.raw(), "_spf.test.com");
         assert_eq!(include.to_string(), "include:_spf.test.com");
     }

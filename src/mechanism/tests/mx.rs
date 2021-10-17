@@ -3,14 +3,14 @@
 mod capture {
 
     use crate::helpers;
+    use crate::mechanism::Kind;
     use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismKind;
     #[test]
     fn test_match_on_mx_only() {
         let string = "mx";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::MX);
+        option_test = helpers::capture_matches(&string, Kind::MX);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);
@@ -22,7 +22,7 @@ mod capture {
         let string = "-mx:example.com";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::MX);
+        option_test = helpers::capture_matches(&string, Kind::MX);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_fail(), true);
@@ -34,7 +34,7 @@ mod capture {
         let string = "~mx/24";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::MX);
+        option_test = helpers::capture_matches(&string, Kind::MX);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_softfail(), true);
@@ -46,7 +46,7 @@ mod capture {
         let string = "+mx:example.com/24";
         let option_test: Option<Mechanism<String>>;
 
-        option_test = helpers::capture_matches(&string, MechanismKind::MX);
+        option_test = helpers::capture_matches(&string, Kind::MX);
 
         let test = option_test.unwrap();
         assert_eq!(test.is_pass(), true);

@@ -6,6 +6,6 @@ mod mechanism;
 mod qualifier;
 mod tests;
 
-pub use kind::MechanismKind;
+pub use kind::Kind;
 pub use mechanism::Mechanism;
 pub use qualifier::Qualifier;

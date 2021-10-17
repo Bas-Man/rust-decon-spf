@@ -1,4 +1,4 @@
-use decon_spf::mechanism::{Mechanism, MechanismKind, Qualifier};
+use decon_spf::mechanism::{Kind, Mechanism, Qualifier};
 use decon_spf::spf::Spf;
 
 fn main() {
@@ -21,7 +21,7 @@ fn main() {
     spf2.append_mechanism(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
     println!("Altered spf 2: >{}<", spf2);
     println!("Clear mx from spf2");
-    spf2.clear_mechanism(MechanismKind::MX);
+    spf2.clear_mechanism(Kind::MX);
     println!("Altered spf 2: >{}<", spf2);
 
     let mut spf3 = Spf::new();

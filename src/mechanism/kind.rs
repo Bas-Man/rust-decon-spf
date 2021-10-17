@@ -1,58 +1,61 @@
-//! Defines the supported SPF Mechanisms  
-
+//! Defines the supported SPF *Mechanisms* and *Modifiers*  
+//!
+//! Whilst *Mechanisms* and *Modifiers* differ slightly. This difference is so
+//! small as to not require any distinction in the current code base.
+//!
 /// This enum defines the possible mechanisms.
 #[derive(Debug, Clone, PartialEq)]
-pub enum MechanismKind {
-    /// Represents a Mechanism of type redirect=  
-    /// If this is present, no other mechanism should be present.  
+pub enum Kind {
+    /// Represents a *Modifier* of type redirect=  
+    /// If this is present, the *All* mechanism should not be present.  
     Redirect,
-    /// Represents a Mechanism of type a
+    /// Represents a Mechanism of type *A*
     /// # Possible Values:  
-    /// ```bash
+    /// ```text
     /// a   
     /// a/24  
     /// a:example.com  
     /// a:example.com/24  
     /// ```
     A,
-    /// Represents a Mechanism of type mx  
-    /// Possible values follow the same loyout as for [`A`](MechanismKind::A)
+    /// Represents a Mechanism of type *MX*  
+    /// Possible values follow the same loyout as for [`A`](Kind::A)
     MX,
-    /// Represents a Mechanism of type include:
+    /// Represents a Mechanism of type *Include*  
     Include,
-    /// Represents a Mechanism of type ip4:  
+    /// Represents a Mechanism of type *ip4*  
     /// # Example Values:  
     /// ```text
     /// ip4:192.168.11.0/24  
     /// ip4:10.10.1.1
     /// ```
     IpV4,
-    /// Represents a Mechanism of type ip6:
+    /// Represents a Mechanism of type *ip6*
     IpV6,
-    /// Represents a Mechanism of type ptr:
+    /// Represents a Mechanism of type *ptr*
     /// # Note:
     /// This is rarely use.
     Ptr,
-    /// Represents a Mechanism of type exists:
+    /// Represents a Mechanism of type *exists*
     Exists,
-    /// Represents a Mechanism of type all
+    /// Represents a Mechanism of type *All*
     All,
 }
 
-impl MechanismKind {
-    /// Returns `true` if the mechanism is [`Redirect`](MechanismKind::Redirect).
+impl Kind {
+    /// Returns `true` if the mechanism is [`Redirect`](Kind::Redirect).
     pub fn is_redirect(&self) -> bool {
         matches!(self, Self::Redirect)
     }
-    /// Returns `true` if the mechanism is [`A`](MechanismKind::A).
+    /// Returns `true` if the mechanism is [`A`](Kind::A).
     pub fn is_a(&self) -> bool {
         matches!(self, Self::A)
     }
-    /// Returns `true` if the mechanism is [`MX`](MechanismKind::MX).
+    /// Returns `true` if the mechanism is [`MX`](Kind::MX).
     pub fn is_mx(&self) -> bool {
         matches!(self, Self::MX)
     }
-    /// Returns `true` if the mechanism is [`Include`](MechanismKind::Include).
+    /// Returns `true` if the mechanism is [`Include`](Kind::Include).
     pub fn is_include(&self) -> bool {
         matches!(self, Self::Include)
     }
@@ -61,9 +64,9 @@ impl MechanismKind {
     /// # Examples:
     ///
     /// ```
-    /// # use decon_spf::mechanism::MechanismKind;
-    /// let ip4 = MechanismKind::IpV4;
-    /// let ip6 = MechanismKind::IpV6;
+    /// # use decon_spf::mechanism::Kind;
+    /// let ip4 = Kind::IpV4;
+    /// let ip6 = Kind::IpV6;
     /// assert_eq!(ip4.is_ip_v4(), true);
     /// assert_eq!(ip4.is_ip_v6(), false);
     /// assert_eq!(ip4.is_ip(), true);
@@ -74,23 +77,23 @@ impl MechanismKind {
     pub fn is_ip(&self) -> bool {
         matches!(self, Self::IpV4) || matches!(self, Self::IpV6)
     }
-    /// Returns `true` if the mechanism is [`IpV4`](MechanismKind::IpV4).
+    /// Returns `true` if the mechanism is [`IpV4`](Kind::IpV4).
     pub fn is_ip_v4(&self) -> bool {
         matches!(self, Self::IpV4)
     }
-    /// Returns `true` if the mechanism is [`IpV6`](MechanismKind::IpV6).
+    /// Returns `true` if the mechanism is [`IpV6`](Kind::IpV6).
     pub fn is_ip_v6(&self) -> bool {
         matches!(self, Self::IpV6)
     }
-    /// Returns `true` if the mechanism is [`Ptr`](MechanismKind::Ptr).
+    /// Returns `true` if the mechanism is [`Ptr`](Kind::Ptr).
     pub fn is_ptr(&self) -> bool {
         matches!(self, Self::Ptr)
     }
-    /// Returns `true` if the mechanism is [`Exists`](MechanismKind::Exists).
+    /// Returns `true` if the mechanism is [`Exists`](Kind::Exists).
     pub fn is_exists(&self) -> bool {
         matches!(self, Self::Exists)
     }
-    /// Returns `true` if the mechanism is [`All`](MechanismKind::All).
+    /// Returns `true` if the mechanism is [`All`](Kind::All).
     pub fn is_all(&self) -> bool {
         matches!(self, Self::All)
     }
@@ -99,9 +102,9 @@ impl MechanismKind {
     /// # Examples:
     ///
     /// ```rust
-    /// # use decon_spf::mechanism::MechanismKind;
-    /// let a = MechanismKind::A;
-    /// let mx = MechanismKind::MX;
+    /// # use decon_spf::mechanism::Kind;
+    /// let a = Kind::A;
+    /// let mx = Kind::MX;
     /// assert_eq!(a.as_str(), "a");
     /// assert_eq!(a.is_a(), true);
     /// assert_eq!(mx.as_str(), "mx");
@@ -110,21 +113,21 @@ impl MechanismKind {
     ///
     pub fn as_str(&self) -> &str {
         let push_str = match self {
-            MechanismKind::Redirect => "redirect=",
-            MechanismKind::Include => "include:",
-            MechanismKind::A => "a",
-            MechanismKind::MX => "mx",
-            MechanismKind::IpV4 => "ip4:",
-            MechanismKind::IpV6 => "ip6:",
-            MechanismKind::Ptr => "ptr",
-            MechanismKind::Exists => "exists:",
-            MechanismKind::All => "all",
+            Kind::Redirect => "redirect=",
+            Kind::Include => "include:",
+            Kind::A => "a",
+            Kind::MX => "mx",
+            Kind::IpV4 => "ip4:",
+            Kind::IpV6 => "ip6:",
+            Kind::Ptr => "ptr",
+            Kind::Exists => "exists:",
+            Kind::All => "all",
         };
         push_str
     }
 }
 
-impl Default for MechanismKind {
+impl Default for Kind {
     fn default() -> Self {
         Self::A
     }
@@ -132,46 +135,46 @@ impl Default for MechanismKind {
 
 #[test]
 fn a() {
-    let a = MechanismKind::A;
+    let a = Kind::A;
     assert_eq!(a.as_str(), "a");
 }
 #[test]
 fn mx() {
-    let a = MechanismKind::MX;
+    let a = Kind::MX;
     assert_eq!(a.as_str(), "mx");
 }
 #[test]
 fn redirect() {
-    let a = MechanismKind::Redirect;
+    let a = Kind::Redirect;
     assert_eq!(a.as_str(), "redirect=");
 }
 #[test]
 fn include() {
-    let a = MechanismKind::Include;
+    let a = Kind::Include;
     assert_eq!(a.as_str(), "include:");
 }
 #[test]
 fn ip4() {
-    let a = MechanismKind::IpV4;
+    let a = Kind::IpV4;
     assert_eq!(a.as_str(), "ip4:");
 }
 #[test]
 fn ip6() {
-    let a = MechanismKind::IpV6;
+    let a = Kind::IpV6;
     assert_eq!(a.as_str(), "ip6:");
 }
 #[test]
 fn ptr() {
-    let a = MechanismKind::Ptr;
+    let a = Kind::Ptr;
     assert_eq!(a.as_str(), "ptr");
 }
 #[test]
 fn exists() {
-    let a = MechanismKind::Exists;
+    let a = Kind::Exists;
     assert_eq!(a.as_str(), "exists:");
 }
 #[test]
 fn all() {
-    let a = MechanismKind::All;
+    let a = Kind::All;
     assert_eq!(a.as_str(), "all");
 }
