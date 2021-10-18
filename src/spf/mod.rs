@@ -2,6 +2,7 @@
 //! constituent parts.  
 //! It is not intended to validate the spf record.
 
+mod errors;
 mod tests;
 mod validate;
 
@@ -10,59 +11,9 @@ use crate::mechanism::Kind;
 use crate::mechanism::Mechanism;
 use crate::mechanism::Qualifier;
 // Make this public in the future
+pub use crate::spf::errors::SpfErrorType;
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use ipnetwork::IpNetwork;
-use ipnetwork::IpNetworkError;
-
-/// A list of expected possible errors for SPF records.
-#[derive(Debug, PartialEq)]
-pub enum SpfErrorType {
-    /// Source is invalid, SPF struct was not created using `from_str()`
-    InvalidSource,
-    /// Source string length exceeds 255 Characters
-    SourceLengthExceeded,
-    /// Exceeds RFC lookup limit.
-    LookupLimitExceeded,
-    /// Source Spf String has not been parsed.
-    HasNotBeenParsed,
-    /// Only one white space is permitted bdtween mechanisms.
-    WhiteSpaceSyntaxError,
-    /// Invalid SPF
-    InvalidSPF,
-    /// Rediect with additional Mechanisms
-    RedirectWithAllMechanism,
-    /// Network Address is not valid Error.
-    InvalidIPAddr(IpNetworkError),
-}
-impl std::fmt::Display for SpfErrorType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SpfErrorType::InvalidSource => write!(f, "Source string not valid."),
-            SpfErrorType::SourceLengthExceeded => write!(f, "Spf record exceeds 255 characters."),
-            SpfErrorType::LookupLimitExceeded => write!(f, "Too many DNS lookups."),
-            SpfErrorType::HasNotBeenParsed => write!(f, "Source string has not been parsed."),
-            SpfErrorType::WhiteSpaceSyntaxError => {
-                write!(
-                    f,
-                    "Spf contains two or more consecutive whitespace characters."
-                )
-            }
-            SpfErrorType::InvalidSPF => write!(f, "Spf record is invalid."),
-            SpfErrorType::RedirectWithAllMechanism => {
-                write!(f, "Redirect with unexpected 'All' Mechanism")
-            }
-            SpfErrorType::InvalidIPAddr(err) => write!(f, "{}", err.to_string()),
-        }
-    }
-}
-
-impl From<IpNetworkError> for SpfErrorType {
-    fn from(err: IpNetworkError) -> Self {
-        SpfErrorType::InvalidIPAddr(err)
-    }
-}
-
-impl std::error::Error for SpfErrorType {}
 
 /// The Definition of the Spf struct which contains all information related a single
 /// SPF record.
@@ -571,8 +522,8 @@ impl Spf {
     /// Returns a new string representation of the spf record if possible.
     /// This does not use the `source` attribute.
     #[deprecated(
-        since = "0.2.2",
-        note = "This will be deprecated in the future. Use to_string() instead."
+        since = "0.2.0",
+        note = "This has been deprecated. Use to_string() instead."
     )]
     pub fn as_spf(&self) -> Result<String, SpfErrorType> {
         unimplemented!("Spf struct now has a Display trait. Start using to_string()")
