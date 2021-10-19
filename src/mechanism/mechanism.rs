@@ -3,13 +3,14 @@
 use crate::mechanism::Kind;
 use crate::mechanism::Qualifier;
 use ipnetwork::IpNetwork;
+use ipnetwork::IpNetworkError;
 
 /// Stores its `Kind`, `Qualifier` and its `Value`
 #[derive(Debug, Clone)]
 pub struct Mechanism<T> {
     kind: Kind,
     qualifier: Qualifier,
-    rr_value: Option<T>,
+    rrdata: Option<T>,
 }
 
 impl<T> Mechanism<T> {
@@ -20,7 +21,7 @@ impl<T> Mechanism<T> {
         Self {
             kind,
             qualifier,
-            rr_value: mechanism,
+            rrdata: mechanism,
         }
     }
     /// check mechanism is pass
@@ -50,7 +51,7 @@ impl<T> Mechanism<T> {
     /// Returns a reference to the Mechanism's Value.
     /// This could return a `String`, `IpNetwork`, or `None`
     pub fn mechanism(&self) -> &Option<T> {
-        &self.rr_value
+        &self.rrdata
     }
 }
 
@@ -183,10 +184,10 @@ impl Mechanism<String> {
     ///                                                          String::from("example.com"));
     /// assert_eq!(mechanism_a_string.raw(), "example.com");
     pub fn raw(&self) -> &str {
-        if self.rr_value.is_none() {
+        if self.rrdata.is_none() {
             self.kind().as_str()
         } else {
-            self.rr_value.as_ref().unwrap()
+            self.rrdata.as_ref().unwrap()
         }
     }
 
@@ -215,8 +216,8 @@ impl Mechanism<String> {
             mechanism_str.push_str(self.qualifier.as_str());
         };
         mechanism_str.push_str(self.kind().as_str());
-        if self.rr_value.is_some() {
-            tmp_mechanism_str = self.rr_value.as_ref().unwrap().as_str();
+        if self.rrdata.is_some() {
+            tmp_mechanism_str = self.rrdata.as_ref().unwrap().as_str();
         } else {
             tmp_mechanism_str = ""
         }
@@ -294,7 +295,19 @@ impl Mechanism<IpNetwork> {
     pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::new(Kind::IpV6, qualifier, Some(mechanism))
     }
-
+    #[doc(hidden)]
+    #[allow(dead_code)]
+    pub fn new_ip_from_str(
+        qualifier: Qualifier,
+        s: &str,
+    ) -> Result<Mechanism<IpNetwork>, IpNetworkError> {
+        let ip = s.parse::<IpNetwork>();
+        if ip.is_ok() {
+            Ok(Mechanism::new_ip(qualifier, ip.unwrap()))
+        } else {
+            Err(ip.unwrap_err())
+        }
+    }
     /// Returns the simple string representation of the mechanism
     /// # Example
     ///
@@ -310,7 +323,7 @@ impl Mechanism<IpNetwork> {
     ///
     pub fn raw(&self) -> String {
         // Consider striping ":" and "/" if they are the first characters.
-        self.rr_value.unwrap().to_string()
+        self.rrdata.unwrap().to_string()
     }
 
     /// Returns the mechanism string representation of an IP4/6 mechanism.
@@ -339,13 +352,13 @@ impl Mechanism<IpNetwork> {
             ip_mechanism_str.push_str(self.qualifier.as_str());
         };
         ip_mechanism_str.push_str(self.kind().as_str());
-        ip_mechanism_str.push_str(self.rr_value.unwrap().to_string().as_str());
+        ip_mechanism_str.push_str(self.rrdata.unwrap().to_string().as_str());
         ip_mechanism_str
     }
 
     /// Returns the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
-        &self.rr_value.as_ref().unwrap()
+        &self.rrdata.as_ref().unwrap()
     }
 }
 

@@ -1,4 +1,4 @@
-//! This module allows you to deconstruct an exiting SPF DNS Record into its
+//! This module allows you to deconstruct an existing SPF DNS record into its
 //! constituent parts.  
 //! It is not intended to validate the spf record.
 
@@ -10,8 +10,8 @@ use crate::helpers;
 use crate::mechanism::Kind;
 use crate::mechanism::Mechanism;
 use crate::mechanism::Qualifier;
-// Make this public in the future
 pub use crate::spf::errors::SpfErrorType;
+// Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use ipnetwork::IpNetwork;
 
@@ -111,6 +111,7 @@ impl Spf {
     /// On Err() Returns an invariant of SpfErrorType:
     /// - [`InvalidSource`](SpfErrorType::InvalidSource)
     /// - [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
+    /// - [`InvalidIPAddr`](SpfErrorType::InvalidIPAddr)
     pub fn parse(&mut self) -> Result<(), SpfErrorType> {
         if !self.from_src
             || !self.source.starts_with("v=spf1") && !self.source.starts_with("spf2.0")
@@ -440,11 +441,14 @@ impl Spf {
         }
     }
     /// # Note: Experimential
-    /// Do not use.
+    /// *Do not use.*
     /// Very rudementary validation check.
-    /// - Will fail if the length of `source` is more than 255 characters See: [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
-    /// - Will fail if there are more than 10 DNS lookups. Looks are required for each 'A', 'MX' and 'Include' Mechanism. See: [`LookupLimitExceeded`](SpfErrorType::LookupLimitExceeded)
+    /// - Will fail if the length of `source` is more than 255 characters See:
+    /// [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
+    /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
+    /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfErrorType::LookupLimitExceeded)
     /// (This will change given new information)
+    #[deprecated(note = "This is expected to be deprecated.")]
     pub fn try_validate(&mut self) -> Result<(), SpfErrorType> {
         if self.from_src {
             if self.source.len() > 255 {

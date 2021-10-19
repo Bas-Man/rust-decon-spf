@@ -4,7 +4,7 @@
 Breaking Changes.
 ================================================================
 
-- as_spf() removed. replaced with a *Display* trait. Use `to_string()`
+- as_spf() removed. Replaced with a *Display* trait. Use `to_string()`
 
 Changes
 =======
@@ -18,4 +18,4 @@ Changes
 - Introduce ability to build SPF records programmatically. 
   - See examples/build-new-spf.rs
 - Implement **Display** trait for structs *Spf* and *Mechanism*
-  - This also deprecates the previously implemented *as_spf()* and *string()* methods.
+  - This also depreciates the previously implemented *as_spf()* and *string()* methods.

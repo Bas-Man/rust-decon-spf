@@ -3,6 +3,20 @@
 //! This crate is responsible for providing tools to access and modify information about spf records.  
 //! Provides methods for building spf records programmatically.  
 //!
+//!
+//! For a list of supported *Modifiers* and *Mechanism*. See [mechanism::Kind](mechanism::Kind)  
+//!
+//! This crate is able to decontruct `v=spf1` and `spf2.0` records.
+//!
+//! # Features:
+//! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
+//! - Check and Create Spf Mechanism/Modifiers:
+//!     - [`Mechanism String`](mechanism::Mechanism::<String>)
+//!     - [`Mechanism IpNetwork`](mechanism::Mechanism::<IpNetwork>)
+//!     - [`Check Qualifier Type`](mechanism::Mechanism::is_pass)
+//!     - [`Check Mechanism Type`](mechanism::Mechanism::kind)
+//!
+//! # Example Code
 //! Deconstructing an existing spf record into its corresponding components.
 //! ========================================================================
 //!```rust
@@ -76,30 +90,6 @@
 //! assert_eq!(spf3.to_string(), "spf2.0/pra a -all");
 //! println!("Altered spf 3: >{}<", spf3);
 //!```
-//!
-//!
-//! For a list of supported *Modifiers* and *Mechanism*. See [mechanism::Kind](mechanism::Kind)  
-//!
-//! The ability to check what version of the Spf record was specified as:
-//!
-//! - *v=spf1* or *spf2.0/* using `is_v1()` or `is_v2()`
-//!
-//! Check if the spf record is a *redirect*, *A*, *MX* and more
-//!
-//! - [is_redirect()](mechanism::Kind::is_redirect()), [redirect()](spf::Spf::redirect())
-//! - `is_a()`, `a()`
-//!
-//! For any given mechanism we can:
-//! - check its *Qualifier* status
-//!     - `is_pass()`, `is_fail()`, `is_softfail()`, `is_neutral()`
-//!
-//! - Check its *Kind*
-//!     - `kind().is_a()`, `kind().is_mx()` and more.
-//!
-//! For **IP4/6** we can access it as an [IpNetwork](mechanism::Mechanism::as_network())
-//! as well as access its [String](mechanism::Mechanism<IpNetwork>::string()) representation.
-//!
-//! See [mechanism::Mechanism].
 //!
 mod helpers;
 pub mod mechanism;
