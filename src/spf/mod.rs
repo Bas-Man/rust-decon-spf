@@ -10,12 +10,12 @@ use crate::helpers;
 use crate::mechanism::Kind;
 use crate::mechanism::Mechanism;
 use crate::mechanism::Qualifier;
-pub use crate::spf::errors::SpfErrorType;
+pub use crate::spf::errors::SpfError;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use ipnetwork::IpNetwork;
 
-/// The Definition of the Spf struct which contains all information related a single
+/// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug)]
 pub struct Spf {
@@ -106,23 +106,23 @@ impl Spf {
     }
     /// Parse the contents of `source` and populate the internal structure of `Spf`  
     ///
-    /// # Returns: Result<(), SpfErrorType>  
+    /// # Returns: Result<(), SpfError>  
     /// On Ok() returns ().  
-    /// On Err() Returns an invariant of SpfErrorType:
-    /// - [`InvalidSource`](SpfErrorType::InvalidSource)
-    /// - [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
-    /// - [`InvalidIPAddr`](SpfErrorType::InvalidIPAddr)
-    pub fn parse(&mut self) -> Result<(), SpfErrorType> {
+    /// On Err() Returns an invariant of SpfError:
+    /// - [`InvalidSource`](SpfError::InvalidSource)
+    /// - [`SourceLengthExceeded`](SpfError::SourceLengthExceeded)
+    /// - [`InvalidIPAddr`](SpfError::InvalidIPAddr)
+    pub fn parse(&mut self) -> Result<(), SpfError> {
         if !self.from_src
             || !self.source.starts_with("v=spf1") && !self.source.starts_with("spf2.0")
         {
-            return Err(SpfErrorType::InvalidSource);
+            return Err(SpfError::InvalidSource);
         };
         if self.source.len() > 255 {
-            return Err(SpfErrorType::SourceLengthExceeded);
+            return Err(SpfError::SourceLengthExceeded);
         };
         if helpers::spf_has_consecutive_whitespace(self.source.as_str()) {
-            return Err(SpfErrorType::InvalidSource);
+            return Err(SpfError::InvalidSource);
         }
         let records = self.source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
@@ -176,7 +176,7 @@ impl Spf {
                         vec_of_ip4.push(network);
                     } else {
                         // The ip4 string was not valid. Return Err()
-                        return Err(SpfErrorType::InvalidIPAddr(valid_ip4.unwrap_err()));
+                        return Err(SpfError::InvalidIPAddr(valid_ip4.unwrap_err()));
                     }
                 }
             } else if record.contains("ip6:") {
@@ -191,7 +191,7 @@ impl Spf {
                         vec_of_ip6.push(network);
                     } else {
                         // The ip6 string was not valid. Return Err()
-                        return Err(SpfErrorType::InvalidIPAddr(valid_ip6.unwrap_err()));
+                        return Err(SpfError::InvalidIPAddr(valid_ip6.unwrap_err()));
                     }
                 }
             } else if record.ends_with("all") {
@@ -444,31 +444,31 @@ impl Spf {
     /// *Do not use.*
     /// Very rudementary validation check.
     /// - Will fail if the length of `source` is more than 255 characters See:
-    /// [`SourceLengthExceeded`](SpfErrorType::SourceLengthExceeded)
+    /// [`SourceLengthExceeded`](SpfError::SourceLengthExceeded)
     /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
-    /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfErrorType::LookupLimitExceeded)
+    /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfError::LookupLimitExceeded)
     /// (This will change given new information)
     #[deprecated(note = "This is expected to be deprecated.")]
-    pub fn try_validate(&mut self) -> Result<(), SpfErrorType> {
+    pub fn try_validate(&mut self) -> Result<(), SpfError> {
         if self.from_src {
             if self.source.len() > 255 {
-                return Err(SpfErrorType::SourceLengthExceeded);
+                return Err(SpfError::SourceLengthExceeded);
             } else if !self.was_parsed {
-                return Err(SpfErrorType::HasNotBeenParsed);
+                return Err(SpfError::HasNotBeenParsed);
             };
         };
         // Rediect should be the only mechanism present. Any additional values are not permitted.
         if self.redirect().is_some() && self.all().is_some() {
-            return Err(SpfErrorType::RedirectWithAllMechanism);
+            return Err(SpfError::RedirectWithAllMechanism);
         }
         if validate::check_lookup_count(&self) > 10 {
-            return Err(SpfErrorType::LookupLimitExceeded);
+            return Err(SpfError::LookupLimitExceeded);
         }
         self.is_valid = true;
         Ok(())
     }
     #[allow(dead_code)]
-    fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfErrorType> {
+    fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
         return match rfc {
             SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
         };
@@ -529,7 +529,7 @@ impl Spf {
         since = "0.2.0",
         note = "This has been deprecated. Use to_string() instead."
     )]
-    pub fn as_spf(&self) -> Result<String, SpfErrorType> {
+    pub fn as_spf(&self) -> Result<String, SpfError> {
         unimplemented!("Spf struct now has a Display trait. Start using to_string()")
     }
     /// Returns a reference to the string stored in `source`

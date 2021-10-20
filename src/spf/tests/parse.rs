@@ -88,7 +88,7 @@ mod valid_spf_from_str {
 mod invalid_spf_from_str {
 
     use crate::spf::Spf;
-    use crate::spf::SpfErrorType;
+    use crate::spf::SpfError;
 
     #[test]
     fn invalid_spf1() {
@@ -97,8 +97,10 @@ mod invalid_spf_from_str {
         let is_valid = spf.parse();
         assert_eq!(is_valid.is_err(), true);
         let err = is_valid.err().unwrap();
+        assert_eq!(err.is_spf_error(), true);
+        assert_eq!(err.is_invalid_source(), true);
         assert_eq!(err.to_string(), "Source string not valid.");
-        assert_eq!(err, SpfErrorType::InvalidSource);
+        assert_eq!(err, SpfError::InvalidSource);
     }
     #[test]
     fn invalid_spf2() {
@@ -108,25 +110,25 @@ mod invalid_spf_from_str {
         assert_eq!(is_valid.is_err(), true);
     }
     #[test]
-    fn invalid_spf2_pra() {
+    fn valid_spf2_pra() {
         let input = "spf2.0/pra a";
         let mut spf = Spf::from_str(&input);
         assert_eq!(spf.parse().is_ok(), true);
     }
     #[test]
-    fn invalid_spf2_mfrom() {
+    fn valid_spf2_mfrom() {
         let input = "spf2.0/mfrom a";
         let mut spf = Spf::from_str(&input);
         assert_eq!(spf.parse().is_ok(), true);
     }
     #[test]
-    fn invalid_spf2_mfrom_pra() {
+    fn valid_spf2_mfrom_pra() {
         let input = "spf2.0/mfrom,pra a";
         let mut spf = Spf::from_str(&input);
         assert_eq!(spf.parse().is_ok(), true);
     }
     #[test]
-    fn invalid_spf2_pra_mfrom() {
+    fn valid_spf2_pra_mfrom() {
         let input = "spf2.0/pra,mfrom a";
         let mut spf = Spf::from_str(&input);
         assert_eq!(spf.parse().is_ok(), true);
@@ -145,6 +147,7 @@ mod invalid_ip {
         let err_mesg = spf.parse();
         assert_eq!(err_mesg.is_err(), true);
         let error_type = err_mesg.unwrap_err();
+        assert_eq!(error_type.is_invalid_ip_addr(), true);
         assert_eq!(error_type.to_string(), "invalid address: 203.32.10.0/33");
     }
     #[test]

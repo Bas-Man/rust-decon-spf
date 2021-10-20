@@ -2,7 +2,7 @@ use ipnetwork::IpNetworkError;
 
 /// A list of expected possible errors for SPF records.
 #[derive(Debug, PartialEq)]
-pub enum SpfErrorType {
+pub enum SpfError {
     /// Source is invalid, SPF struct was not created using `from_str()`
     InvalidSource,
     /// Source string length exceeds 255 Characters
@@ -20,38 +20,38 @@ pub enum SpfErrorType {
     /// Network Address is not valid Error.
     InvalidIPAddr(IpNetworkError),
 }
-impl std::fmt::Display for SpfErrorType {
+impl std::fmt::Display for SpfError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SpfErrorType::InvalidSource => write!(f, "Source string not valid."),
-            SpfErrorType::SourceLengthExceeded => write!(f, "Spf record exceeds 255 characters."),
-            SpfErrorType::LookupLimitExceeded => write!(f, "Too many DNS lookups."),
-            SpfErrorType::HasNotBeenParsed => write!(f, "Source string has not been parsed."),
-            SpfErrorType::WhiteSpaceSyntaxError => {
+            SpfError::InvalidSource => write!(f, "Source string not valid."),
+            SpfError::SourceLengthExceeded => write!(f, "Spf record exceeds 255 characters."),
+            SpfError::LookupLimitExceeded => write!(f, "Too many DNS lookups."),
+            SpfError::HasNotBeenParsed => write!(f, "Source string has not been parsed."),
+            SpfError::WhiteSpaceSyntaxError => {
                 write!(
                     f,
                     "Spf contains two or more consecutive whitespace characters."
                 )
             }
-            SpfErrorType::InvalidSPF => write!(f, "Spf record is invalid."),
-            SpfErrorType::RedirectWithAllMechanism => {
+            SpfError::InvalidSPF => write!(f, "Spf record is invalid."),
+            SpfError::RedirectWithAllMechanism => {
                 write!(f, "Redirect with unexpected 'All' Mechanism")
             }
-            SpfErrorType::InvalidIPAddr(err) => write!(f, "{}", err.to_string()),
+            SpfError::InvalidIPAddr(err) => write!(f, "{}", err.to_string()),
         }
     }
 }
 
-impl From<IpNetworkError> for SpfErrorType {
+impl From<IpNetworkError> for SpfError {
     fn from(err: IpNetworkError) -> Self {
-        SpfErrorType::InvalidIPAddr(err)
+        SpfError::InvalidIPAddr(err)
     }
 }
 
-impl std::error::Error for SpfErrorType {}
+impl std::error::Error for SpfError {}
 
-impl SpfErrorType {
-    /// Returns `true` if the SpfError is any of those listed [`SpfErrorType`](SpfErrorType).
+impl SpfError {
+    /// Returns `true` if the SpfError is any of those listed [`SpfError`](SpfError).
     pub fn is_spf_error(&self) -> bool {
         matches!(self, Self::InvalidSource)
             || matches!(self, Self::SourceLengthExceeded)
@@ -93,37 +93,37 @@ impl SpfErrorType {
 
 #[test]
 fn is_any_spf_error() {
-    let err = SpfErrorType::InvalidSource;
+    let err = SpfError::InvalidSource;
     assert_eq!(err.is_spf_error(), true);
 }
 #[test]
 fn is_invalid_source() {
-    let err = SpfErrorType::InvalidSource;
+    let err = SpfError::InvalidSource;
     assert_eq!(err.is_invalid_source(), true);
 }
 #[test]
 fn is_source_length_exceeded() {
-    let err = SpfErrorType::SourceLengthExceeded;
+    let err = SpfError::SourceLengthExceeded;
     assert_eq!(err.is_source_length_exceeded(), true);
 }
 #[test]
 fn is_lookup_limit_exceeded() {
-    let err = SpfErrorType::LookupLimitExceeded;
+    let err = SpfError::LookupLimitExceeded;
     assert_eq!(err.is_lookup_limit_exceeded(), true)
 }
 #[test]
 fn is_has_not_been_parsed() {
-    let err = SpfErrorType::HasNotBeenParsed;
+    let err = SpfError::HasNotBeenParsed;
     assert_eq!(err.is_has_not_been_parsed(), true)
 }
 #[test]
 fn is_invalid_spf() {
-    let err = SpfErrorType::InvalidSPF;
+    let err = SpfError::InvalidSPF;
     assert_eq!(err.is_invalid_spf(), true)
 }
 #[test]
 fn is_redirect_with_all_mechanism() {
-    let err = SpfErrorType::RedirectWithAllMechanism;
+    let err = SpfError::RedirectWithAllMechanism;
     assert_eq!(err.is_redirect_with_all_mechanism(), true)
 }
 #[test]
@@ -131,6 +131,6 @@ fn is_invalid_ip_addr() {
     let bad_ip = "203.32.160.0/33"
         .parse::<ipnetwork::IpNetwork>()
         .unwrap_err();
-    let err = SpfErrorType::InvalidIPAddr(bad_ip);
+    let err = SpfError::InvalidIPAddr(bad_ip);
     assert_eq!(err.is_invalid_ip_addr(), true)
 }
