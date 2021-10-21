@@ -16,6 +16,9 @@ use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use ipnetwork::IpNetwork;
 use std::{convert::TryFrom, str::FromStr};
 
+/// This is the maximnum number of characters that an Spf Record can store.
+const MAX_SPF_STRING_LENGTH: usize = 255;
+
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug)]
@@ -67,6 +70,25 @@ impl Default for Spf {
     }
 }
 
+/// Creates an `Spf Stuct` by parsing a spf string.
+///
+/// # examples
+///
+///```rust
+/// use decon_spf::spf::Spf;
+/// use decon_spf::spf::SpfError;
+/// // Successful
+/// let input = "v=spf1 a mx -all";
+/// let spf: Spf = input.to_string().parse().unwrap();
+/// assert_eq!(spf.to_string(), input);
+///
+/// // Additional Space between `A` and `MX`
+/// let bad_input = "v=spf1 a   mx -all";
+/// let err: SpfError = bad_input.to_string().parse::<Spf>().unwrap_err();
+/// assert_eq!(err.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
+/// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
+///```
+///
 impl FromStr for Spf {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -74,7 +96,7 @@ impl FromStr for Spf {
         if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
             return Err(SpfError::InvalidSource);
         };
-        if source.len() > 255 {
+        if source.len() > MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
         if helpers::spf_has_consecutive_whitespace(source.as_str()) {
@@ -416,7 +438,7 @@ impl Spf {
     /// # Note: Experimential
     /// *Do not use.*
     /// Very rudementary validation check.
-    /// - Will fail if the length of `source` is more than 255 characters See:
+    /// - Will fail if the length of `source` is more than MAX_SPF_STRING_LENGTH characters See:
     /// [`SourceLengthExceeded`](SpfError::SourceLengthExceeded)
     /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
     /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfError::LookupLimitExceeded)
@@ -424,7 +446,7 @@ impl Spf {
     #[deprecated(note = "This is expected to be deprecated.")]
     pub fn try_validate(&mut self) -> Result<(), SpfError> {
         if self.from_src {
-            if self.source.len() > 255 {
+            if self.source.len() > MAX_SPF_STRING_LENGTH {
                 return Err(SpfError::SourceLengthExceeded);
             } else if !self.was_parsed {
                 return Err(SpfError::HasNotBeenParsed);

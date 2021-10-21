@@ -23,11 +23,9 @@
 //! use decon_spf::spf::Spf;
 //! let test_str = "v=spf1 a mx ~all";
 //! // Parsing updates information in the Spf Struct; it needs to be mutable.
-//! let mut spf = Spf::from_str(test_str);
+//! let spf: Spf = test_str.to_string().parse().unwrap();
 //! // Parse test_str and populate Spf Struct.  
-//! // Parse returns a Result<(), SpfErrorType> allowing for some error checking.  
-//! let check = spf.parse();
-//! assert_eq!(check.is_ok(), true);
+//! // Parse returns a Result<Spf, SpfError> allowing for some error checking.  
 //! // spf should be of v_1 form
 //! assert_eq!(spf.is_v1(), true);
 //! // There should be no ip4 or ip6 data

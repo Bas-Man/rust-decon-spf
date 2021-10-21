@@ -8,8 +8,7 @@ mod parse {
     fn test_ip6_valid() {
         let input = "v=spf1 ip6:2001:4860:4000::/36 ~all";
 
-        let mut spf = Spf::from_str(&input.to_string());
-        let _ = spf.parse();
+        let spf: Spf = input.to_string().parse().unwrap();
         assert!(spf.ip6().is_some());
         assert_eq!(spf.ip6().unwrap()[0].is_pass(), true);
         assert_eq!(spf.ip6().unwrap()[0].raw(), "2001:4860:4000::/36");
