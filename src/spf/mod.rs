@@ -126,7 +126,7 @@ impl FromStr for Spf {
                 spf.is_redirected = true;
             } else if record.contains("include:") {
                 // Match an include
-                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
                 for item in record.rsplit(":") {
                     vec_of_includes.push(Mechanism::new_include(
                         qualifier_and_modified_str.0,
@@ -136,7 +136,7 @@ impl FromStr for Spf {
                 }
             } else if record.contains("exists:") {
                 // Match exists
-                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'e');
+                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'e');
                 for item in record.rsplit(":") {
                     vec_of_exists.push(Mechanism::new_exists(
                         qualifier_and_modified_str.0,
@@ -146,7 +146,7 @@ impl FromStr for Spf {
                 }
             } else if record.contains("ip4:") {
                 // Match an ip4
-                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
                     let valid_ip4 = raw_ip4.parse();
                     if valid_ip4.is_ok() {
@@ -161,7 +161,7 @@ impl FromStr for Spf {
                 }
             } else if record.contains("ip6:") {
                 // Match an ip6
-                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
                     let valid_ip6 = raw_ip6.parse();
                     if valid_ip6.is_ok() {
@@ -177,7 +177,7 @@ impl FromStr for Spf {
             } else if record.ends_with("all") {
                 // deal with all if present
                 spf.all = Some(Mechanism::new_all(
-                    return_and_remove_qualifier(record, 'a').0,
+                    helpers::return_and_remove_qualifier(record, 'a').0,
                 ))
             // Handle A, MX and PTR types.
             } else if let Some(a_mechanism) = helpers::capture_matches(record, Kind::A) {
@@ -572,71 +572,4 @@ impl Spf {
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
     }
-}
-#[doc(hidden)]
-// Check if the initial character in the string `record` matches `c`
-// If they do no match then return the initial character
-// if c matches first character of record, we can `+`, a blank modiifer equates to `+`
-fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, &str) {
-    // Returns a tuple of (qualifier, &str)
-    // &str will have had the qualifier character removed if it existed. The &str will be unchanged
-    // if the qualifier was not present
-    if c != record.chars().nth(0).unwrap() {
-        // qualifier exists. return tuple of qualifier and `record` with qualifier removed.
-        (
-            helpers::char_to_qualifier(record.chars().nth(0).unwrap()),
-            remove_qualifier(record),
-        )
-    } else {
-        // qualifier does not exist, default to `+` and return unmodified `record`
-        (Qualifier::Pass, record)
-    }
-}
-#[test]
-fn return_and_remove_qualifier_no_qualifier() {
-    let source = "no prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Pass, c);
-    assert_eq!(source, new_str);
-}
-#[test]
-fn return_and_remove_qualifier_pass() {
-    let source = "+prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Pass, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_fail() {
-    let source = "-prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Fail, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_softfail() {
-    let source = "~prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::SoftFail, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_neutral() {
-    let source = "?prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Neutral, c);
-    assert_eq!("prefix", new_str);
-}
-#[doc(hidden)]
-fn remove_qualifier(record: &str) -> &str {
-    // Remove leading (+,-,~,?) character and return an updated str
-    let mut chars = record.chars();
-    chars.next();
-    chars.as_str()
-}
-#[test]
-fn test_remove_qualifier() {
-    let test_str = "abc";
-    let result = remove_qualifier(test_str);
-    assert_eq!(result, "bc");
 }

@@ -99,3 +99,71 @@ pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> 
     }
     partial_spf
 }
+
+#[doc(hidden)]
+// Check if the initial character in the string `record` matches `c`
+// If they do no match then return the initial character
+// if c matches first character of record, we can `+`, a blank modiifer equates to `+`
+pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, &str) {
+    // Returns a tuple of (qualifier, &str)
+    // &str will have had the qualifier character removed if it existed. The &str will be unchanged
+    // if the qualifier was not present
+    if c != record.chars().nth(0).unwrap() {
+        // qualifier exists. return tuple of qualifier and `record` with qualifier removed.
+        (
+            char_to_qualifier(record.chars().nth(0).unwrap()),
+            remove_qualifier(record),
+        )
+    } else {
+        // qualifier does not exist, default to `+` and return unmodified `record`
+        (Qualifier::Pass, record)
+    }
+}
+#[test]
+fn return_and_remove_qualifier_no_qualifier() {
+    let source = "no prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!(Qualifier::Pass, c);
+    assert_eq!(source, new_str);
+}
+#[test]
+fn return_and_remove_qualifier_pass() {
+    let source = "+prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!(Qualifier::Pass, c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn return_and_remove_qualifier_fail() {
+    let source = "-prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!(Qualifier::Fail, c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn return_and_remove_qualifier_softfail() {
+    let source = "~prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!(Qualifier::SoftFail, c);
+    assert_eq!("prefix", new_str);
+}
+#[test]
+fn return_and_remove_qualifier_neutral() {
+    let source = "?prefix";
+    let (c, new_str) = return_and_remove_qualifier(source, 'n');
+    assert_eq!(Qualifier::Neutral, c);
+    assert_eq!("prefix", new_str);
+}
+#[doc(hidden)]
+pub(crate) fn remove_qualifier(record: &str) -> &str {
+    // Remove leading (+,-,~,?) character and return an updated str
+    let mut chars = record.chars();
+    chars.next();
+    chars.as_str()
+}
+#[test]
+fn test_remove_qualifier() {
+    let test_str = "abc";
+    let result = remove_qualifier(test_str);
+    assert_eq!(result, "bc");
+}
