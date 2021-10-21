@@ -22,9 +22,8 @@ fn main() {
 
     let txt_response = resolver.txt_lookup(query);
 
-    let mut spf_record = display_txt(&query, &txt_response);
+    let spf_record = display_txt(&query, &txt_response);
     println!("\nDecontructing SPF Record");
-    let _ = spf_record.parse();
     println!("{:?}", spf_record);
     println!("SPF1: {}\n", spf_record.source());
     if spf_record.includes().is_some() {
@@ -73,7 +72,7 @@ fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
                 println!("TXT Record {}:", i);
                 println!("{}", &record.to_string());
                 if record.to_string().starts_with("v=spf1") {
-                    spf_record = Spf::from_str(&record.to_string());
+                    spf_record = record.to_string().parse().unwrap();
                 }
                 i = i + 1;
             }
