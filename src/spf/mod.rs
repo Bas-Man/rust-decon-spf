@@ -14,6 +14,7 @@ pub use crate::spf::errors::SpfError;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use ipnetwork::IpNetwork;
+use std::{convert::TryFrom, str::FromStr};
 
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
@@ -66,6 +67,138 @@ impl Default for Spf {
     }
 }
 
+impl FromStr for Spf {
+    type Err = SpfError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let source = String::from(s);
+        if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
+            return Err(SpfError::InvalidSource);
+        };
+        if source.len() > 255 {
+            return Err(SpfError::SourceLengthExceeded);
+        };
+        if helpers::spf_has_consecutive_whitespace(source.as_str()) {
+            return Err(SpfError::WhiteSpaceSyntaxError);
+        };
+        // Basic Checks are ok.
+        let mut spf = Spf::new();
+        // Setup Vecs
+        let records = source.split_whitespace();
+        let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
+        let mut vec_of_ip6: Vec<Mechanism<IpNetwork>> = Vec::new();
+        let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+        for record in records {
+            // Consider ensuring we do this once at least and then skip
+            if record.contains("v=spf1") || record.starts_with("spf2.0") {
+                spf.version = record.to_string();
+            } else if record.contains("redirect=") {
+                // Match a redirect
+                let items = record.rsplit("=");
+                for item in items {
+                    spf.redirect = Some(Mechanism::new_redirect(Qualifier::Pass, item.to_string()));
+                    break;
+                }
+                spf.is_redirected = true;
+            } else if record.contains("include:") {
+                // Match an include
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                for item in record.rsplit(":") {
+                    vec_of_includes.push(Mechanism::new_include(
+                        qualifier_and_modified_str.0,
+                        item.to_string(),
+                    ));
+                    break; // skip the 'include:' side of the split
+                }
+            } else if record.contains("exists:") {
+                // Match exists
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'e');
+                for item in record.rsplit(":") {
+                    vec_of_exists.push(Mechanism::new_exists(
+                        qualifier_and_modified_str.0,
+                        item.to_string(),
+                    ));
+                    break; // Skip the 'exists:' site of the split
+                }
+            } else if record.contains("ip4:") {
+                // Match an ip4
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
+                    let valid_ip4 = raw_ip4.parse();
+                    if valid_ip4.is_ok() {
+                        // Safe to build Mechanism.
+                        let network =
+                            Mechanism::new_ip4(qualifier_and_modified_str.0, valid_ip4.unwrap());
+                        vec_of_ip4.push(network);
+                    } else {
+                        // The ip4 string was not valid. Return Err()
+                        return Err(SpfError::InvalidIPAddr(valid_ip4.unwrap_err()));
+                    }
+                }
+            } else if record.contains("ip6:") {
+                // Match an ip6
+                let qualifier_and_modified_str = return_and_remove_qualifier(record, 'i');
+                if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
+                    let valid_ip6 = raw_ip6.parse();
+                    if valid_ip6.is_ok() {
+                        // Safe to build Mechanism
+                        let network =
+                            Mechanism::new_ip6(qualifier_and_modified_str.0, valid_ip6.unwrap());
+                        vec_of_ip6.push(network);
+                    } else {
+                        // The ip6 string was not valid. Return Err()
+                        return Err(SpfError::InvalidIPAddr(valid_ip6.unwrap_err()));
+                    }
+                }
+            } else if record.ends_with("all") {
+                // deal with all if present
+                spf.all = Some(Mechanism::new_all(
+                    return_and_remove_qualifier(record, 'a').0,
+                ))
+            // Handle A, MX and PTR types.
+            } else if let Some(a_mechanism) = helpers::capture_matches(record, Kind::A) {
+                vec_of_a.push(a_mechanism);
+            } else if let Some(mx_mechanism) = helpers::capture_matches(record, Kind::MX) {
+                vec_of_mx.push(mx_mechanism);
+            } else if let Some(ptr_mechanism) = helpers::capture_matches(record, Kind::Ptr) {
+                spf.ptr = Some(ptr_mechanism);
+            }
+        }
+        // Move vec_of_* int the SPF struct
+        if !vec_of_includes.is_empty() {
+            spf.include = Some(vec_of_includes);
+        };
+        if !vec_of_ip4.is_empty() {
+            spf.ip4 = Some(vec_of_ip4);
+        };
+        if !vec_of_ip6.is_empty() {
+            spf.ip6 = Some(vec_of_ip6);
+        };
+        if !vec_of_a.is_empty() {
+            spf.a = Some(vec_of_a);
+        }
+        if !vec_of_mx.is_empty() {
+            spf.mx = Some(vec_of_mx);
+        }
+        if !vec_of_exists.is_empty() {
+            spf.exists = Some(vec_of_exists);
+        }
+        spf.was_parsed = true;
+        spf.is_valid = true;
+        spf.source = source;
+        Ok(spf)
+    }
+}
+
+impl TryFrom<&str> for Spf {
+    type Error = SpfError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Spf::from_str(s)
+    }
+}
 impl Spf {
     /// Create a new empty Spf struct.
     pub fn new() -> Self {
@@ -84,7 +217,7 @@ impl Spf {
     /// let spf = Spf::from_str(&source_str);
     /// ```
     ///
-    pub fn from_str(str: &str) -> Self {
+    pub fn from_str2(str: &str) -> Self {
         Self {
             source: str.clone().to_string(),
             version: String::new(),
