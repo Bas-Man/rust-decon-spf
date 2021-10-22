@@ -1,9 +1,52 @@
 //! A struct created either by having an existing SPF record `parsed` or programmatically created.
 
-use crate::mechanism::Kind;
-use crate::mechanism::Qualifier;
-use ipnetwork::IpNetwork;
-use ipnetwork::IpNetworkError;
+use crate::helpers;
+use crate::mechanism::{Kind, Qualifier};
+use ipnetwork::{IpNetwork, IpNetworkError};
+use std::{convert::TryFrom, str::FromStr};
+
+/// Error message when unable to contrsuct a new Mechanism.
+#[derive(Debug, PartialEq)]
+pub enum MechanismError {
+    NotValidMechanismFormat(String),
+    NotIP4Network(String),
+    NotIP6Network(String),
+    NotValidIPNetwork(String),
+}
+
+impl std::fmt::Display for MechanismError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MechanismError::NotValidMechanismFormat(mesg) => {
+                write!(f, "{} does not conform to any Mechanism format.", mesg)
+            }
+            MechanismError::NotIP4Network(mesg) => {
+                write!(f, "Was given ip4:{}. This is not an ip4 network.", mesg)
+            }
+            MechanismError::NotIP6Network(mesg) => {
+                write!(f, "Was given ip6:{}. This is not an ip6 network.", mesg)
+            }
+            MechanismError::NotValidIPNetwork(mesg) => {
+                write!(f, "{}.", mesg)
+            }
+        }
+    }
+}
+
+impl MechanismError {
+    pub fn is_invalid_format(&self) -> bool {
+        matches!(self, Self::NotValidMechanismFormat(_))
+    }
+    pub fn is_not_ip4_network(&self) -> bool {
+        matches!(self, Self::NotIP4Network(_))
+    }
+    pub fn is_not_ip6_network(&self) -> bool {
+        matches!(self, Self::NotIP6Network(_))
+    }
+    pub fn is_invalid_ip(&self) -> bool {
+        matches!(self, Self::NotValidIPNetwork(_))
+    }
+}
 
 /// Stores its `Kind`, `Qualifier` and its `Value`
 #[derive(Debug, Clone)]
@@ -11,6 +54,88 @@ pub struct Mechanism<T> {
     kind: Kind,
     qualifier: Qualifier,
     rrdata: Option<T>,
+}
+
+impl std::error::Error for MechanismError {}
+
+impl FromStr for Mechanism<String> {
+    type Err = MechanismError;
+
+    fn from_str(s: &str) -> Result<Mechanism<String>, Self::Err> {
+        if s.contains("redirect=") {
+            let items = s.rsplit("=");
+            for item in items {
+                return Ok(Mechanism::new(
+                    Kind::Redirect,
+                    Qualifier::Pass,
+                    Some(item.to_string()),
+                ));
+            }
+        } else if s.contains("include:") {
+            let qualifier_and_modified_str = helpers::return_and_remove_qualifier(s, 'i');
+            for item in s.rsplit(":") {
+                return Ok(Mechanism::new_include(
+                    qualifier_and_modified_str.0,
+                    item.to_string(),
+                ));
+            }
+        }
+        Err(MechanismError::NotValidMechanismFormat(s.to_string()))
+    }
+}
+
+impl TryFrom<&str> for Mechanism<String> {
+    type Error = MechanismError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Mechanism::from_str(s)
+    }
+}
+
+impl FromStr for Mechanism<IpNetwork> {
+    type Err = MechanismError;
+
+    fn from_str(s: &str) -> Result<Mechanism<IpNetwork>, Self::Err> {
+        if s.contains("ip4:") || s.contains("ip6:") {
+            let mut kind = Kind::IpV4;
+            let mut raw_ip: Option<&str> = None;
+            let qualifier_and_modified_str = helpers::return_and_remove_qualifier(s, 'i');
+            if qualifier_and_modified_str.1.contains("ip4") {
+                kind = Kind::IpV4;
+                raw_ip = qualifier_and_modified_str.1.strip_prefix("ip4:");
+            } else if qualifier_and_modified_str.1.contains("ip6") {
+                kind = Kind::IpV6;
+                raw_ip = qualifier_and_modified_str.1.strip_prefix("ip6:")
+            };
+            let parsed = raw_ip.unwrap().parse();
+            if parsed.is_ok() {
+                let ip: IpNetwork = parsed.unwrap();
+                if ip.is_ipv4() && kind.is_ip_v4() {
+                    return Ok(Mechanism::new_ip4(qualifier_and_modified_str.0, ip));
+                } else if ip.is_ipv4() && !kind.is_ip_v4() {
+                    return Err(MechanismError::NotIP6Network(ip.to_string()));
+                } else if ip.is_ipv6() && kind.is_ip_v6() {
+                    return Ok(Mechanism::new_ip6(qualifier_and_modified_str.0, ip));
+                } else if ip.is_ipv6() && !kind.is_ip_v6() {
+                    return Err(MechanismError::NotIP4Network(ip.to_string()));
+                };
+            } else {
+                return Err(MechanismError::NotValidIPNetwork(
+                    parsed.unwrap_err().to_string(),
+                ));
+            };
+        }
+        // Catch all. This is not an ip4 or ip6 spf string.
+        Err(MechanismError::NotValidMechanismFormat(s.to_string()))
+    }
+}
+
+impl TryFrom<&str> for Mechanism<IpNetwork> {
+    type Error = MechanismError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Mechanism::from_str(s)
+    }
 }
 
 impl<T> Mechanism<T> {

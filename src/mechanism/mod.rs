@@ -8,4 +8,5 @@ mod tests;
 
 pub use kind::Kind;
 pub use mechanism::Mechanism;
+pub use mechanism::MechanismError;
 pub use qualifier::Qualifier;
