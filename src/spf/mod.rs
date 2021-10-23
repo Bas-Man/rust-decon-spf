@@ -8,7 +8,8 @@ mod validate;
 
 use crate::helpers;
 use crate::mechanism::Kind;
-use crate::mechanism::Mechanism;
+//use crate::mechanism::Mechanism;
+use crate::mechanism::MechanismImpl;
 use crate::mechanism::Qualifier;
 pub use crate::spf::errors::SpfError;
 // Make this public in the future
@@ -26,16 +27,16 @@ pub struct Spf {
     source: String,
     version: String,
     from_src: bool,
-    redirect: Option<Mechanism<String>>,
+    redirect: Option<MechanismImpl<String>>,
     is_redirected: bool,
-    a: Option<Vec<Mechanism<String>>>,
-    mx: Option<Vec<Mechanism<String>>>,
-    include: Option<Vec<Mechanism<String>>>,
-    ip4: Option<Vec<Mechanism<IpNetwork>>>,
-    ip6: Option<Vec<Mechanism<IpNetwork>>>,
-    ptr: Option<Mechanism<String>>,
-    exists: Option<Vec<Mechanism<String>>>,
-    all: Option<Mechanism<String>>,
+    a: Option<Vec<MechanismImpl<String>>>,
+    mx: Option<Vec<MechanismImpl<String>>>,
+    include: Option<Vec<MechanismImpl<String>>>,
+    ip4: Option<Vec<MechanismImpl<IpNetwork>>>,
+    ip6: Option<Vec<MechanismImpl<IpNetwork>>>,
+    ptr: Option<MechanismImpl<String>>,
+    exists: Option<Vec<MechanismImpl<String>>>,
+    all: Option<MechanismImpl<String>>,
     was_parsed: bool,
     was_validated: bool,
     is_valid: bool,
@@ -75,8 +76,8 @@ impl Default for Spf {
 /// # examples
 ///
 ///```rust
-/// use decon_spf::spf::Spf;
-/// use decon_spf::spf::SpfError;
+/// use decon_spf::Spf;
+/// use decon_spf::SpfError;
 /// // Successful
 /// let input = "v=spf1 a mx -all";
 /// let spf: Spf = input.to_string().parse().unwrap();
@@ -106,29 +107,32 @@ impl FromStr for Spf {
         let mut spf = Spf::new();
         // Setup Vecs
         let records = source.split_whitespace();
-        let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
-        let mut vec_of_ip6: Vec<Mechanism<IpNetwork>> = Vec::new();
-        let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_includes: Vec<MechanismImpl<String>> = Vec::new();
+        let mut vec_of_ip4: Vec<MechanismImpl<IpNetwork>> = Vec::new();
+        let mut vec_of_ip6: Vec<MechanismImpl<IpNetwork>> = Vec::new();
+        let mut vec_of_a: Vec<MechanismImpl<String>> = Vec::new();
+        let mut vec_of_mx: Vec<MechanismImpl<String>> = Vec::new();
+        let mut vec_of_exists: Vec<MechanismImpl<String>> = Vec::new();
         for record in records {
             // Consider ensuring we do this once at least and then skip
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
                 // Match a redirect
-                let items = record.rsplit("=");
+                let items = record.rsplit('=');
                 for item in items {
-                    spf.redirect = Some(Mechanism::new_redirect(Qualifier::Pass, item.to_string()));
+                    spf.redirect = Some(MechanismImpl::new_redirect(
+                        Qualifier::Pass,
+                        item.to_string(),
+                    ));
                     break;
                 }
                 spf.is_redirected = true;
             } else if record.contains("include:") {
                 // Match an include
                 let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
-                for item in record.rsplit(":") {
-                    vec_of_includes.push(Mechanism::new_include(
+                for item in record.rsplit(':') {
+                    vec_of_includes.push(MechanismImpl::new_include(
                         qualifier_and_modified_str.0,
                         item.to_string(),
                     ));
@@ -137,8 +141,8 @@ impl FromStr for Spf {
             } else if record.contains("exists:") {
                 // Match exists
                 let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'e');
-                for item in record.rsplit(":") {
-                    vec_of_exists.push(Mechanism::new_exists(
+                for item in record.rsplit(':') {
+                    vec_of_exists.push(MechanismImpl::new_exists(
                         qualifier_and_modified_str.0,
                         item.to_string(),
                     ));
@@ -151,8 +155,10 @@ impl FromStr for Spf {
                     let valid_ip4 = raw_ip4.parse();
                     if valid_ip4.is_ok() {
                         // Safe to build Mechanism.
-                        let network =
-                            Mechanism::new_ip4(qualifier_and_modified_str.0, valid_ip4.unwrap());
+                        let network = MechanismImpl::new_ip4(
+                            qualifier_and_modified_str.0,
+                            valid_ip4.unwrap(),
+                        );
                         vec_of_ip4.push(network);
                     } else {
                         // The ip4 string was not valid. Return Err()
@@ -166,8 +172,10 @@ impl FromStr for Spf {
                     let valid_ip6 = raw_ip6.parse();
                     if valid_ip6.is_ok() {
                         // Safe to build Mechanism
-                        let network =
-                            Mechanism::new_ip6(qualifier_and_modified_str.0, valid_ip6.unwrap());
+                        let network = MechanismImpl::new_ip6(
+                            qualifier_and_modified_str.0,
+                            valid_ip6.unwrap(),
+                        );
                         vec_of_ip6.push(network);
                     } else {
                         // The ip6 string was not valid. Return Err()
@@ -176,7 +184,7 @@ impl FromStr for Spf {
                 }
             } else if record.ends_with("all") {
                 // deal with all if present
-                spf.all = Some(Mechanism::new_all(
+                spf.all = Some(MechanismImpl::new_all(
                     helpers::return_and_remove_qualifier(record, 'a').0,
                 ))
             // Handle A, MX and PTR types.
@@ -271,7 +279,7 @@ impl Spf {
         &self.version
     }
     /// Append a Redirect Mechanism to the Spf Struct.
-    fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_redirect(&mut self, mechanism: MechanismImpl<String>) {
         self.redirect = Some(mechanism);
         self.is_redirected = true;
         if self.all.is_some() {
@@ -284,11 +292,11 @@ impl Spf {
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
-    /// use decon_spf::spf::Spf;
+    /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// new_spf_record.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::new_a(Qualifier::Pass, None));
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                                      "203.32.160.0/23".parse().unwrap()));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
@@ -312,88 +320,66 @@ impl Spf {
         }
     }
 
-    fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) {
-        let mut vec: Vec<Mechanism<String>> = Vec::new();
-        vec.push(mechanism);
-        if self.a.is_none() {
-            self.a = Some(vec);
+    fn append_mechanism_of_a(&mut self, mechanism: MechanismImpl<String>) {
+        if let Some(a) = &mut self.a {
+            a.push(mechanism);
         } else {
-            self.a.as_mut().unwrap().append(&mut vec);
+            self.a = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) {
-        let mut vec: Vec<Mechanism<String>> = Vec::new();
-        vec.push(mechanism);
-        if self.mx.is_none() {
-            // Empty vec. Just attach the new vec
-            self.mx = Some(vec);
+    fn append_mechanism_of_mx(&mut self, mechanism: MechanismImpl<String>) {
+        if let Some(mx) = &mut self.mx {
+            mx.push(mechanism);
         } else {
-            // Already has a vec of values. Append to it.
-            self.mx.as_mut().unwrap().append(&mut vec);
+            self.mx = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) {
-        let mut vec: Vec<Mechanism<String>> = Vec::new();
-        vec.push(mechanism);
-        if self.include.is_none() {
-            // Empty vec. Just attach the new vec
-            self.include = Some(vec);
+    fn append_mechanism_of_include(&mut self, mechanism: MechanismImpl<String>) {
+        if let Some(include) = &mut self.include {
+            include.push(mechanism);
         } else {
-            // Already has a vec of values. Append to it.
-            self.include.as_mut().unwrap().append(&mut vec);
+            self.include = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) {
-        let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
-        vec.push(mechanism);
-        if self.ip4.is_none() {
-            // Empty vec. Just attach the new vec
-            self.ip4 = Some(vec);
+    fn append_mechanism_of_ip4(&mut self, mechanism: MechanismImpl<IpNetwork>) {
+        if let Some(ip4) = &mut self.ip4 {
+            ip4.push(mechanism);
         } else {
-            // Already has a vec of values. Append to it.
-            self.ip4.as_mut().unwrap().append(&mut vec);
+            self.ip4 = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) {
-        let mut vec: Vec<Mechanism<IpNetwork>> = Vec::new();
-        vec.push(mechanism);
-        if self.ip6.is_none() {
-            // Empty vec. Just attach the new vec
-            self.ip6 = Some(vec);
+    fn append_mechanism_of_ip6(&mut self, mechanism: MechanismImpl<IpNetwork>) {
+        if let Some(ip6) = &mut self.ip6 {
+            ip6.push(mechanism);
         } else {
-            // Already has a vec of values. Append to it.
-            self.ip6.as_mut().unwrap().append(&mut vec);
+            self.ip6 = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) {
-        let mut vec: Vec<Mechanism<String>> = Vec::new();
-        vec.push(mechanism);
-        if self.exists.is_none() {
-            // Empty vec. Just attach the new vec
-            self.exists = Some(vec);
+    fn append_mechanism_of_exists(&mut self, mechanism: MechanismImpl<String>) {
+        if let Some(exists) = &mut self.exists {
+            exists.push(mechanism);
         } else {
-            // Already has a vec of values. Append to it.
-            self.exists.as_mut().unwrap().append(&mut vec);
+            self.exists = Some(vec![mechanism]);
         }
     }
-    fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_ptr(&mut self, mechanism: MechanismImpl<String>) {
         self.ptr = Some(mechanism);
     }
-    fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) {
+    fn append_mechanism_of_all(&mut self, mechanism: MechanismImpl<String>) {
         if self.redirect.is_none() {
             self.all = Some(mechanism);
         }
     }
-    /// Appends the passed Mechanism<String> to the SPF struct.
+    /// Appends the passed MechanismImpl<String> to the SPF struct.
     ///
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::spf::Spf;
+    /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
     /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
-    ///                                 String::from("_spf.example.com")));
+    ///                                 "_spf.example.com"));
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
@@ -401,7 +387,7 @@ impl Spf {
     /// # Note:
     /// If The Spf is already set as `Redirect` trying to append an `All`
     /// Mechanism will have no affect.
-    pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
+    pub fn append_mechanism(&mut self, mechanism: MechanismImpl<String>) {
         match mechanism.kind() {
             Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
             Kind::A => self.append_mechanism_of_a(mechanism),
@@ -413,12 +399,12 @@ impl Spf {
             _ => unreachable!(),
         }
     }
-    /// Appends the passed Mechanism<IpNetwork> to the SPF struct.
+    /// Appends the passed MechanismImpl<IpNetwork> to the SPF struct.
     ///
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::spf::Spf;
+    /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
@@ -426,7 +412,7 @@ impl Spf {
     /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
-    pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
+    pub fn append_ip_mechanism(&mut self, mechanism: MechanismImpl<IpNetwork>) {
         match mechanism.kind() {
             Kind::IpV4 => self.append_mechanism_of_ip4(mechanism),
             Kind::IpV6 => self.append_mechanism_of_ip6(mechanism),
@@ -456,7 +442,7 @@ impl Spf {
         if self.redirect().is_some() && self.all().is_some() {
             return Err(SpfError::RedirectWithAllMechanism);
         }
-        if validate::check_lookup_count(&self) > 10 {
+        if validate::check_lookup_count(self) > 10 {
             return Err(SpfError::LookupLimitExceeded);
         }
         self.is_valid = true;
@@ -474,9 +460,9 @@ impl Spf {
             SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
         };
         if res.is_ok() {
-            return SpfValidationResult::Valid(res.unwrap());
+            SpfValidationResult::Valid(res.unwrap())
         } else {
-            return SpfValidationResult::InValid(res.unwrap_err());
+            SpfValidationResult::InValid(res.unwrap_err())
         }
     }
 
@@ -502,21 +488,19 @@ impl Spf {
             spf.push_str(helpers::build_spf_str(self.exists()).as_str());
         }
         if self.ptr().is_some() {
-            spf.push_str(" ");
+            spf.push(' ');
             spf.push_str(self.ptr().unwrap().to_string().as_str());
         }
         if self.is_redirected {
-            spf.push_str(" ");
+            spf.push(' ');
             spf.push_str(self.redirect().unwrap().to_string().as_str());
         }
         // All can only be used if this is not a redirect.
-        if !self.is_redirected {
-            if self.all().is_some() {
-                spf.push_str(" ");
-                spf.push_str(self.all().unwrap().to_string().as_str());
-            }
+        if !self.is_redirected && self.all().is_some() {
+            spf.push(' ');
+            spf.push_str(self.all().unwrap().to_string().as_str());
         }
-        return spf;
+        spf
     }
     /// Returns a new string representation of the spf record if possible.
     /// This does not use the `source` attribute.
@@ -537,39 +521,39 @@ impl Spf {
         self.is_redirected
     }
     /// Returns a reference to the `Redirect` Mechanism
-    pub fn redirect(&self) -> Option<&Mechanism<String>> {
+    pub fn redirect(&self) -> Option<&MechanismImpl<String>> {
         self.redirect.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Include`
-    pub fn includes(&self) -> Option<&Vec<Mechanism<String>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<String>` for `Include`
+    pub fn includes(&self) -> Option<&Vec<MechanismImpl<String>>> {
         self.include.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `A`
-    pub fn a(&self) -> Option<&Vec<Mechanism<String>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<String>` for `A`
+    pub fn a(&self) -> Option<&Vec<MechanismImpl<String>>> {
         self.a.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `MX`
-    pub fn mx(&self) -> Option<&Vec<Mechanism<String>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<String>` for `MX`
+    pub fn mx(&self) -> Option<&Vec<MechanismImpl<String>>> {
         self.mx.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP4`
-    pub fn ip4(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<IpNetwork>` for `IP4`
+    pub fn ip4(&self) -> Option<&Vec<MechanismImpl<IpNetwork>>> {
         self.ip4.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP6`
-    pub fn ip6(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<IpNetwork>` for `IP6`
+    pub fn ip6(&self) -> Option<&Vec<MechanismImpl<IpNetwork>>> {
         self.ip6.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Exists`
-    pub fn exists(&self) -> Option<&Vec<Mechanism<String>>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<String>` for `Exists`
+    pub fn exists(&self) -> Option<&Vec<MechanismImpl<String>>> {
         self.exists.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Ptr`
-    pub fn ptr(&self) -> Option<&Mechanism<String>> {
+    /// Returns a reference to the a `Vec` of `MechanismImpl<String>` for `Ptr`
+    pub fn ptr(&self) -> Option<&MechanismImpl<String>> {
         self.ptr.as_ref()
     }
-    /// Returns a reference to `Mechanism<String>` for `All`
-    pub fn all(&self) -> Option<&Mechanism<String>> {
+    /// Returns a reference to `MechanismImpl<String>` for `All`
+    pub fn all(&self) -> Option<&MechanismImpl<String>> {
         self.all.as_ref()
     }
 }

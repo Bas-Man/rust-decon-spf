@@ -11,19 +11,19 @@
 //! # Features:
 //! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
-//!     - [`Mechanism String`](mechanism::Mechanism::<String>)
-//!     - [`Mechanism IpNetwork`](mechanism::Mechanism::<IpNetwork>)
-//!     - [`Check Qualifier Type`](mechanism::Mechanism::is_pass)
-//!     - [`Check Mechanism Type`](mechanism::Mechanism::kind)
+//!     - [`Mechanism String`](mechanism::MechanismImpl::<String>)
+//!     - [`Mechanism IpNetwork`](mechanism::MechanismImpl::<IpNetwork>)
+//!     - [`Check Qualifier Type`](mechanism::MechanismImpl::is_pass)
+//!     - [`Check Mechanism Type`](mechanism::MechanismImpl::kind)
 //!
 //! # Example Code
 //! Deconstructing an existing spf record into its corresponding components.
 //! ========================================================================
 //!```rust
-//! use decon_spf::spf::Spf;
+//! use decon_spf::Spf;
 //! let test_str = "v=spf1 a mx ~all";
 //! // Parsing updates information in the Spf Struct; it needs to be mutable.
-//! let spf: Spf = test_str.to_string().parse().unwrap();
+//! let spf: Spf = test_str.parse().unwrap();
 //! // Parse test_str and populate Spf Struct.  
 //! // Parse returns a Result<Spf, SpfError> allowing for some error checking.  
 //! // spf should be of v_1 form
@@ -49,7 +49,7 @@
 //! =====================================
 //!
 //!```rust
-//! use decon_spf::spf::Spf;
+//! use decon_spf::{Spf};
 //! use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
 //! let mut spf1 = Spf::new();
 //! spf1.set_v1();
@@ -67,7 +67,7 @@
 //! println!("\nNew spf 2: >{}<", spf2);
 //! assert_eq!(spf2.to_string(), "v=spf1 ip4:203.32.166.0/24");
 //! println!("Add mx to spf2");
-//! spf2.append_mechanism(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
+//! spf2.append_mechanism(Mechanism::new_mx(Qualifier::Pass, None));
 //!
 //! assert_eq!(spf2.to_string(), "v=spf1 mx ip4:203.32.166.0/24");
 //! println!("Altered spf 2: >{}<", spf2);
@@ -78,7 +78,7 @@
 //!
 //! let mut spf3 = Spf::new();
 //! spf3.set_v2_pra();
-//! spf3.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
+//! spf3.append_mechanism(Mechanism::new_a(Qualifier::Pass, None));
 //! spf3.append_mechanism(Mechanism::new_all(Qualifier::Neutral));
 //!
 //! assert_eq!(spf3.to_string(), "spf2.0/pra a ?all");
@@ -91,4 +91,8 @@
 //!
 mod helpers;
 pub mod mechanism;
-pub mod spf;
+mod spf;
+
+//use crate::mechanism::Mechanism;
+pub use crate::spf::Spf;
+pub use crate::spf::SpfError;

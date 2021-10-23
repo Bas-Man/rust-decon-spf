@@ -8,7 +8,7 @@ mod parse {
     fn test_include() {
         let input = "v=spf1 include:_spf.example.com ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert!(spf.includes().is_some());
         assert_eq!(spf.includes().unwrap()[0].is_pass(), true);
         assert_eq!(spf.includes().unwrap()[0].raw(), "_spf.example.com");

@@ -9,7 +9,7 @@ mod valid_spf_from_str {
     fn test_redirect() {
         let input = "v=spf1 redirect=_spf.google.com";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert_eq!(input, spf.source());
         assert_eq!(spf.is_redirect(), true);
@@ -37,7 +37,7 @@ mod valid_spf_from_str {
     fn test_hotmail() {
         let input = "v=spf1 ip4:157.55.9.128/25 include:spf.protection.outlook.com include:spf-a.outlook.com include:spf-b.outlook.com include:spf-a.hotmail.com include:_spf-ssg-b.microsoft.com include:_spf-ssg-c.microsoft.com ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert_eq!(input, spf.source());
         assert_eq!(spf.is_redirect(), false);
@@ -55,7 +55,7 @@ mod valid_spf_from_str {
     fn test_netblocks2_google_com() {
         let input = "v=spf1 ip6:2001:4860:4000::/36 ip6:2404:6800:4000::/36 ip6:2607:f8b0:4000::/36 ip6:2800:3f0:4000::/36 ip6:2a00:1450:4000::/36 ip6:2c0f:fb50:4000::/36 ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert_eq!(spf.includes().is_none(), true);
         assert_eq!(spf.ip4().is_none(), true);
         assert_eq!(!spf.ip6().is_none(), true);
@@ -70,14 +70,14 @@ mod valid_spf_from_str {
     #[test]
     fn valid_spf1() {
         let input = "v=spf1 a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_ok(), true);
         assert_eq!(spf.unwrap().source(), input);
     }
     #[test]
     fn valid_spf2() {
         let input = "spf2.0 a";
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert_eq!(spf.source(), input);
     }
 }
@@ -91,7 +91,7 @@ mod invalid_spf_from_str {
     #[test]
     fn invalid_spf1() {
         let input = "v=sf a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_err(), true);
         let err = spf.unwrap_err();
         assert_eq!(err.is_spf_error(), true);
@@ -102,31 +102,31 @@ mod invalid_spf_from_str {
     #[test]
     fn invalid_spf2() {
         let input = "spf2 a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_err(), true);
     }
     #[test]
     fn valid_spf2_pra() {
         let input = "spf2.0/pra a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_ok(), true);
     }
     #[test]
     fn valid_spf2_mfrom() {
         let input = "spf2.0/mfrom a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_ok(), true);
     }
     #[test]
     fn valid_spf2_mfrom_pra() {
         let input = "spf2.0/mfrom,pra a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_ok(), true);
     }
     #[test]
     fn valid_spf2_pra_mfrom() {
         let input = "spf2.0/pra,mfrom a";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_ok(), true);
     }
 }
@@ -140,7 +140,7 @@ mod invalid_ip {
     #[test]
     fn invalid_ip4() {
         let input = "v=spf1 ip4:203.32.10.0/33";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_err(), true);
         let error = spf.unwrap_err();
         assert_eq!(error.is_invalid_ip_addr(), true);
@@ -149,7 +149,7 @@ mod invalid_ip {
     #[test]
     fn invalid_ip6() {
         let input = "v=spf1 ip6:2001:4860:4000::/129";
-        let spf: Result<Spf, SpfError> = input.to_string().parse();
+        let spf: Result<Spf, SpfError> = input.parse();
 
         assert_eq!(spf.is_err(), true);
         let error = spf.unwrap_err();

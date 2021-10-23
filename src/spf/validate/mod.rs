@@ -69,7 +69,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
             return Err(SpfError::RedirectWithAllMechanism);
         }
         // Basic check of lookup limit
-        if check_lookup_count(&spf) > 10 {
+        if check_lookup_count(spf) > 10 {
             return Err(SpfError::LookupLimitExceeded);
         }
     }

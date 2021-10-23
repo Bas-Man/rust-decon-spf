@@ -112,7 +112,7 @@ impl Kind {
     /// ```
     ///
     pub fn as_str(&self) -> &str {
-        let push_str = match self {
+        match self {
             Kind::Redirect => "redirect=",
             Kind::Include => "include:",
             Kind::A => "a",
@@ -122,8 +122,7 @@ impl Kind {
             Kind::Ptr => "ptr",
             Kind::Exists => "exists:",
             Kind::All => "all",
-        };
-        push_str
+        }
     }
 }
 

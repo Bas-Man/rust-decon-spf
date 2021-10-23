@@ -8,7 +8,7 @@ mod parse {
     fn test_mx_mechanism() {
         let input = "v=spf1 mx ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_pass(), true);
@@ -18,7 +18,7 @@ mod parse {
     fn test_mx_mechanism_slash() {
         let input = "v=spf1 -mx/24 ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_fail(), true);
@@ -28,7 +28,7 @@ mod parse {
     fn test_mx_mechanism_colon() {
         let input = "v=spf1 ?mx:example.com ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_neutral(), true);
@@ -38,7 +38,7 @@ mod parse {
     fn test_mx_mechanism_colon_slash() {
         let input = "v=spf1 ~mx:example.com/24 ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].is_softfail(), true);

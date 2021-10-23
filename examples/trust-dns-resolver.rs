@@ -1,4 +1,4 @@
-use decon_spf::spf::Spf;
+use decon_spf::Spf;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::TxtLookup};
@@ -59,6 +59,7 @@ fn main() {
         println!("\nredirect: {}", spf_record.redirect().unwrap().raw());
         println!("mechanism: {}", spf_record.redirect().unwrap());
     }
+    println!("spf: {}", spf_record);
 }
 
 fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {

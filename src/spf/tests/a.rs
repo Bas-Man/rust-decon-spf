@@ -8,7 +8,7 @@ mod parse {
     fn test_a_mechanism() {
         let input = "v=spf1 a ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert_eq!(spf.is_valid(), true);
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
@@ -21,7 +21,7 @@ mod parse {
     fn test_a_mechanism_slash() {
         let input = "v=spf1 -a/24 ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_fail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
@@ -30,7 +30,7 @@ mod parse {
     fn test_a_mechanism_colon() {
         let input = "v=spf1 ?a:example.com ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");
@@ -39,7 +39,7 @@ mod parse {
     fn test_a_mechanism_colon_slash() {
         let input = "v=spf1 ~a:example.com/24 ~all";
 
-        let spf: Spf = input.to_string().parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "~a:example.com/24");

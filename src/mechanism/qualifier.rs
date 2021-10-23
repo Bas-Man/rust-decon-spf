@@ -44,20 +44,20 @@ impl Qualifier {
     /// value in SPF.
     pub fn as_str(&self) -> &str {
         match self {
-            Qualifier::Pass => return "",
-            Qualifier::Fail => return "-",
-            Qualifier::SoftFail => return "~",
-            Qualifier::Neutral => return "?",
+            Qualifier::Pass => "",
+            Qualifier::Fail => "-",
+            Qualifier::SoftFail => "~",
+            Qualifier::Neutral => "?",
         }
     }
     /// Returns the character, as a `char`, that represents a given ['Qualifier'](Qualifier)
     /// value in SPF.
     pub fn as_char(&self) -> char {
         match self {
-            Qualifier::Pass => return '+',
-            Qualifier::Fail => return '-',
-            Qualifier::SoftFail => return '~',
-            Qualifier::Neutral => return '?',
+            Qualifier::Pass => '+',
+            Qualifier::Fail => '-',
+            Qualifier::SoftFail => '~',
+            Qualifier::Neutral => '?',
         }
     }
 }
