@@ -12,9 +12,9 @@ mod parse {
         assert_eq!(spf.is_valid(), true);
         assert_eq!(spf.version(), "v=spf1");
         assert!(spf.a().is_some());
-        assert_eq!(spf.a().unwrap()[0].is_pass(), true);
+        assert_eq!(spf.a().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "a");
-        assert_eq!(spf.all().unwrap().is_softfail(), true);
+        assert_eq!(spf.all().unwrap().qualifier().is_softfail(), true);
         assert_eq!(spf.all().unwrap().to_string(), "~all");
     }
     #[test]
@@ -23,7 +23,7 @@ mod parse {
 
         let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
-        assert_eq!(spf.a().unwrap()[0].is_fail(), true);
+        assert_eq!(spf.a().unwrap()[0].qualifier().is_fail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
     }
     #[test]
@@ -32,7 +32,7 @@ mod parse {
 
         let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
-        assert_eq!(spf.a().unwrap()[0].is_neutral(), true);
+        assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");
     }
     #[test]
@@ -41,7 +41,7 @@ mod parse {
 
         let spf: Spf = input.parse().unwrap();
         assert!(spf.a().is_some());
-        assert_eq!(spf.a().unwrap()[0].is_softfail(), true);
+        assert_eq!(spf.a().unwrap()[0].qualifier().is_softfail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "~a:example.com/24");
     }
 }

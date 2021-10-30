@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod validate {
-    use crate::mechanism::{MechanismImpl, Qualifier};
+    use crate::mechanism::{Mechanism, Qualifier};
     use crate::spf::Spf;
     use crate::spf::SpfRfcStandard;
 
@@ -8,11 +8,11 @@ mod validate {
     fn validate() {
         let mut spf = Spf::new();
         spf.set_v1();
-        spf.append_ip_mechanism(MechanismImpl::new_ip(
+        spf.append_ip_mechanism(Mechanism::new_ip(
             Qualifier::Pass,
             "203.32.160.0/23".parse().unwrap(),
         ));
-        spf.append_ip_mechanism(MechanismImpl::new_ip(
+        spf.append_ip_mechanism(Mechanism::new_ip(
             Qualifier::Pass,
             "2001:5160:4000::/36".parse().unwrap(),
         ));
@@ -33,11 +33,11 @@ mod validate {
     fn invalidate() {
         let mut spf = Spf::new();
         //spf.set_v1();
-        spf.append_ip_mechanism(MechanismImpl::new_ip(
+        spf.append_ip_mechanism(Mechanism::new_ip(
             Qualifier::Pass,
             "203.32.160.0/23".parse().unwrap(),
         ));
-        spf.append_ip_mechanism(MechanismImpl::new_ip(
+        spf.append_ip_mechanism(Mechanism::new_ip(
             Qualifier::Pass,
             "2001:5160:4000::/36".parse().unwrap(),
         ));

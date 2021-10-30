@@ -1,11 +1,11 @@
 #[cfg(test)]
-use crate::mechanism::MechanismImpl;
+use crate::mechanism::Mechanism;
 
 #[test]
 fn default() {
     let input = "all";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_all(), true);
     assert_eq!(m.raw(), "all");
     assert_eq!(m.to_string(), input);
@@ -14,7 +14,7 @@ fn default() {
 fn with_plus() {
     let input = "+all";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_all(), true);
     assert_eq!(m.raw(), "all");
     assert_eq!(m.to_string(), "all");
@@ -23,7 +23,7 @@ fn with_plus() {
 fn neutral() {
     let input = "~all";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_all(), true);
     assert_eq!(m.raw(), "all");
     assert_eq!(m.to_string(), input);
@@ -32,7 +32,7 @@ fn neutral() {
 fn fail() {
     let input = "-all";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_all(), true);
     assert_eq!(m.raw(), "all");
     assert_eq!(m.to_string(), input);

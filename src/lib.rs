@@ -11,10 +11,9 @@
 //! # Features:
 //! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
-//!     - [`Mechanism String`](mechanism::MechanismImpl::<String>)
-//!     - [`Mechanism IpNetwork`](mechanism::MechanismImpl::<IpNetwork>)
-//!     - [`Check Qualifier Type`](mechanism::MechanismImpl::is_pass)
-//!     - [`Check Mechanism Type`](mechanism::MechanismImpl::kind)
+//!     - [`Mechanism`](mechanism::Mechanism)
+//!     - [`Check Qualifier Type`](mechanism::Mechanism::is_pass)
+//!     - [`Check Mechanism Type`](mechanism::Mechanism::kind)
 //!
 //! # Example Code
 //! Deconstructing an existing spf record into its corresponding components.
@@ -36,7 +35,7 @@
 //! assert_eq!(spf.mx().is_some(), true);
 //! assert_eq!(spf.all().is_some(), true);
 //! // Check that 'All' is a soft fail denoted by the use of '~'
-//! assert_eq!(spf.all().unwrap().is_softfail(), true);
+//! assert_eq!(spf.all().unwrap().qualifier().is_softfail(), true);
 //! // Generate the spf record based on the content of the Spf struct.
 //! // Does not use the original source string.
 //! // # note: `Display` has been implemented for Spf so we could usually make the call
@@ -49,7 +48,7 @@
 //! =====================================
 //!
 //!```rust
-//! use decon_spf::{Spf};
+//! use decon_spf::Spf;
 //! use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
 //! let mut spf1 = Spf::new();
 //! spf1.set_v1();
@@ -67,7 +66,7 @@
 //! println!("\nNew spf 2: >{}<", spf2);
 //! assert_eq!(spf2.to_string(), "v=spf1 ip4:203.32.166.0/24");
 //! println!("Add mx to spf2");
-//! spf2.append_mechanism(Mechanism::new_mx(Qualifier::Pass, None));
+//! spf2.append_mechanism(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
 //!
 //! assert_eq!(spf2.to_string(), "v=spf1 mx ip4:203.32.166.0/24");
 //! println!("Altered spf 2: >{}<", spf2);
@@ -78,7 +77,7 @@
 //!
 //! let mut spf3 = Spf::new();
 //! spf3.set_v2_pra();
-//! spf3.append_mechanism(Mechanism::new_a(Qualifier::Pass, None));
+//! spf3.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
 //! spf3.append_mechanism(Mechanism::new_all(Qualifier::Neutral));
 //!
 //! assert_eq!(spf3.to_string(), "spf2.0/pra a ?all");

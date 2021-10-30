@@ -3,12 +3,12 @@ use crate::helpers;
 #[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
-use crate::mechanism::MechanismImpl;
+use crate::mechanism::Mechanism;
 
 #[test]
 fn match_on_mx_only() {
     let string = "mx";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::MX);
 
@@ -20,7 +20,7 @@ fn match_on_mx_only() {
 #[test]
 fn match_on_mx_colon() {
     let string = "-mx:example.com";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::MX);
 
@@ -32,7 +32,7 @@ fn match_on_mx_colon() {
 #[test]
 fn match_on_mx_slash() {
     let string = "~mx/24";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::MX);
 
@@ -44,7 +44,7 @@ fn match_on_mx_slash() {
 #[test]
 fn match_on_mx_colon_slash() {
     let string = "+mx:example.com/24";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::MX);
 

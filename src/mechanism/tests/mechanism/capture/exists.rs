@@ -3,12 +3,12 @@ use crate::helpers;
 #[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
-use crate::mechanism::MechanismImpl;
+use crate::mechanism::Mechanism;
 
 #[test]
 fn basic() {
     let string = "exists:a.example.com";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::Exists);
 

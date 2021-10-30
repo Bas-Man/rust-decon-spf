@@ -11,7 +11,7 @@ mod parse {
         let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
-        assert_eq!(spf.mx().unwrap()[0].is_pass(), true);
+        assert_eq!(spf.mx().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.mx().unwrap()[0].to_string(), "mx");
     }
     #[test]
@@ -21,7 +21,7 @@ mod parse {
         let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
-        assert_eq!(spf.mx().unwrap()[0].is_fail(), true);
+        assert_eq!(spf.mx().unwrap()[0].qualifier().is_fail(), true);
         assert_eq!(spf.mx().unwrap()[0].to_string(), "-mx/24");
     }
     #[test]
@@ -31,7 +31,7 @@ mod parse {
         let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
-        assert_eq!(spf.mx().unwrap()[0].is_neutral(), true);
+        assert_eq!(spf.mx().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.mx().unwrap()[0].to_string(), "?mx:example.com");
     }
     #[test]
@@ -41,7 +41,7 @@ mod parse {
         let spf: Spf = input.parse().unwrap();
 
         assert!(spf.mx().is_some());
-        assert_eq!(spf.mx().unwrap()[0].is_softfail(), true);
+        assert_eq!(spf.mx().unwrap()[0].qualifier().is_softfail(), true);
         assert_eq!(spf.mx().unwrap()[0].to_string(), "~mx:example.com/24");
     }
 }

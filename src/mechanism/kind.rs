@@ -4,7 +4,7 @@
 //! small as to not require any distinction in the current code base.
 //!
 /// This enum defines the possible mechanisms.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Kind {
     /// Represents a *Modifier* of type redirect=  
     /// If this is present, the *All* mechanism should not be present.  
@@ -126,6 +126,22 @@ impl Kind {
     }
 }
 
+impl std::fmt::Display for Kind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Kind::Redirect => write!(f, "{}", "redirect="),
+            Kind::Include => write!(f, "{}", "include:"),
+            Kind::A => write!(f, "{}", "a"),
+            Kind::MX => write!(f, "{}", "mx"),
+            Kind::IpV4 => write!(f, "{}", "ip4:"),
+            Kind::IpV6 => write!(f, "{}", "ip6:"),
+            Kind::Ptr => write!(f, "{}", "ptr"),
+            Kind::Exists => write!(f, "{}", "exists:"),
+            Kind::All => write!(f, "{}", "all"),
+        }
+    }
+}
+
 impl Default for Kind {
     fn default() -> Self {
         Self::A
@@ -135,45 +151,45 @@ impl Default for Kind {
 #[test]
 fn a() {
     let a = Kind::A;
-    assert_eq!(a.as_str(), "a");
+    assert_eq!(a.to_string(), "a");
 }
 #[test]
 fn mx() {
     let a = Kind::MX;
-    assert_eq!(a.as_str(), "mx");
+    assert_eq!(a.to_string(), "mx");
 }
 #[test]
 fn redirect() {
     let a = Kind::Redirect;
-    assert_eq!(a.as_str(), "redirect=");
+    assert_eq!(a.to_string(), "redirect=");
 }
 #[test]
 fn include() {
     let a = Kind::Include;
-    assert_eq!(a.as_str(), "include:");
+    assert_eq!(a.to_string(), "include:");
 }
 #[test]
 fn ip4() {
     let a = Kind::IpV4;
-    assert_eq!(a.as_str(), "ip4:");
+    assert_eq!(a.to_string(), "ip4:");
 }
 #[test]
 fn ip6() {
     let a = Kind::IpV6;
-    assert_eq!(a.as_str(), "ip6:");
+    assert_eq!(a.to_string(), "ip6:");
 }
 #[test]
 fn ptr() {
     let a = Kind::Ptr;
-    assert_eq!(a.as_str(), "ptr");
+    assert_eq!(a.to_string(), "ptr");
 }
 #[test]
 fn exists() {
     let a = Kind::Exists;
-    assert_eq!(a.as_str(), "exists:");
+    assert_eq!(a.to_string(), "exists:");
 }
 #[test]
 fn all() {
     let a = Kind::All;
-    assert_eq!(a.as_str(), "all");
+    assert_eq!(a.to_string(), "all");
 }

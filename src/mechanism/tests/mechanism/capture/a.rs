@@ -3,12 +3,12 @@ use crate::helpers;
 #[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
-use crate::mechanism::MechanismImpl;
+use crate::mechanism::Mechanism;
 
 #[test]
 fn test_match_on_a_only() {
     let string = "a";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::A);
 
@@ -20,7 +20,7 @@ fn test_match_on_a_only() {
 #[test]
 fn test_match_on_a_colon() {
     let string = "-a:example.com";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::A);
 
@@ -32,7 +32,7 @@ fn test_match_on_a_colon() {
 #[test]
 fn test_match_on_a_slash() {
     let string = "~a/24";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::A);
 
@@ -44,7 +44,7 @@ fn test_match_on_a_slash() {
 #[test]
 fn test_match_on_a_colon_slash() {
     let string = "+a:example.com/24";
-    let option_test: Option<MechanismImpl<String>>;
+    let option_test: Option<Mechanism<String>>;
 
     option_test = helpers::capture_matches(&string, Kind::A);
 

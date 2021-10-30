@@ -1,11 +1,11 @@
 #[cfg(test)]
-use crate::mechanism::MechanismImpl;
+use crate::mechanism::Mechanism;
 
 #[test]
 fn default() {
     let input = "mx";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_mx(), true);
     assert_eq!(m.is_pass(), true);
     assert_eq!(m.raw(), "mx");
@@ -15,7 +15,7 @@ fn default() {
 fn mx_pass() {
     let input = "+mx";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.kind().is_mx(), true);
     assert_eq!(m.raw(), "mx");
     assert_eq!(m.to_string(), "mx");
@@ -24,7 +24,7 @@ fn mx_pass() {
 fn neutral_rrdata() {
     let input = "~mx:example.com";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.raw(), "example.com");
     assert_eq!(m.to_string(), input);
 }
@@ -32,7 +32,7 @@ fn neutral_rrdata() {
 fn mx_rrdata_slash() {
     let input = "mx:example.com/24";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.raw(), "example.com/24");
     assert_eq!(m.to_string(), input);
 }
@@ -40,7 +40,7 @@ fn mx_rrdata_slash() {
 fn mx_slash() {
     let input = "mx/24";
 
-    let m: MechanismImpl<String> = input.parse().unwrap();
+    let m: Mechanism<String> = input.parse().unwrap();
     assert_eq!(m.raw(), "/24");
     assert_eq!(m.to_string(), input);
 }

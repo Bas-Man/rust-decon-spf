@@ -3,12 +3,16 @@
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
     NotValidMechanismFormat(String),
-    /// Indcates that the provided string could not be parsed into an Ipnetwork::IP4 though it is valid IpNetwork.
+    /// Indcates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
     NotIP4Network(String),
-    /// Indcates that the provided string could not be parsed into an Ipnetwork::IP6 though it is a valid IpNetwork.
+    /// Indcates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
     NotIP6Network(String),
     /// Indicates that the provided string does not contain any valid IpNetwork.
     NotValidIPNetwork(String),
+    /// Attempted to access a Mechanism as a Mechanism<IpNetwork> but is Mechanism<String>
+    NotIpNetworkMechanism,
+    /// Attempted to access a Mechanism as a Mechanism<String> but is Mechanism<IpNetwork>
+    NotStringMechanism,
 }
 
 impl std::fmt::Display for MechanismError {
@@ -26,10 +30,15 @@ impl std::fmt::Display for MechanismError {
             MechanismError::NotValidIPNetwork(mesg) => {
                 write!(f, "{}.", mesg)
             }
+            MechanismError::NotIpNetworkMechanism => {
+                write!(f, "Attempt to access TXT as IP.")
+            }
+            MechanismError::NotStringMechanism => {
+                write!(f, "Attempt to access IP as TXT.")
+            }
         }
     }
 }
-/// simethuing
 impl MechanismError {
     /// Returns `true` if it is not a valid Mechanism format.
     pub fn is_invalid_format(&self) -> bool {

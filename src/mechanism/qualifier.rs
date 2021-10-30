@@ -1,7 +1,7 @@
 //! An enumeration of possible qualifiers that are used in SPF records.
 
 /// Enum declaration for possible `Qualifier` of a given Mechanism
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Qualifier {
     /// This is the default value for a qualifier if the value is not present in the SPF record.
     /// It is denoted by '+' (Plus Sign)

@@ -9,7 +9,7 @@ mod parse {
         let input = "v=spf1 ptr ~all";
 
         let spf: Spf = input.parse().unwrap();
-        assert_eq!(spf.ptr().unwrap().is_pass(), true);
+        assert_eq!(spf.ptr().unwrap().qualifier().is_pass(), true);
         assert_eq!(spf.ptr().unwrap().to_string(), "ptr");
     }
     #[test]
@@ -17,7 +17,7 @@ mod parse {
         let input = "v=spf1 ptr:host.example.com ~all";
 
         let spf: Spf = input.parse().unwrap();
-        assert_eq!(spf.ptr().unwrap().is_pass(), true);
+        assert_eq!(spf.ptr().unwrap().qualifier().is_pass(), true);
         assert_eq!(spf.ptr().unwrap().to_string(), "ptr:host.example.com");
     }
 }

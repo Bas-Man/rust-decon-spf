@@ -31,7 +31,7 @@ name = "trust-dns-demo"
 path = "examples/trust-dns-resolver.rs"
 
 [[example]]
-name = "build-new-spf"
+name = "build-spf"
 path = "examples/build-new-spf.rs"
 
 [dependencies]
