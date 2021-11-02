@@ -129,14 +129,12 @@ impl FromStr for Spf {
                 let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
                     let valid_ip4 = raw_ip4.parse();
-                    if valid_ip4.is_ok() {
-                        // Safe to build Mechanism.
-                        let network =
-                            Mechanism::new_ip4(qualifier_and_modified_str.0, valid_ip4.unwrap());
-                        vec_of_ip4.push(network);
-                    } else {
-                        // The ip4 string was not valid. Return Err()
-                        return Err(SpfError::InvalidIPAddr(valid_ip4.unwrap_err()));
+                    match valid_ip4 {
+                        Ok(ip4) => {
+                            let network = Mechanism::new_ip4(qualifier_and_modified_str.0, ip4);
+                            vec_of_ip4.push(network);
+                        }
+                        Err(ip4) => return Err(SpfError::InvalidIPAddr(ip4)),
                     }
                 }
             } else if record.contains("ip6:") {
@@ -144,14 +142,12 @@ impl FromStr for Spf {
                 let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
                     let valid_ip6 = raw_ip6.parse();
-                    if valid_ip6.is_ok() {
-                        // Safe to build Mechanism
-                        let network =
-                            Mechanism::new_ip6(qualifier_and_modified_str.0, valid_ip6.unwrap());
-                        vec_of_ip6.push(network);
-                    } else {
-                        // The ip6 string was not valid. Return Err()
-                        return Err(SpfError::InvalidIPAddr(valid_ip6.unwrap_err()));
+                    match valid_ip6 {
+                        Ok(ip6) => {
+                            let network = Mechanism::new_ip6(qualifier_and_modified_str.0, ip6);
+                            vec_of_ip6.push(network);
+                        }
+                        Err(ip6) => return Err(SpfError::InvalidIPAddr(ip6)),
                     }
                 }
             } else if record.ends_with("all") {
@@ -429,10 +425,9 @@ impl Spf {
         let res = match rfc {
             SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
         };
-        if res.is_ok() {
-            SpfValidationResult::Valid(res.unwrap())
-        } else {
-            SpfValidationResult::InValid(res.unwrap_err())
+        match res {
+            Ok(x) => SpfValidationResult::Valid(x),
+            Err(x) => SpfValidationResult::InValid(x),
         }
     }
 

@@ -129,15 +129,15 @@ impl Kind {
 impl std::fmt::Display for Kind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Kind::Redirect => write!(f, "{}", "redirect="),
-            Kind::Include => write!(f, "{}", "include:"),
-            Kind::A => write!(f, "{}", "a"),
-            Kind::MX => write!(f, "{}", "mx"),
-            Kind::IpV4 => write!(f, "{}", "ip4:"),
-            Kind::IpV6 => write!(f, "{}", "ip6:"),
-            Kind::Ptr => write!(f, "{}", "ptr"),
-            Kind::Exists => write!(f, "{}", "exists:"),
-            Kind::All => write!(f, "{}", "all"),
+            Kind::Redirect => write!(f, "redirect="),
+            Kind::Include => write!(f, "include:"),
+            Kind::A => write!(f, "a"),
+            Kind::MX => write!(f, "mx"),
+            Kind::IpV4 => write!(f, "ip4:"),
+            Kind::IpV6 => write!(f, "ip6:"),
+            Kind::Ptr => write!(f, "ptr"),
+            Kind::Exists => write!(f, "exists:"),
+            Kind::All => write!(f, "all"),
         }
     }
 }

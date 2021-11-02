@@ -52,8 +52,8 @@ impl FromStr for Mechanism<String> {
             return Err(MechanismError::NotValidMechanismFormat(s.to_string()));
         }
         if s.contains("redirect=") {
-            let items = s.rsplit('=');
-            for item in items {
+            let mut items = s.rsplit('=');
+            if let Some(item) = items.next() {
                 return Ok(Mechanism::new(
                     Kind::Redirect,
                     Qualifier::Pass,
@@ -62,7 +62,7 @@ impl FromStr for Mechanism<String> {
             }
         } else if s.contains("include:") {
             let qualifier_and_modified_str = helpers::return_and_remove_qualifier(s, 'i');
-            for item in s.rsplit(':') {
+            if let Some(item) = s.rsplit(':').next() {
                 return Ok(Mechanism::new_include(
                     qualifier_and_modified_str.0,
                     item.to_string(),
@@ -132,8 +132,8 @@ impl FromStr for Mechanism<IpNetwork> {
                 raw_ip = qualifier_and_modified_str.1.strip_prefix("ip6:")
             };
             let parsed = raw_ip.unwrap().parse();
-            if parsed.is_ok() {
-                let ip: IpNetwork = parsed.unwrap();
+            if let Ok(parsed_ip) = parsed {
+                let ip: IpNetwork = parsed_ip;
                 if ip.is_ipv4() && kind.is_ip_v4() {
                     return Ok(Mechanism::new_ip4(qualifier_and_modified_str.0, ip));
                 } else if ip.is_ipv4() && !kind.is_ip_v4() {
