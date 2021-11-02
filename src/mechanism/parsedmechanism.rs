@@ -3,8 +3,8 @@ use ipnetwork::IpNetwork;
 
 use std::{convert::TryFrom, str::FromStr};
 
-/// This enum stores the result of a successful parsing of a Mechanism String.  
-/// This will either contain a Mechanism holding a `String` or Mechanism holding a `IpNetwork`
+/// Stores the result of a successful parsing of a Mechanism String.  
+/// This will either contain a Mechanism holding a `String` or Mechanism holding an `IpNetwork`
 #[derive(Debug)]
 pub enum ParsedMechanism {
     /// This variant represents a Mechanism containing a String  
@@ -22,7 +22,7 @@ impl std::fmt::Display for ParsedMechanism {
     }
 }
 
-/// Emplement `from_str` for ParsedMechanism.  
+/// Implement `from_str` for ParsedMechanism.  
 /// Provides the ability to parse any supported `Spf Mechanisms`. See [`Kind`](Kind)
 /// # Examples:
 ///```rust
@@ -36,7 +36,8 @@ impl std::fmt::Display for ParsedMechanism {
 /// assert_eq!(mechanism_not_ip4.unwrap_err(),
 ///            MechanismError::NotValidIPNetwork("invalid address: example.com".to_string()));
 ///
-/// let mechanism_malformed: Result<ParsedMechanism, MechanismError> = "ab.com".parse::<ParsedMechanism>();
+/// let mechanism_malformed: Result<ParsedMechanism, MechanismError> =
+///     "ab.com".parse::<ParsedMechanism>();
 /// assert_eq!(mechanism_malformed.unwrap_err().to_string(),
 ///            "ab.com does not conform to any Mechanism format.");
 ///```
@@ -62,10 +63,13 @@ impl ParsedMechanism {
     /// Provides another way to parse `Spf Mechanisms`
     /// # Example:
     ///```rust
-    /// use decon_spf::mechanism::ParsedMechanism;
+    /// use decon_spf::mechanism::{ParsedMechanism,MechanismError};
     /// let parsed_mechanism = ParsedMechanism::new("ptr").unwrap();
     /// let mechanism = parsed_mechanism.txt();
     /// assert_eq!(mechanism.kind().is_ptr(), true);
+    /// let error: Result<ParsedMechanism, MechanismError> =
+    ///     ParsedMechanism::new("ab.com");
+    /// assert_eq!(error.unwrap_err(), MechanismError::NotValidMechanismFormat("ab.com".to_string()));
     ///```
     pub fn new(s: &str) -> Result<ParsedMechanism, MechanismError> {
         if s.contains("ip4:") || s.contains("ip6:") {
@@ -127,8 +131,8 @@ impl ParsedMechanism {
     pub fn new_all(q: Qualifier) -> ParsedMechanism {
         ParsedMechanism::TXT(Mechanism::new_all(q))
     }
-    /// Provides the ability to extract a `Spf Mechanism` which is not `ip4` or ip6`
-    /// Example:
+    /// Provides the ability to extract a `Mechanism` which is not `ip4` or `ip6`
+    /// # Example:
     ///```rust
     /// use decon_spf::mechanism::{ParsedMechanism,Mechanism};
     /// let parsed_mechanism = ParsedMechanism::new("mx").unwrap();
@@ -143,8 +147,8 @@ impl ParsedMechanism {
             ParsedMechanism::IP(_) => unreachable!(),
         }
     }
-    /// Provides the ability to extract a `Spf Mechanism` which is either a `ip4` or ip6`
-    /// Example:
+    /// Provides the ability to extract a `Mechanism` which is either a `ip4` or `ip6`
+    /// # Example:
     ///```rust
     /// use decon_spf::mechanism::{ParsedMechanism,Mechanism};
     /// let parsed_mechanism = ParsedMechanism::new("ip4:203.32.160.0/24").unwrap();

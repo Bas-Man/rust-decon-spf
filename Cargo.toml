@@ -7,8 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 description = """
-This is a simple tool to be able to deconstruct an existing SPF record that might be
+This is a simple tool that allows you to deconstruct an existing SPF record that might be
 retreived in a normal DNS TXT lookup.
+With version 0.2.0 you can now also construct a new Spf record.
 """
 
 documentation = "https://docs.rs/decon-spf"

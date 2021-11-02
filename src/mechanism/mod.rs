@@ -17,7 +17,7 @@ use std::{convert::TryFrom, str::FromStr};
 
 // //! A struct created either by having an existing SPF record `parsed` or programmatically created.
 
-/// Stores its `Kind`, `Qualifier` and its `Value`
+/// Stores its [`Kind`](Kind), [`Qualifier`](Qualifier), and its `Value`
 #[derive(Debug, Clone)]
 pub struct Mechanism<T> {
     kind: Kind,
@@ -173,7 +173,7 @@ impl<T> Mechanism<T> {
             rrdata: mechanism,
         }
     }
-    /// check mechanism is pass
+    /// Check mechanism is pass
     pub fn is_pass(&self) -> bool {
         self.qualifier == Qualifier::Pass
     }
@@ -181,11 +181,11 @@ impl<T> Mechanism<T> {
     pub fn is_fail(&self) -> bool {
         self.qualifier == Qualifier::Fail
     }
-    /// check mechanism is softfail
+    /// Check mechanism is softfail
     pub fn is_softfail(&self) -> bool {
         self.qualifier == Qualifier::SoftFail
     }
-    /// check mechanism is neutral
+    /// Check mechanism is neutral
     pub fn is_neutral(&self) -> bool {
         self.qualifier == Qualifier::Neutral
     }
@@ -197,7 +197,7 @@ impl<T> Mechanism<T> {
     pub fn qualifier(&self) -> &Qualifier {
         &self.qualifier
     }
-    /// Returns a reference to the Mechanism's Value.
+    /// Returns a reference to the Mechanism's Value.  
     /// This could return a `String`, `IpNetwork`, or `None`
     pub fn mechanism(&self) -> &Option<T> {
         &self.rrdata
@@ -363,7 +363,7 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_a_string.to_string(), "a:example.com");
     #[deprecated(
         since = "0.2.0",
-        note = "This will be removed in a future release. Use to_string() which is implemented through Display trait."
+        note = "This will be removed in a future release. Use `to_string()` which is implemented through Display trait."
     )]
     pub fn string(&self) -> String {
         self.build_string()
@@ -456,18 +456,18 @@ impl Mechanism<IpNetwork> {
         Mechanism::new(Kind::IpV6, qualifier, Some(mechanism))
     }
     /// Returns the simple string representation of the mechanism
-    // # Example
-    //
-    // ```
-    // use ipnetwork::IpNetwork;
-    // use decon_spf::mechanism::Qualifier;
-    // use decon_spf::mechanism::Mechanism;
-    // let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    // let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
-    // assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
-    // assert_eq!(ip_mechanism.kind().is_ip(), true);
-    // ```
-    //
+    /// # Example
+    ///
+    ///```
+    /// use ipnetwork::IpNetwork;
+    /// use decon_spf::mechanism::Qualifier;
+    /// use decon_spf::mechanism::Mechanism;
+    /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
+    /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
+    /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
+    /// assert_eq!(ip_mechanism.kind().is_ip(), true);
+    ///```
+    ///
     pub fn raw(&self) -> String {
         // Consider striping ':' and "/" if they are the first characters.
         self.rrdata.unwrap().to_string()
@@ -503,7 +503,7 @@ impl Mechanism<IpNetwork> {
         ip_mechanism_str
     }
 
-    /// Returns the mechanism as an `IpNetwork`
+    /// Returns a reference to the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         self.rrdata.as_ref().unwrap()
     }

@@ -255,6 +255,9 @@ impl Spf {
     /// Clear the passed Kind which has been passed.
     /// Sets the passed mechanism to `None`
     ///
+    /// # Note:
+    /// This method clears all assocated Mechanism for the [`Kind`](Kind) provided.
+    ///
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
@@ -269,6 +272,7 @@ impl Spf {
     /// // Remove ip4 Mechanism
     /// new_spf_record.clear_mechanism(Kind::IpV4);
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a all".to_string());
+    ///```
     pub fn clear_mechanism(&mut self, kind: Kind) {
         match kind {
             Kind::Redirect => {
@@ -336,7 +340,8 @@ impl Spf {
             self.all = Some(mechanism);
         }
     }
-    /// Appends the passed Mechanism<String> to the SPF struct.
+    /// Appends the passed `Mechanism<String>` to the SPF struct.
+    /// This only works for Mechanism which are *NOT* `ip4:` or `ip6:`
     ///
     /// # Example:
     /// ```
@@ -353,6 +358,7 @@ impl Spf {
     /// # Note:
     /// If The Spf is already set as `Redirect` trying to append an `All`
     /// Mechanism will have no affect.
+    // Consider make this a Result
     pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
         match mechanism.kind() {
             Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
@@ -365,7 +371,7 @@ impl Spf {
             _ => {}
         }
     }
-    /// Appends the passed Mechanism<IpNetwork> to the SPF struct.
+    /// Appends the passed `Mechanism<IpNetwork>` to the SPF struct.
     ///
     /// # Example:
     /// ```

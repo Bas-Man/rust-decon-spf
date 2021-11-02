@@ -11,13 +11,13 @@ pub enum SpfError {
     LookupLimitExceeded,
     /// Source Spf String has not been parsed.
     HasNotBeenParsed,
-    /// Only one white space is permitted bdtween mechanisms.
+    /// Only one white space is permitted between mechanisms.
     WhiteSpaceSyntaxError,
     /// Invalid SPF
     InvalidSPF,
-    /// Rediect with additional Mechanisms
+    /// Redirect with `All` Mechanism
     RedirectWithAllMechanism,
-    /// Network Address is not valid Error.
+    /// Network Address is not valid
     InvalidIPAddr(IpNetworkError),
 }
 impl std::fmt::Display for SpfError {
@@ -81,7 +81,7 @@ impl SpfError {
     pub fn is_invalid_spf(&self) -> bool {
         matches!(self, Self::InvalidSPF)
     }
-    /// Returns `true` if the SpfError indicates the presents of `All` Mechanism with
+    /// Returns `true` if the SpfError indicates the presents of `All` Mechanism
     pub fn is_redirect_with_all_mechanism(&self) -> bool {
         matches!(self, Self::RedirectWithAllMechanism)
     }

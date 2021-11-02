@@ -4,7 +4,7 @@
 //! Provides methods for building spf records programmatically.  
 //!
 //!
-//! For a list of supported *Modifiers* and *Mechanism*. See [mechanism::Kind](mechanism::Kind)  
+//! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)  
 //!
 //! This crate is able to decontruct `v=spf1` and `spf2.0` records.
 //!
@@ -21,10 +21,9 @@
 //!```rust
 //! use decon_spf::Spf;
 //! let test_str = "v=spf1 a mx ~all";
-//! // Parsing updates information in the Spf Struct; it needs to be mutable.
-//! let spf: Spf = test_str.parse().unwrap();
 //! // Parse test_str and populate Spf Struct.  
 //! // Parse returns a Result<Spf, SpfError> allowing for some error checking.  
+//! let spf: Spf = test_str.parse().unwrap();
 //! // spf should be of v_1 form
 //! assert_eq!(spf.is_v1(), true);
 //! // There should be no ip4 or ip6 data
@@ -38,7 +37,7 @@
 //! assert_eq!(spf.all().unwrap().qualifier().is_softfail(), true);
 //! // Generate the spf record based on the content of the Spf struct.
 //! // Does not use the original source string.
-//! // # note: `Display` has been implemented for Spf so we could usually make the call
+//! // # Note: `Display` has been implemented for Spf so we could usually make the call
 //! // as follows.
 //! println!("{}", spf);
 //! assert_eq!(spf.to_string(), "v=spf1 a mx ~all");

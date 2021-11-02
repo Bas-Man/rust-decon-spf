@@ -1,5 +1,11 @@
-0.2.0 DATE
-==========
+0.2.1 2021-11-03
+================
+
+- Documentation Update
+
+
+0.2.0 2021-11-02 
+================
 
 Breaking Changes.
 ================================================================
@@ -23,4 +29,3 @@ Changes
 - implemented **FromStr** trait for Struct *Spf*
 - Implemented Errors for `Mechanism`
 - Improved regular expressions to handle more strings when parsing.
-

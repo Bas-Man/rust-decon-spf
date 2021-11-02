@@ -3,7 +3,7 @@
 //! Whilst *Mechanisms* and *Modifiers* differ slightly. This difference is so
 //! small as to not require any distinction in the current code base.
 //!
-/// This enum defines the possible mechanisms.
+/// Defines the possible mechanisms.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Kind {
     /// Represents a *Modifier* of type redirect=  
@@ -22,6 +22,9 @@ pub enum Kind {
     /// Possible values follow the same loyout as for [`A`](Kind::A)
     MX,
     /// Represents a Mechanism of type *Include*  
+    /// ```test
+    /// include:<domain>
+    ///```
     Include,
     /// Represents a Mechanism of type *ip4*  
     /// # Example Values:  
@@ -36,7 +39,11 @@ pub enum Kind {
     /// # Note:
     /// This is rarely use.
     Ptr,
-    /// Represents a Mechanism of type *exists*
+    /// Represents a Mechanism of type *exists*  
+    ///```text
+    /// ptr
+    /// ptr:<domain>
+    ///```
     Exists,
     /// Represents a Mechanism of type *All*
     All,
