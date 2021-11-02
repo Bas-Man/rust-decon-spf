@@ -22,3 +22,5 @@ Changes
   - This also depreciates the previously implemented *as_spf()* and *string()* methods.
 - implemented **FromStr** trait for Struct *Spf*
 - Implemented Errors for `Mechanism`
+- Improved regular expressions to handle more strings when parsing.
+
