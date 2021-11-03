@@ -20,7 +20,7 @@ $ cargo run --example
 
 ```bash
 $ cargo run --example trust-dns-demo
-$ cargo run --example build-spf.rs
+$ cargo run --example build-spf
 ```
 
 ## Syntax Validation
