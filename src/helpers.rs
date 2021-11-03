@@ -87,11 +87,12 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
     }
 }
 
-pub(crate) fn spf_has_consecutive_whitespace(spf: &str) -> bool {
+pub(crate) fn spf_check_whitespace(s: &str) -> bool {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"\s{2,}").unwrap();
+        static ref ENDING_SPACE: Regex = Regex::new(r"\s$").unwrap();
     }
-    RE.is_match(spf)
+    RE.is_match(s) || ENDING_SPACE.is_match(s)
 }
 
 pub(crate) fn char_to_qualifier(c: char) -> Qualifier {

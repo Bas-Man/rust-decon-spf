@@ -98,7 +98,7 @@ impl FromStr for Spf {
         if source.len() > MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
-        if helpers::spf_has_consecutive_whitespace(source.as_str()) {
+        if helpers::spf_check_whitespace(source.as_str()) {
             return Err(SpfError::WhiteSpaceSyntaxError);
         };
         // Basic Checks are ok.
