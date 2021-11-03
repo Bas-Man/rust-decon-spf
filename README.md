@@ -1,3 +1,5 @@
+[![Latest Version](https://img.shields.io/crates/v/decon-spf.svg)](https://crates.io/crates/decon-spf) [![Docs](https://docs.rs/decon-spf/badge.svg)](https://docs.rs/decon-spf)
+
 # Overview
 
 This crate allows you to deconstruct an existing SPF record that might be retrieved with a dns query of type TXT.  
