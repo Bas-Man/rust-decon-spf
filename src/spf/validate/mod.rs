@@ -56,7 +56,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
         if spf.source.len() > 255 {
             return Err(SpfError::SourceLengthExceeded);
         };
-        if !helpers::spf_check_whitespace(&spf.to_string()) {
+        if !helpers::spf_has_consecutive_whitespace(&spf.to_string()) {
             return Err(SpfError::WhiteSpaceSyntaxError);
         }
     } else {
