@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: RFC1123 Allowing additional characters for host names
+    url: https://www.ietf.org/rfc/rfc1123.txt
+    about: >
+      This is the RFC which documents how we are allowed to use additional chracters to 
+      create special host records such as _spf.example.com
