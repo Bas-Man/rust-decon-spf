@@ -9,7 +9,13 @@ assignees: ''
 ---
 
 What Mechanism are you trying to create?  
-A[ ] MX[ ] INCLUDE[ ] IP4[ ] IP6[ ] EXISTS[ ] PTR[ ] ALL[ ]
+- A [ ] 
+- MX [ ]
+- INCLUDE [ ]
+- IP4 [ ] IP6[ ]
+- EXISTS[ ]
+- PTR[ ]
+- ALL[ ]
 
 What is the string you are providing?
 [STRING]
