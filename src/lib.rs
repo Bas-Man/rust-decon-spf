@@ -6,7 +6,7 @@
 //!
 //! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)  
 //!
-//! This crate is able to decontruct `v=spf1` and `spf2.0` records.
+//! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
 //!
 //! # Features:
 //! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
