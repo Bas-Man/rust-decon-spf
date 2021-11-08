@@ -13,6 +13,7 @@ pub enum MechanismError {
     NotIpNetworkMechanism,
     /// Attempted to access a Mechanism as a `Mechanism<String>` but is `Mechanism<IpNetwork>`
     NotStringMechanism,
+    NotValidDomainHost(String),
 }
 
 impl std::fmt::Display for MechanismError {
@@ -35,6 +36,9 @@ impl std::fmt::Display for MechanismError {
             }
             MechanismError::NotStringMechanism => {
                 write!(f, "Attempt to access IP as TXT.")
+            }
+            MechanismError::NotValidDomainHost(host) => {
+                write!(f, "{} is not a valid Spf Host record.", host)
             }
         }
     }

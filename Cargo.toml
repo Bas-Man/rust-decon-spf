@@ -45,4 +45,4 @@ addr = { version = "0.15.0", optional = true }
 trust-dns-resolver = "0.20.1"
 
 [features]
-strict-dns = ["addr"] # a custom name
+warn-dns = ["addr"] # a custom name

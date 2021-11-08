@@ -7,6 +7,10 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::num::ParseIntError;
 
+// Provide domain host validation check.
+#[cfg(feature = "warn-dns")]
+use addr::parse_dns_name;
+
 // List of Regular Expressions used to parse Spf Mechanisms.
 // Note: This Regex has errors. Needs to be reworked.
 // Tends to match any string starting with 'a'
@@ -143,6 +147,32 @@ pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, 
         (Qualifier::Pass, record)
     }
 }
+
+// Return true if the domain/host is valid.
+#[allow(dead_code)]
+#[cfg(feature = "warn-dns")]
+pub(crate) fn dns_is_valid(name: &str) -> bool {
+    match parse_dns_name(name) {
+        Err(_) => return false,
+        Ok(dns) => return dns.has_known_suffix(),
+    };
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn invalid_tld() {
+    assert_eq!(dns_is_valid("t.xx"), false);
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn valid_domain() {
+    assert_eq!(dns_is_valid("test.com"), true);
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn valid_host() {
+    assert_eq!(dns_is_valid("_spf.test.com"), true);
+}
+
 #[test]
 fn return_and_remove_qualifier_no_qualifier() {
     let source = "no prefix";

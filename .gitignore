@@ -1,3 +1,6 @@
 debug/
 target/
 Cargo.lock
+
+# Editor Items
+.vscode/

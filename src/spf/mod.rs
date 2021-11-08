@@ -38,6 +38,8 @@ pub struct Spf {
     was_parsed: bool,
     was_validated: bool,
     is_valid: bool,
+    #[cfg(feature = "warn-dns")]
+    erroneous: Option<Vec<String>>,
 }
 
 impl std::fmt::Display for Spf {
@@ -65,6 +67,8 @@ impl Default for Spf {
             was_parsed: false,
             was_validated: false,
             is_valid: false,
+            #[cfg(feature = "warn-dns")]
+            erroneous: None,
         }
     }
 }
