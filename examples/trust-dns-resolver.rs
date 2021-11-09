@@ -24,7 +24,9 @@ fn main() {
 
     let spf_record = display_txt(&query, &txt_response);
     println!("\nDecontructing SPF Record");
+    println!("Debug Output!");
     println!("{:?}", spf_record);
+    println!("\nSource Attribute Output");
     println!("SPF1: {}\n", spf_record.source());
     if spf_record.includes().is_some() {
         println!("Include list");
@@ -32,22 +34,22 @@ fn main() {
             println!("spf: {}", mechanism);
         }
     }
-    if spf_record.ip4().is_some() {
+    if let Some(list) = spf_record.ip4() {
         println!("IP4 Address Ranges");
-        for mechanism in spf_record.ip4().unwrap().iter() {
+        for mechanism in list.iter() {
             println!(
-                "IP: {} prefix: {}",
+                "Network: {} prefix: {}",
                 mechanism.as_network().network(),
                 mechanism.as_network().prefix()
             );
-            println!("spf: {}", mechanism);
+            println!("Mechanism: {}", mechanism);
         }
     }
-    if spf_record.ip6().is_some() {
+    if let Some(list) = spf_record.ip6() {
         println!("IP6 Address Ranges");
-        for mechanism in spf_record.ip6().unwrap().iter() {
+        for mechanism in list.iter() {
             println!(
-                "IP: {} prefix: {}",
+                "Network: {} prefix: {}",
                 mechanism.as_network().network(),
                 mechanism.as_network().prefix()
             );
@@ -56,10 +58,13 @@ fn main() {
     }
     println!("\nIs a redirect: {}", spf_record.is_redirect());
     if spf_record.is_redirect() {
-        println!("\nredirect: {}", spf_record.redirect().unwrap().raw());
-        println!("mechanism: {}", spf_record.redirect().unwrap());
+        if let Some(mechanism) = spf_record.redirect() {
+            println!("\nRaw Redirect: {}", mechanism.raw());
+            println!("Mechanism: {}", mechanism);
+        }
     }
-    println!("spf: {}", spf_record);
+    println!("Build Spf from Struct. Not from source()");
+    println!("Spf: {}", spf_record);
 }
 
 fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
