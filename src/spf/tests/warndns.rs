@@ -117,6 +117,17 @@ fn invalid_include() {
 }
 #[cfg(feature = "warn-dns")]
 #[test]
+fn invalid_exists() {
+    let input = "v=spf1 exists:test.t";
+
+    let spf: Spf = input.parse().unwrap();
+    assert_eq!(spf.exists().unwrap()[0].raw(), "test.t");
+    assert_eq!(spf.warnings.is_some(), true);
+    assert_eq!(spf.has_warnings(), true);
+    assert_eq!(spf.warnings.unwrap()[0], "test.t");
+}
+#[cfg(feature = "warn-dns")]
+#[test]
 fn multiple_errors() {
     let input = "v=spf1 a:ex.t/23 mx:test.e -all";
     let err = vec!["ex.t/23", "test.e"];

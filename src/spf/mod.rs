@@ -142,13 +142,15 @@ impl FromStr for Spf {
                     vec_of_includes.push(include);
                 }
             } else if record.contains("exists:") {
-                #[cfg(feature = "warn-dns")]
-                {
-                    if !helpers::dns_is_valid(record) {
-                        vec_of_warnings.push(record.to_string().clone());
+                if let Ok(exists) = Mechanism::<String>::from_str(record) {
+                    #[cfg(feature = "warn-dns")]
+                    {
+                        if !helpers::dns_is_valid(&exists.raw()) {
+                            vec_of_warnings.push(exists.raw());
+                        }
                     }
+                    vec_of_exists.push(Mechanism::<String>::from_str(record).unwrap());
                 }
-                vec_of_exists.push(Mechanism::<String>::from_str(record).unwrap());
             } else if record.contains("ip4:") {
                 // Match an ip4
                 let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
