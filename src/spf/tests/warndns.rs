@@ -94,6 +94,29 @@ fn invalid_ptr() {
 }
 #[cfg(feature = "warn-dns")]
 #[test]
+fn invalid_redirect() {
+    let input = "v=spf1 redirect=_spf.example.o";
+
+    let spf: Spf = input.parse().unwrap();
+    assert_eq!(spf.is_redirect(), true);
+    assert_eq!(spf.redirect().unwrap().raw(), "_spf.example.o");
+    assert_eq!(spf.warnings.is_some(), true);
+    assert_eq!(spf.has_warnings(), true);
+    assert_eq!(spf.warnings.unwrap()[0], "_spf.example.o");
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn invalid_include() {
+    let input = "v=spf1 include:test.t";
+
+    let spf: Spf = input.parse().unwrap();
+    assert_eq!(spf.includes().unwrap()[0].raw(), "test.t");
+    assert_eq!(spf.warnings.is_some(), true);
+    assert_eq!(spf.has_warnings(), true);
+    assert_eq!(spf.warnings.unwrap()[0], "test.t");
+}
+#[cfg(feature = "warn-dns")]
+#[test]
 fn multiple_errors() {
     let input = "v=spf1 a:ex.t/23 mx:test.e -all";
     let err = vec!["ex.t/23", "test.e"];

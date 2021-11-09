@@ -121,23 +121,26 @@ impl FromStr for Spf {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
                 // Match a redirect
-                #[cfg(feature = "warn-dns")]
-                {
-                    if !helpers::dns_is_valid(record) {
-                        vec_of_warnings.push(record.to_string().clone());
+                if let Ok(redirect) = Mechanism::<String>::from_str(record) {
+                    #[cfg(feature = "warn-dns")]
+                    {
+                        if !helpers::dns_is_valid(&redirect.raw()) {
+                            vec_of_warnings.push(redirect.raw());
+                        }
                     }
+                    spf.redirect = Some(redirect);
+                    spf.is_redirected = true;
                 }
-                spf.redirect = Some(Mechanism::<String>::from_str(record).unwrap());
-                spf.is_redirected = true;
             } else if record.contains("include:") {
-                #[cfg(feature = "warn-dns")]
-                {
-                    if !helpers::dns_is_valid(record) {
-                        vec_of_warnings.push(record.to_string().clone());
+                if let Ok(include) = Mechanism::<String>::from_str(record) {
+                    #[cfg(feature = "warn-dns")]
+                    {
+                        if !helpers::dns_is_valid(&include.raw()) {
+                            vec_of_warnings.push(include.raw());
+                        }
                     }
+                    vec_of_includes.push(include);
                 }
-                // Match an include
-                vec_of_includes.push(Mechanism::<String>::from_str(record).unwrap());
             } else if record.contains("exists:") {
                 #[cfg(feature = "warn-dns")]
                 {
