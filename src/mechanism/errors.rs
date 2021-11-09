@@ -3,9 +3,9 @@
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
     NotValidMechanismFormat(String),
-    /// Indcates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
+    /// Indicates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
     NotIP4Network(String),
-    /// Indcates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
+    /// Indicates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
     NotIP6Network(String),
     /// Indicates that the provided string does not contain any valid IpNetwork.
     NotValidIPNetwork(String),
@@ -13,6 +13,7 @@ pub enum MechanismError {
     NotIpNetworkMechanism,
     /// Attempted to access a Mechanism as a `Mechanism<String>` but is `Mechanism<IpNetwork>`
     NotStringMechanism,
+    /// Indicates that the host record is not valid. Does not conform to RFC1123
     NotValidDomainHost(String),
 }
 
@@ -38,7 +39,7 @@ impl std::fmt::Display for MechanismError {
                 write!(f, "Attempt to access IP as TXT.")
             }
             MechanismError::NotValidDomainHost(host) => {
-                write!(f, "{} is not a valid Spf Host record.", host)
+                write!(f, "{} is not a valid string for a host record.", host)
             }
         }
     }

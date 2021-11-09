@@ -38,8 +38,7 @@ pub struct Spf {
     was_parsed: bool,
     was_validated: bool,
     is_valid: bool,
-    #[cfg(feature = "warn-dns")]
-    erroneous: Option<Vec<String>>,
+    warnings: Option<Vec<String>>,
 }
 
 impl std::fmt::Display for Spf {
@@ -67,8 +66,7 @@ impl Default for Spf {
             was_parsed: false,
             was_validated: false,
             is_valid: false,
-            #[cfg(feature = "warn-dns")]
-            erroneous: None,
+            warnings: None,
         }
     }
 }
@@ -115,18 +113,38 @@ impl FromStr for Spf {
         let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+        #[cfg(feature = "warn-dns")]
+        let mut vec_of_warnings: Vec<String> = Vec::new();
         for record in records {
             // Consider ensuring we do this once at least and then skip
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
                 // Match a redirect
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !helpers::dns_is_valid(record) {
+                        vec_of_warnings.push(record.to_string().clone());
+                    }
+                }
                 spf.redirect = Some(Mechanism::<String>::from_str(record).unwrap());
                 spf.is_redirected = true;
             } else if record.contains("include:") {
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !helpers::dns_is_valid(record) {
+                        vec_of_warnings.push(record.to_string().clone());
+                    }
+                }
                 // Match an include
                 vec_of_includes.push(Mechanism::<String>::from_str(record).unwrap());
             } else if record.contains("exists:") {
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !helpers::dns_is_valid(record) {
+                        vec_of_warnings.push(record.to_string().clone());
+                    }
+                }
                 vec_of_exists.push(Mechanism::<String>::from_str(record).unwrap());
             } else if record.contains("ip4:") {
                 // Match an ip4
@@ -159,10 +177,36 @@ impl FromStr for Spf {
                 spf.all = Some(Mechanism::<String>::from_str(record).unwrap());
             // Handle A, MX and PTR types.
             } else if let Some(a_mechanism) = helpers::capture_matches(record, Kind::A) {
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !a_mechanism.raw().starts_with('/')
+                        && !helpers::dns_is_valid(helpers::get_domain_before_slash(
+                            &a_mechanism.raw(),
+                        ))
+                    {
+                        vec_of_warnings.push(a_mechanism.raw());
+                    }
+                }
                 vec_of_a.push(a_mechanism);
             } else if let Some(mx_mechanism) = helpers::capture_matches(record, Kind::MX) {
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !mx_mechanism.raw().starts_with('/')
+                        && !helpers::dns_is_valid(helpers::get_domain_before_slash(
+                            &mx_mechanism.raw(),
+                        ))
+                    {
+                        vec_of_warnings.push(mx_mechanism.raw());
+                    }
+                }
                 vec_of_mx.push(mx_mechanism);
             } else if let Some(ptr_mechanism) = helpers::capture_matches(record, Kind::Ptr) {
+                #[cfg(feature = "warn-dns")]
+                {
+                    if !helpers::dns_is_valid(&ptr_mechanism.raw()) {
+                        vec_of_warnings.push(ptr_mechanism.raw());
+                    }
+                }
                 spf.ptr = Some(ptr_mechanism);
             }
         }
@@ -185,6 +229,13 @@ impl FromStr for Spf {
         if !vec_of_exists.is_empty() {
             spf.exists = Some(vec_of_exists);
         }
+        #[cfg(feature = "warn-dns")]
+        {
+            if !vec_of_warnings.is_empty() {
+                spf.warnings = Some(vec_of_warnings);
+            }
+        }
+
         spf.was_parsed = true;
         spf.is_valid = true;
         spf.source = source;
@@ -215,6 +266,12 @@ impl Spf {
             return self.is_valid;
         };
         false
+    }
+    /// Check if there were any warnings when parsing the Spf String.
+    /// This can only be changed to `true` when `warn-dns` feature has been eabled. Other wise it
+    /// will always be `false`
+    pub fn has_warnings(&self) -> bool {
+        !self.warnings.is_none()
     }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {
@@ -530,5 +587,9 @@ impl Spf {
     /// Returns a reference to `Mechanism<String>` for `All`
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
+    }
+    /// Return a reference to the list of domains that gave warnings.
+    pub fn warnings(&self) -> Option<&Vec<String>> {
+        self.warnings.as_ref()
     }
 }

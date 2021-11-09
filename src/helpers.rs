@@ -2,7 +2,6 @@ use crate::mechanism::Kind;
 use crate::mechanism::Mechanism;
 use crate::mechanism::Qualifier;
 use ipnetwork::IpNetwork;
-//use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::num::ParseIntError;
@@ -131,7 +130,7 @@ pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> 
 #[doc(hidden)]
 // Check if the initial character in the string `record` matches `c`
 // If they do no match then return the initial character
-// if c matches first character of record, we can `+`, a blank modiifer equates to `+`
+// if c matches first character of record, we can `+`, a blank modifier equates to `+`
 pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, &str) {
     // Returns a tuple of (qualifier, &str)
     // &str will have had the qualifier character removed if it existed. The &str will be unchanged
@@ -147,15 +146,46 @@ pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, 
         (Qualifier::Pass, record)
     }
 }
+#[cfg(feature = "warn-dns")]
+pub(crate) fn get_domain_before_slash(s: &str) -> &str {
+    if !s.starts_with('/') && s.contains('/') {
+        s.split('/').next().unwrap()
+    } else {
+        s
+    }
+}
+#[test]
+#[cfg(feature = "warn-dns")]
+fn start_with_slash() {
+    let input = "/24";
+    assert_eq!(get_domain_before_slash(input), "/24");
+}
+#[test]
+#[cfg(feature = "warn-dns")]
+fn domain_contains_slash() {
+    let input = "test.com/24";
+    assert_eq!(get_domain_before_slash(input), "test.com");
+}
+#[test]
+#[cfg(feature = "warn-dns")]
+fn domain_without_slash() {
+    let input = "test.com";
+    assert_eq!(get_domain_before_slash(input), "test.com");
+}
 
 // Return true if the domain/host is valid.
 #[allow(dead_code)]
 #[cfg(feature = "warn-dns")]
 pub(crate) fn dns_is_valid(name: &str) -> bool {
-    match parse_dns_name(name) {
-        Err(_) => return false,
-        Ok(dns) => return dns.has_known_suffix(),
-    };
+    // These can not be and do not need to be tested. They are always valid.
+    if name == "a" || name == "mx" || name == "ptr" {
+        true
+    } else {
+        match parse_dns_name(name) {
+            Err(_) => false,
+            Ok(dns) => dns.has_known_suffix(),
+        }
+    }
 }
 #[cfg(feature = "warn-dns")]
 #[test]
@@ -169,8 +199,18 @@ fn valid_domain() {
 }
 #[cfg(feature = "warn-dns")]
 #[test]
-fn valid_host() {
-    assert_eq!(dns_is_valid("_spf.test.com"), true);
+fn valid_a() {
+    assert_eq!(dns_is_valid("a"), true);
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn valid_mx() {
+    assert_eq!(dns_is_valid("mx"), true);
+}
+#[cfg(feature = "warn-dns")]
+#[test]
+fn valid_ptr() {
+    assert_eq!(dns_is_valid("ptr"), true);
 }
 
 #[test]
