@@ -10,6 +10,9 @@ use std::num::ParseIntError;
 #[cfg(feature = "warn-dns")]
 use addr::parse_dns_name;
 
+/// This is the maximnum number of characters that an Spf Record can store.
+pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
+
 // List of Regular Expressions used to parse Spf Mechanisms.
 // Note: This Regex has errors. Needs to be reworked.
 // Tends to match any string starting with 'a'
@@ -109,18 +112,18 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
 }
 
 // builds a string representation of of the mechanisms stored in the Vec<Mechanism<String>>
-pub(crate) fn build_spf_str(str: Option<&Vec<Mechanism<String>>>) -> String {
+pub(crate) fn build_spf_str(str: &Vec<Mechanism<String>>) -> String {
     let mut partial_spf = String::new();
-    for i in str.unwrap().iter() {
+    for i in str.iter() {
         partial_spf.push(' ');
         partial_spf.push_str(i.to_string().as_str());
     }
     partial_spf
 }
 // builds a string representation of of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
-pub(crate) fn build_spf_str_from_ip(str: Option<&Vec<Mechanism<IpNetwork>>>) -> String {
+pub(crate) fn build_spf_str_from_ip(str: &Vec<Mechanism<IpNetwork>>) -> String {
     let mut partial_spf = String::new();
-    for i in str.unwrap().iter() {
+    for i in str.iter() {
         partial_spf.push(' ');
         partial_spf.push_str(i.to_string().as_str());
     }

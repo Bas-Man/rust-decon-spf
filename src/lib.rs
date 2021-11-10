@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 //! This crate is responsible for providing tools to access and modify information about spf records.  
 //! Provides methods for building spf records programmatically.  
 //!
@@ -8,12 +9,17 @@
 //!
 //! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
 //!
-//! # Features:
+//! # Abilities:
 //! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
 //!     - [`Mechanism`](mechanism::Mechanism)
 //!     - [`Check Qualifier Type`](mechanism::Mechanism::is_pass)
 //!     - [`Check Mechanism Type`](mechanism::Mechanism::kind)
+//!
+//! # Feature Flags:
+//! - `warn-dns` (Disabled by default.)
+//!
+//!   This enables syntactical checking of Domain Names.
 //!
 //! # Example Code
 //! Deconstructing an existing spf record into its corresponding components.

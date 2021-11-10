@@ -1,5 +1,17 @@
 //! This module contains the tools and functions to dealing with Mechanisms found within an Spf DNS record.  
 //!
+//! The Mechanism struct stores information about the `mechanism` or `modifier` found in the string representation
+//! of the `Spf` record. It contains a number of methods for transversing and accessing this data.
+//!
+//! The module also contains a number of ways to create the `Mechanism` instances.
+//! - [`ParsedMechanism`](parsedmechanism::ParsedMechanism)
+//!     - This provides a unified method for parsing any mechanism string. It will either contain a `Mechanism<String>`
+//! or a `Mechanism<IpNetwork>` if the string is succesfully parsed.
+//! - Both `Mechanism<String>` and `Mechanism<IpNetwork>` have the `FromStr` trait implemented. Allowing the for the strings
+//! to be `parsed()`
+//! - The `Mechanism` struct also has a number of specfic methods which can be used to create related mechanisms; which are
+//! used with the `FromStr` trait.
+//!
 mod errors;
 mod kind;
 mod parsedmechanism;
@@ -14,8 +26,6 @@ pub use crate::mechanism::qualifier::Qualifier;
 use crate::helpers;
 use ipnetwork::IpNetwork;
 use std::{convert::TryFrom, str::FromStr};
-
-// //! A struct created either by having an existing SPF record `parsed` or programmatically created.
 
 /// Stores its [`Kind`](Kind), [`Qualifier`](Qualifier), and its `Value`
 #[derive(Debug, Clone)]

@@ -45,4 +45,8 @@ addr = { version = "0.15.0", optional = true }
 trust-dns-resolver = "0.20.1"
 
 [features]
-warn-dns = ["addr"] # a custom name
+warn-dns = ["addr"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

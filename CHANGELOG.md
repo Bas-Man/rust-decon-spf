@@ -1,3 +1,9 @@
+0.2.2 2021-12-09
+================
+
+- Add Feature (warn-dns)  
+  With this feature enabled any malformed DNS records will cause `has_warnings()` to be set to `true`. Their values can then be accessed using `warnings()`. Even though they are invalid. No error will be generated.
+  
 0.2.1 2021-11-03
 ================
 

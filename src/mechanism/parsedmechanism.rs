@@ -4,7 +4,7 @@ use ipnetwork::IpNetwork;
 use std::{convert::TryFrom, str::FromStr};
 
 /// Stores the result of a successful parsing of a Mechanism String.  
-/// This will either contain a Mechanism holding a `String` or Mechanism holding an `IpNetwork`
+/// This will either contain a `Mechanism<String>` or `Mechanism<IpNetwork>`
 #[derive(Debug)]
 pub enum ParsedMechanism {
     /// This variant represents a Mechanism containing a String  
@@ -65,11 +65,13 @@ impl ParsedMechanism {
     ///```rust
     /// use decon_spf::mechanism::{ParsedMechanism,MechanismError};
     /// let parsed_mechanism = ParsedMechanism::new("ptr").unwrap();
+    /// // This is clearly not and `IpNetwork` so use `.txt()`
     /// let mechanism = parsed_mechanism.txt();
-    /// assert_eq!(mechanism.kind().is_ptr(), true);
+    /// // How parse errors are handled.
     /// let error: Result<ParsedMechanism, MechanismError> =
     ///     ParsedMechanism::new("ab.com");
-    /// assert_eq!(error.unwrap_err(), MechanismError::NotValidMechanismFormat("ab.com".to_string()));
+    /// assert_eq!(error.unwrap_err(),
+    ///            MechanismError::NotValidMechanismFormat("ab.com".to_string()));
     ///```
     pub fn new(s: &str) -> Result<ParsedMechanism, MechanismError> {
         if s.contains("ip4:") || s.contains("ip6:") {
@@ -131,7 +133,7 @@ impl ParsedMechanism {
     pub fn new_all(q: Qualifier) -> ParsedMechanism {
         ParsedMechanism::TXT(Mechanism::new_all(q))
     }
-    /// Provides the ability to extract a `Mechanism` which is not `ip4` or `ip6`
+    /// Returns a new `Mechanism<String>`
     /// # Example:
     ///```rust
     /// use decon_spf::mechanism::{ParsedMechanism,Mechanism};
@@ -147,10 +149,10 @@ impl ParsedMechanism {
             ParsedMechanism::IP(_) => unreachable!(),
         }
     }
-    /// Provides the ability to extract a `Mechanism` which is either a `ip4` or `ip6`
+    /// Returns a new `Mechanism<IpNetwork>`
     /// # Example:
     ///```rust
-    /// use decon_spf::mechanism::{ParsedMechanism,Mechanism};
+    /// use decon_spf::mechanism::{ParsedMechanism, Mechanism};
     /// let parsed_mechanism = ParsedMechanism::new("ip4:203.32.160.0/24").unwrap();
     /// let mechanism = parsed_mechanism.network();
     /// assert_eq!(mechanism.kind().is_ip_v4(), true);
@@ -182,7 +184,7 @@ impl ParsedMechanism {
             ParsedMechanism::IP(ref m) => m.raw(),
         }
     }
-    #[doc(hidden)]
+    /// Returns `true` if the mechanim is an `IpNetwork` or `false` if it contains any other; A, MX, etc.
     pub fn is_network(&self) -> bool {
         match *self {
             ParsedMechanism::TXT(_) => false,

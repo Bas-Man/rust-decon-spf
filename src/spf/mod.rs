@@ -15,9 +15,6 @@ use ipnetwork::IpNetwork;
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use std::{convert::TryFrom, str::FromStr};
 
-/// This is the maximnum number of characters that an Spf Record can store.
-const MAX_SPF_STRING_LENGTH: usize = 255;
-
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug)]
@@ -38,6 +35,7 @@ pub struct Spf {
     was_parsed: bool,
     was_validated: bool,
     is_valid: bool,
+    #[allow(dead_code)]
     warnings: Option<Vec<String>>,
 }
 
@@ -71,9 +69,9 @@ impl Default for Spf {
     }
 }
 
-/// Creates an `Spf Stuct` by parsing a spf string.
+/// Creates an `Spf Struct` by parsing a string representation of Spf.
 ///
-/// # examples
+/// # Examples:
 ///
 ///```rust
 /// use decon_spf::Spf;
@@ -88,6 +86,13 @@ impl Default for Spf {
 /// let err: SpfError = bad_input.to_string().parse::<Spf>().unwrap_err();
 /// assert_eq!(err.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
+///
+/// // Example with warn-dns feature enabled.
+/// // Spf contains an invalid DNS host entry
+/// let bad_spf2: Spf = "v=spf1 a mx:example.m/24 -all".parse().unwrap();
+/// // Note: `warn-dns` will check `example.m` ignoring `/24`
+/// assert_eq!(bad_spf2.has_warnings(), true);
+/// assert_eq!(bad_spf2.warnings().unwrap()[0], "example.m/24");
 ///```
 ///
 impl FromStr for Spf {
@@ -97,7 +102,7 @@ impl FromStr for Spf {
         if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
             return Err(SpfError::InvalidSource);
         };
-        if source.len() > MAX_SPF_STRING_LENGTH {
+        if source.len() > helpers::MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
         if helpers::spf_check_whitespace(source.as_str()) {
@@ -275,6 +280,8 @@ impl Spf {
     /// Check if there were any warnings when parsing the Spf String.
     /// This can only be changed to `true` when `warn-dns` feature has been eabled. Other wise it
     /// will always be `false`
+    #[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
+    #[cfg(feature = "warn-dns")]
     pub fn has_warnings(&self) -> bool {
         !self.warnings.is_none()
     }
@@ -422,7 +429,7 @@ impl Spf {
     /// ```
     ///
     /// # Note:
-    /// If The Spf is already set as `Redirect` trying to append an `All`
+    /// If the Spf is already set as `Redirect` trying to append an `All`
     /// Mechanism will have no affect.
     // Consider make this a Result
     pub fn append_mechanism(&mut self, mechanism: Mechanism<String>) {
@@ -467,10 +474,10 @@ impl Spf {
     /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
     /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfError::LookupLimitExceeded)
     /// (This will change given new information)
-    #[deprecated(note = "This is expected to be deprecated.")]
+    #[deprecated(note = "This is expected to be depreciated.")]
     pub fn try_validate(&mut self) -> Result<(), SpfError> {
         if self.from_src {
-            if self.source.len() > MAX_SPF_STRING_LENGTH {
+            if self.source.len() > helpers::MAX_SPF_STRING_LENGTH {
                 return Err(SpfError::SourceLengthExceeded);
             } else if !self.was_parsed {
                 return Err(SpfError::HasNotBeenParsed);
@@ -506,27 +513,27 @@ impl Spf {
     fn build_spf_string(&self) -> String {
         let mut spf = String::new();
         spf.push_str(self.version());
-        if self.a().is_some() {
-            spf.push_str(helpers::build_spf_str(self.a()).as_str());
+        if let Some(a) = self.a() {
+            spf.push_str(helpers::build_spf_str(a).as_str());
         };
-        if self.mx().is_some() {
-            spf.push_str(helpers::build_spf_str(self.mx()).as_str());
+        if let Some(mx) = self.mx() {
+            spf.push_str(helpers::build_spf_str(mx).as_str());
         };
-        if self.includes().is_some() {
-            spf.push_str(helpers::build_spf_str(self.includes()).as_str());
+        if let Some(includes) = self.includes() {
+            spf.push_str(helpers::build_spf_str(includes).as_str());
         }
-        if self.ip4().is_some() {
-            spf.push_str(helpers::build_spf_str_from_ip(self.ip4()).as_str());
+        if let Some(ip4) = self.ip4() {
+            spf.push_str(helpers::build_spf_str_from_ip(ip4).as_str());
         }
-        if self.ip6().is_some() {
-            spf.push_str(helpers::build_spf_str_from_ip(self.ip6()).as_str());
+        if let Some(ip6) = self.ip6() {
+            spf.push_str(helpers::build_spf_str_from_ip(ip6).as_str());
         }
-        if self.exists().is_some() {
-            spf.push_str(helpers::build_spf_str(self.exists()).as_str());
+        if let Some(exists) = self.exists() {
+            spf.push_str(helpers::build_spf_str(exists).as_str());
         }
-        if self.ptr().is_some() {
+        if let Some(ptr) = self.ptr() {
             spf.push(' ');
-            spf.push_str(self.ptr().unwrap().to_string().as_str());
+            spf.push_str(ptr.to_string().as_str());
         }
         if self.is_redirected {
             spf.push(' ');
@@ -594,6 +601,8 @@ impl Spf {
         self.all.as_ref()
     }
     /// Return a reference to the list of domains that gave warnings.
+    #[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
+    #[cfg(feature = "warn-dns")]
     pub fn warnings(&self) -> Option<&Vec<String>> {
         self.warnings.as_ref()
     }
