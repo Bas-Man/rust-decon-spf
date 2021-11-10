@@ -29,11 +29,11 @@ path = "src/lib.rs"
 
 [[example]]
 name = "trust-dns-demo"
-path = "examples/trust-dns-resolver.rs"
+path = "examples/trust-dns-demo.rs"
 
 [[example]]
 name = "build-spf"
-path = "examples/build-new-spf.rs"
+path = "examples/build-spf.rs"
 
 [dependencies]
 ipnetwork = "0.18.0"

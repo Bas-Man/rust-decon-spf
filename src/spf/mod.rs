@@ -149,7 +149,7 @@ impl FromStr for Spf {
                             vec_of_warnings.push(exists.raw());
                         }
                     }
-                    vec_of_exists.push(Mechanism::<String>::from_str(record).unwrap());
+                    vec_of_exists.push(exists);
                 }
             } else if record.contains("ip4:") {
                 // Match an ip4

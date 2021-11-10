@@ -11,8 +11,8 @@ Check the **Examples** directory for sample code.
 
 Lookup and deconstruct Spf record.
 
-- [trust-dns-resolver](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/trust-dns-resolver.rs)
-- [build-spf](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-new-spf.rs)
+- [trust-dns-resolver](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/trust-dns-demo.rs)
+- [build-spf](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-spf.rs)
 
 ### Run example
 To see a list of available examples.
