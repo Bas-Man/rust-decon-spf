@@ -17,7 +17,7 @@ use std::{convert::TryFrom, str::FromStr};
 
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Spf {
     source: String,
     version: String,
@@ -45,29 +45,29 @@ impl std::fmt::Display for Spf {
     }
 }
 
-impl Default for Spf {
-    fn default() -> Self {
-        Self {
-            source: String::new(),
-            version: String::new(),
-            from_src: false,
-            redirect: None,
-            is_redirected: false,
-            a: None,
-            mx: None,
-            include: None,
-            ip4: None,
-            ip6: None,
-            ptr: None,
-            exists: None,
-            all: None,
-            was_parsed: false,
-            was_validated: false,
-            is_valid: false,
-            warnings: None,
-        }
-    }
-}
+//impl Default for Spf {
+//   fn default() -> Self {
+//      Self {
+//            source: String::new(),
+//            version: String::new(),
+//           from_src: false,
+//            redirect: None,
+//           is_redirected: false,
+//            a: None,
+//           mx: None,
+//           include: None,
+//          ip4: None,
+//            ip6: None,
+//            ptr: None,
+//            exists: None,
+//            all: None,
+//            was_parsed: false,
+//            was_validated: false,
+//            is_valid: false,
+//            warnings: None,
+//        }
+//    }
+//}
 
 /// Creates an `Spf Struct` by parsing a string representation of Spf.
 ///

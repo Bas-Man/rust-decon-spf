@@ -1,6 +1,6 @@
 [package]
 name = "decon-spf"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Adam.S <Bas-Man@users.noreply.github.com>"]
 edition = "2018"
 
@@ -18,8 +18,8 @@ repository = "https://github.com/Bas-man/rust-decon-spf"
 
 readme = "README.md"
 
-keywords = ["DNS", "SPF"]
-categories = ["network-programming"]
+keywords = ["dns", "spf"]
+categories = ["network-programming", "parser-implementations"]
 
 license = "MIT"
 

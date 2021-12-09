@@ -50,19 +50,14 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
         None => None,
         Some(caps) => {
             // There was a match
-            if caps.name("qualifier").is_some() {
-                qualifier_char = caps
-                    .name("qualifier")
-                    .unwrap()
-                    .as_str()
-                    .chars()
-                    .next()
-                    .unwrap();
+            if let Some(qualifier) = caps.name("qualifier") {
+                qualifier_char = qualifier.as_str().chars().next().unwrap();
                 qualifier_result = char_to_qualifier(qualifier_char);
-            };
-            if caps.name("mechanism").is_some() {
+            }
+            //if caps.name("mechanism").is_some() {
+            if let Some(mechanism_value) = caps.name("mechanism") {
                 let mut new_mechanism: String = String::new();
-                mechanism_string = caps.name("mechanism").unwrap().as_str().to_string();
+                mechanism_string = mechanism_value.as_str().to_string();
                 // Check if we got a match on a number. No more than 3 digits.
                 // Regex matches [ domain, domain/num, num] so we handle the "num" case here
                 if mechanism_string.len() < 4 {
@@ -112,7 +107,7 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
 }
 
 // builds a string representation of of the mechanisms stored in the Vec<Mechanism<String>>
-pub(crate) fn build_spf_str(str: &Vec<Mechanism<String>>) -> String {
+pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
         partial_spf.push(' ');
@@ -121,7 +116,7 @@ pub(crate) fn build_spf_str(str: &Vec<Mechanism<String>>) -> String {
     partial_spf
 }
 // builds a string representation of of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
-pub(crate) fn build_spf_str_from_ip(str: &Vec<Mechanism<IpNetwork>>) -> String {
+pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
         partial_spf.push(' ');

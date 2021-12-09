@@ -121,8 +121,8 @@ impl TryFrom<&str> for Mechanism<String> {
 /// let bad_ip4: Result<Mechanism<IpNetwork>, MechanismError> = "ip4:203.32.160.0/33".parse();
 /// assert_eq!(bad_ip4.unwrap_err().to_string(), "invalid address: 203.32.160.0/33.");
 ///
-/// let ip6_but_ip6: Result<Mechanism<IpNetwork>, MechanismError> = "ip6:203.32.160.0/24".parse();
-/// let err = ip6_but_ip6.unwrap_err();
+/// let ip6_but_ip4: Result<Mechanism<IpNetwork>, MechanismError> = "ip6:203.32.160.0/24".parse();
+/// let err = ip6_but_ip4.unwrap_err();
 /// assert_eq!(err, MechanismError::NotIP6Network("203.32.160.0/24".to_string()));
 /// assert_eq!(err.to_string(), "Was given ip6:203.32.160.0/24. This is not an ip6 network.");
 ///```
@@ -216,7 +216,6 @@ impl<T> Mechanism<T> {
 
 impl Mechanism<String> {
     /// Create a new Mechanism struct of `Redirect`
-    #[doc(hidden)]
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::Redirect, qualifier, Some(mechanism))
     }
@@ -231,7 +230,6 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_a.kind().is_a(), true);
     /// assert_eq!(mechanism_a.raw(), "a".to_string());
     /// assert_eq!(mechanism_a.mechanism().is_none(), true);
-    #[doc(hidden)]
     pub fn new_a_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::A, qualifier, None)
     }
@@ -248,7 +246,6 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_of_a.raw(), "example.com");
     /// assert_eq!(mechanism_of_a.to_string(), "a:example.com");
     /// ```
-    #[doc(hidden)]
     pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::A, qualifier, Some(mechanism))
     }
@@ -263,7 +260,6 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_mx.kind().is_mx(), true);
     /// assert_eq!(mechanism_mx.raw(), "mx");
     /// ```
-    #[doc(hidden)]
     pub fn new_mx_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::MX, qualifier, None)
     }
@@ -278,7 +274,6 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_mx.raw(), "example.com");
     /// assert_eq!(mechanism_mx.to_string(), "mx:example.com")
     /// ```
-    #[doc(hidden)]
     pub fn new_mx_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::MX, qualifier, Some(mechanism))
     }
@@ -297,7 +292,6 @@ impl Mechanism<String> {
     ///                                                    String::from("example.com"));
     /// assert_eq!(mechanism_of_include2.to_string(), "~include:example.com")
     /// ```
-    #[doc(hidden)]
     pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::Include, qualifier, Some(mechanism))
     }
@@ -309,7 +303,6 @@ impl Mechanism<String> {
     /// use decon_spf::mechanism::Mechanism;
     /// let mechanism_of_ptr = Mechanism::new_ptr_without_mechanism(Qualifier::Fail);
     /// assert_eq!(mechanism_of_ptr.to_string(), "-ptr");
-    #[doc(hidden)]
     pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::Ptr, qualifier, None)
     }
@@ -324,19 +317,16 @@ impl Mechanism<String> {
     /// assert_eq!(mechanism_of_ptr.qualifier().as_str(), "");
     /// assert_eq!(mechanism_of_ptr.raw(), "example.com");
     /// assert_eq!(mechanism_of_ptr.to_string(), "ptr:example.com");
-    #[doc(hidden)]
     pub fn new_ptr_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::Ptr, qualifier, Some(mechanism))
     }
 
     /// Create a new Mechanism struct of `Exists`
-    #[doc(hidden)]
     pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::new(Kind::Exists, qualifier, Some(mechanism))
     }
 
     /// Create a new Mechanism struct of `All`
-    #[doc(hidden)]
     pub fn new_all(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::All, qualifier, None)
     }
@@ -385,15 +375,15 @@ impl Mechanism<String> {
             mechanism_str.push_str(self.qualifier.as_str());
         };
         mechanism_str.push_str(self.kind().as_str());
-        if self.rrdata.is_some() {
-            tmp_mechanism_str = self.rrdata.as_ref().unwrap().as_str();
+        if let Some(ref rrdata) = self.rrdata {
+            tmp_mechanism_str = rrdata.as_str();
         } else {
-            tmp_mechanism_str = ""
+            tmp_mechanism_str = "";
         }
         match self.kind {
             Kind::A | Kind::MX => {
                 // This must be starting with 'domain.com' So prepend ':'
-                if !tmp_mechanism_str.starts_with('/') && !tmp_mechanism_str.is_empty() {
+                if !tmp_mechanism_str.is_empty() && !tmp_mechanism_str.starts_with('/') {
                     mechanism_str.push(':')
                 }
             }
@@ -410,6 +400,8 @@ impl Mechanism<String> {
         mechanism_str
     }
 }
+
+/// Provide to_string for Mechanism<String>
 
 impl std::fmt::Display for Mechanism<String> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -445,7 +437,6 @@ impl Mechanism<IpNetwork> {
     /// assert_eq!(mechanism_ip6.kind().is_ip(), true);
     /// assert_eq!(mechanism_ip6.to_string(), "ip6:2001:4860:4000::/36".to_string());
     ///```
-    #[doc(hidden)]
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Mechanism<IpNetwork> {
         if mechanism.is_ipv4() {
             Mechanism::new_ip4(qualifier, mechanism)
@@ -519,6 +510,7 @@ impl Mechanism<IpNetwork> {
     }
 }
 
+/// Provide to_string for Mechanism<IpNetwork>
 impl std::fmt::Display for Mechanism<IpNetwork> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())
