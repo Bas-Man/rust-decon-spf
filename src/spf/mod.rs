@@ -91,7 +91,9 @@ impl Default for Spf {
 /// // Spf contains an invalid DNS host entry
 /// let bad_spf2: Spf = "v=spf1 a mx:example.m/24 -all".parse().unwrap();
 /// // Note: `warn-dns` will check `example.m` ignoring `/24`
+/// #[cfg(feature = "warn-dns")]
 /// assert_eq!(bad_spf2.has_warnings(), true);
+/// #[cfg(feature = "warn-dns")]
 /// assert_eq!(bad_spf2.warnings().unwrap()[0], "example.m/24");
 ///```
 ///
