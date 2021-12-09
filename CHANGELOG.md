@@ -1,3 +1,8 @@
+0.2.3 2021-12-09
+================
+
+- Add `#[cfg(feature = warn-dns)]` to code documentation to remove warnings and errors when feature is not enabled.
+
 0.2.2 2021-12-09
 ================
 
