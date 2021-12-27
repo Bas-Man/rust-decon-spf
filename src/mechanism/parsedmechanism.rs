@@ -80,59 +80,6 @@ impl ParsedMechanism {
             Ok(ParsedMechanism::TXT(Mechanism::<String>::from_str(s)?))
         }
     }
-    /// Create a `Redirect` Mechanism from `&str`
-    /// # Example:
-    ///```rust
-    /// use decon_spf::mechanism::ParsedMechanism;
-    /// use decon_spf::mechanism::Qualifier;
-    /// let parsed_mechanism = ParsedMechanism::new_redirect(Qualifier::Pass, "_spf.example.com");
-    /// let m = parsed_mechanism.txt();
-    /// assert_eq!(m.to_string(), "redirect=_spf.example.com");
-    ///```    
-    #[doc(hidden)]
-    pub fn new_redirect(qualifier: Qualifier, s: &str) -> ParsedMechanism {
-        ParsedMechanism::TXT(Mechanism::new_redirect(qualifier, s.to_string()))
-    }
-    #[doc(hidden)]
-    pub fn new_a(q: Qualifier, m: Option<String>) -> ParsedMechanism {
-        if let Some(m) = m {
-            ParsedMechanism::TXT(Mechanism::new_a_with_mechanism(q, m))
-        } else {
-            ParsedMechanism::TXT(Mechanism::new_a_without_mechanism(q))
-        }
-    }
-    #[doc(hidden)]
-    pub fn new_mx(q: Qualifier, m: Option<String>) -> ParsedMechanism {
-        if let Some(m) = m {
-            ParsedMechanism::TXT(Mechanism::new_mx_with_mechanism(q, m))
-        } else {
-            ParsedMechanism::TXT(Mechanism::new_mx_without_mechanism(q))
-        }
-    }
-    #[doc(hidden)]
-    pub fn new_include(q: Qualifier, m: String) -> Mechanism<String> {
-        Mechanism::new_include(q, m)
-    }
-    #[doc(hidden)]
-    pub fn new_ip(q: Qualifier, ip: IpNetwork) -> ParsedMechanism {
-        ParsedMechanism::IP(Mechanism::new_ip(q, ip))
-    }
-    #[doc(hidden)]
-    pub fn new_exists(q: Qualifier, m: String) -> Mechanism<String> {
-        Mechanism::new_exists(q, m)
-    }
-    #[doc(hidden)]
-    pub fn new_ptr(q: Qualifier, m: Option<String>) -> Mechanism<String> {
-        if let Some(m) = m {
-            Mechanism::new_ptr_with_mechanism(q, m)
-        } else {
-            Mechanism::new_ptr_without_mechanism(q)
-        }
-    }
-    #[doc(hidden)]
-    pub fn new_all(q: Qualifier) -> ParsedMechanism {
-        ParsedMechanism::TXT(Mechanism::new_all(q))
-    }
     /// Returns a new `Mechanism<String>`
     /// # Example:
     ///```rust
@@ -159,7 +106,7 @@ impl ParsedMechanism {
     ///```
     pub fn network(&self) -> Mechanism<IpNetwork> {
         match *self {
-            ParsedMechanism::IP(ref m) => Mechanism::new_ip(*m.qualifier(), *m.as_network()),
+            ParsedMechanism::IP(ref m) => Mechanism::create_ip(*m.qualifier(), *m.as_network()),
             ParsedMechanism::TXT(_) => unreachable!(),
         }
     }

@@ -18,6 +18,8 @@
 //!
 //! # Feature Flags:
 //! - `warn-dns` (Disabled by default.)
+//!     - This feature only applies to the Spf parser and only warns of possible problems.
+//! - `strict-dns` (Disabled by default.)
 //!
 //!   This enables syntactical checking of Domain Names.
 //!

@@ -7,7 +7,7 @@ use regex::Regex;
 use std::num::ParseIntError;
 
 // Provide domain host validation check.
-#[cfg(feature = "warn-dns")]
+#[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
 use addr::parse_dns_name;
 
 /// This is the maximnum number of characters that an Spf Record can store.
@@ -75,13 +75,13 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
                 if !new_mechanism.is_empty() {
                     mechanism_string = new_mechanism;
                 }
-                mechanism = Mechanism::new(
+                mechanism = Mechanism::generic_inclusive(
                     kind,
                     qualifier_result,
                     Some((*mechanism_string).to_string()),
                 );
             } else {
-                mechanism = Mechanism::new(kind, qualifier_result, None);
+                mechanism = Mechanism::generic_inclusive(kind, qualifier_result, None);
             }
             Some(mechanism)
         }
@@ -144,7 +144,7 @@ pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, 
         (Qualifier::Pass, record)
     }
 }
-#[cfg(feature = "warn-dns")]
+#[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
 pub(crate) fn get_domain_before_slash(s: &str) -> &str {
     if !s.starts_with('/') && s.contains('/') {
         s.split('/').next().unwrap()
@@ -171,12 +171,18 @@ fn domain_without_slash() {
     assert_eq!(get_domain_before_slash(input), "test.com");
 }
 
+#[cfg(feature = "warn-dns")]
+pub(crate) fn check_for_dns_warning(warning_vec: &mut Vec<String>, name: &str) {
+    if !dns_is_valid(name) {
+        warning_vec.push(name.to_string());
+    }
+}
 // Return true if the domain/host is valid.
 #[allow(dead_code)]
-#[cfg(feature = "warn-dns")]
+#[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
 pub(crate) fn dns_is_valid(name: &str) -> bool {
     // These can not be and do not need to be tested. They are always valid.
-    if name == "a" || name == "mx" || name == "ptr" {
+    if name == "a" || name == "mx" || name == "ptr" || name == "all" || name.starts_with('/') {
         true
     } else {
         match parse_dns_name(name) {

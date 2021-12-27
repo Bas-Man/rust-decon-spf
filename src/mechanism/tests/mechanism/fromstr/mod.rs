@@ -7,3 +7,4 @@ mod ipnetwork;
 mod mx;
 mod ptr;
 mod redirect;
+mod strictdns;

@@ -8,7 +8,7 @@ mod validate;
 
 use crate::helpers;
 use crate::mechanism::Kind;
-pub use crate::mechanism::{Mechanism, ParsedMechanism};
+pub use crate::mechanism::{Mechanism, ParsedMechanism, Qualifier};
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -44,30 +44,6 @@ impl std::fmt::Display for Spf {
         write!(f, "{}", self.build_spf_string())
     }
 }
-
-//impl Default for Spf {
-//   fn default() -> Self {
-//      Self {
-//            source: String::new(),
-//            version: String::new(),
-//           from_src: false,
-//            redirect: None,
-//           is_redirected: false,
-//            a: None,
-//           mx: None,
-//           include: None,
-//          ip4: None,
-//            ip6: None,
-//            ptr: None,
-//            exists: None,
-//            all: None,
-//            was_parsed: false,
-//            was_validated: false,
-//            is_valid: false,
-//            warnings: None,
-//        }
-//    }
-//}
 
 /// Creates an `Spf Struct` by parsing a string representation of Spf.
 ///
@@ -127,36 +103,44 @@ impl FromStr for Spf {
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
-                // Match a redirect
-                if let Ok(redirect) = Mechanism::<String>::from_str(record) {
+                let mut items = record.rsplit('=');
+                if let Some(rrdata) = items.next() {
+                    let m = Mechanism::generic_inclusive(
+                        Kind::Redirect,
+                        Qualifier::Pass,
+                        Some(rrdata.to_string()),
+                    );
                     #[cfg(feature = "warn-dns")]
                     {
-                        if !helpers::dns_is_valid(&redirect.raw()) {
-                            vec_of_warnings.push(redirect.raw());
-                        }
+                        helpers::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
                     }
-                    spf.redirect = Some(redirect);
+                    spf.redirect = Some(m);
                     spf.is_redirected = true;
                 }
             } else if record.contains("include:") {
-                if let Ok(include) = Mechanism::<String>::from_str(record) {
+                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
+                if let Some(rrdata) = record.rsplit(':').next() {
+                    let m = Mechanism::generic_inclusive(
+                        Kind::Include,
+                        qualifier_and_modified_str.0,
+                        Some(rrdata.to_string()),
+                    );
                     #[cfg(feature = "warn-dns")]
                     {
-                        if !helpers::dns_is_valid(&include.raw()) {
-                            vec_of_warnings.push(include.raw());
-                        }
+                        helpers::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
                     }
-                    vec_of_includes.push(include);
+                    vec_of_includes.push(m);
                 }
-            } else if record.contains("exists:") {
-                if let Ok(exists) = Mechanism::<String>::from_str(record) {
+            } else if let Some(exists_mechanism) = helpers::capture_matches(record, Kind::Exists) {
+                if !exists_mechanism.raw().contains('/') {
                     #[cfg(feature = "warn-dns")]
                     {
-                        if !helpers::dns_is_valid(&exists.raw()) {
-                            vec_of_warnings.push(exists.raw());
-                        }
+                        helpers::check_for_dns_warning(
+                            &mut vec_of_warnings,
+                            &exists_mechanism.raw(),
+                        );
                     }
-                    vec_of_exists.push(exists);
+                    vec_of_exists.push(exists_mechanism);
                 }
             } else if record.contains("ip4:") {
                 // Match an ip4
@@ -165,7 +149,7 @@ impl FromStr for Spf {
                     let valid_ip4 = raw_ip4.parse();
                     match valid_ip4 {
                         Ok(ip4) => {
-                            let network = Mechanism::new_ip4(qualifier_and_modified_str.0, ip4);
+                            let network = Mechanism::create_ip4(qualifier_and_modified_str.0, ip4);
                             vec_of_ip4.push(network);
                         }
                         Err(ip4) => return Err(SpfError::InvalidIPAddr(ip4)),
@@ -178,15 +162,16 @@ impl FromStr for Spf {
                     let valid_ip6 = raw_ip6.parse();
                     match valid_ip6 {
                         Ok(ip6) => {
-                            let network = Mechanism::new_ip6(qualifier_and_modified_str.0, ip6);
+                            let network = Mechanism::create_ip6(qualifier_and_modified_str.0, ip6);
                             vec_of_ip6.push(network);
                         }
                         Err(ip6) => return Err(SpfError::InvalidIPAddr(ip6)),
                     }
                 }
-            } else if record.ends_with("all") {
-                // deal with all if present
-                spf.all = Some(Mechanism::<String>::from_str(record).unwrap());
+            } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
+                spf.all = Some(Mechanism::create_all(
+                    helpers::return_and_remove_qualifier(record, 'a').0,
+                ));
             // Handle A, MX and PTR types.
             } else if let Some(a_mechanism) = helpers::capture_matches(record, Kind::A) {
                 #[cfg(feature = "warn-dns")]
@@ -215,9 +200,7 @@ impl FromStr for Spf {
             } else if let Some(ptr_mechanism) = helpers::capture_matches(record, Kind::Ptr) {
                 #[cfg(feature = "warn-dns")]
                 {
-                    if !helpers::dns_is_valid(&ptr_mechanism.raw()) {
-                        vec_of_warnings.push(ptr_mechanism.raw());
-                    }
+                    helpers::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
                 }
                 spf.ptr = Some(ptr_mechanism);
             }
@@ -339,8 +322,8 @@ impl Spf {
     /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
-    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
-    /// new_spf_record.append_mechanism(Mechanism::new_a_without_mechanism(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::create_a(Qualifier::Pass));
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                                      "203.32.160.0/23".parse().unwrap()));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
@@ -426,7 +409,7 @@ impl Spf {
     /// new_spf_record.set_v1();
     /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
     ///                                 "_spf.example.com".to_string()));
-    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
     ///
@@ -456,7 +439,7 @@ impl Spf {
     /// new_spf_record.set_v1();
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
-    /// new_spf_record.append_mechanism(Mechanism::new_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {

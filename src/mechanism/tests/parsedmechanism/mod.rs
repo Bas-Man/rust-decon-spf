@@ -2,14 +2,6 @@
 mod test_a {
     use crate::mechanism::MechanismError;
     use crate::mechanism::ParsedMechanism;
-    use crate::mechanism::Qualifier;
-    #[test]
-    fn make_a() {
-        let m = ParsedMechanism::new_a(Qualifier::Pass, None);
-        assert_eq!(m.txt().kind().is_a(), true);
-        assert_eq!(m.txt().qualifier().is_pass(), true);
-        assert_eq!(m.txt().raw(), "a");
-    }
     #[test]
     fn make_mechanism() {
         let m: ParsedMechanism = "ip4:203.32.160.0/24".parse().unwrap();
@@ -72,7 +64,6 @@ mod test_a {
 #[cfg(test)]
 mod redirect {
     use crate::mechanism::ParsedMechanism;
-    use crate::mechanism::Qualifier;
 
     #[test]
     fn parse_redirect() {
@@ -81,18 +72,84 @@ mod redirect {
         assert_eq!(m.txt().kind().is_redirect(), true);
         assert_eq!(m.txt().to_string(), "redirect=_spf.example.com");
     }
+}
+#[cfg(feature = "strict-dns")]
+#[cfg(test)]
+mod a_invalid {
+    use crate::mechanism::ParsedMechanism;
+
     #[test]
-    fn redirect_by_str() {
-        let input = "_spf.example.com";
-        let m = ParsedMechanism::new_redirect(Qualifier::Pass, input);
-        assert_eq!(m.txt().kind().is_redirect(), true);
-        assert_eq!(m.to_string(), "redirect=_spf.example.com");
+    fn check_a() {
+        let input = "-a:example.xx";
+        let m = ParsedMechanism::new(input);
+        let err = m.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "example.xx is not a valid string for a host record."
+        );
     }
+}
+#[cfg(feature = "strict-dns")]
+#[cfg(test)]
+mod mx_invalid {
+    use crate::mechanism::ParsedMechanism;
+
     #[test]
-    fn redirect_by_string() {
-        let input = String::from("_spf.example.com");
-        let m = ParsedMechanism::new_redirect(Qualifier::Pass, &input);
-        assert_eq!(m.txt().kind().is_redirect(), true);
-        assert_eq!(m.to_string(), "redirect=_spf.example.com");
+    fn check_a() {
+        let input = "+mx:example.xx";
+        let m = ParsedMechanism::new(input);
+        let err = m.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "example.xx is not a valid string for a host record."
+        );
+    }
+}
+#[cfg(feature = "strict-dns")]
+#[cfg(test)]
+mod include_invalid {
+    use crate::mechanism::ParsedMechanism;
+
+    #[test]
+    fn check_a() {
+        let input = "+include:example.xx";
+        let m = ParsedMechanism::new(input);
+        let err = m.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "example.xx is not a valid string for a host record."
+        );
+    }
+}
+#[cfg(feature = "strict-dns")]
+#[cfg(test)]
+mod ptr_invalid {
+    use crate::mechanism::ParsedMechanism;
+
+    #[test]
+    fn check_a() {
+        let input = "ptr:example.xx";
+        let m = ParsedMechanism::new(input);
+        let err = m.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "example.xx is not a valid string for a host record."
+        );
+    }
+}
+#[cfg(feature = "strict-dns")]
+#[cfg(test)]
+mod exists_invalid {
+    use crate::mechanism::ParsedMechanism;
+
+    #[test]
+    fn check_a() {
+        let input = "exists:example.xx";
+        let m = ParsedMechanism::new(input);
+        let err = m.unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "example.xx is not a valid string for a host record."
+        );
     }
 }

@@ -15,8 +15,8 @@ pub enum SpfValidationResult<'a> {
 impl<'a> std::fmt::Display for SpfValidationResult<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SpfValidationResult::Valid(obj) => write!(f, "{}", obj.to_string()),
-            SpfValidationResult::InValid(obj) => write!(f, "{}", obj.to_string()),
+            SpfValidationResult::Valid(obj) => write!(f, "{}", obj),
+            SpfValidationResult::InValid(obj) => write!(f, "{}", obj),
         }
     }
 }

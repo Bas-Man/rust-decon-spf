@@ -37,7 +37,7 @@ impl std::fmt::Display for SpfError {
             SpfError::RedirectWithAllMechanism => {
                 write!(f, "Redirect with unexpected 'All' Mechanism")
             }
-            SpfError::InvalidIPAddr(err) => write!(f, "{}", err.to_string()),
+            SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
         }
     }
 }
@@ -65,16 +65,32 @@ impl SpfError {
     pub fn is_invalid_source(&self) -> bool {
         matches!(self, Self::InvalidSource)
     }
+    /// Returns `true` if the SpfError indicates and Invalid Source error.
+    pub fn source_is_invalid(&self) -> bool {
+        matches!(self, Self::InvalidSource)
+    }
     /// Returns `true` if the SpfError indictes source length exceeds 255 characters.
     pub fn is_source_length_exceeded(&self) -> bool {
+        matches!(self, Self::SourceLengthExceeded)
+    }
+    /// Returns `true` if the SpfError indictes source length exceeds 255 characters.
+    pub fn source_length_exceeded(&self) -> bool {
         matches!(self, Self::SourceLengthExceeded)
     }
     /// Returns `true` if the SpfError indicates SPF contains more than 10 DNS lookups.
     pub fn is_lookup_limit_exceeded(&self) -> bool {
         matches!(self, Self::LookupLimitExceeded)
     }
+    /// Returns `true` if the SpfError indicates SPF contains more than 10 DNS lookups.
+    pub fn lookup_limit_exceeded(&self) -> bool {
+        matches!(self, Self::LookupLimitExceeded)
+    }
     /// Returns `true` if the SpfError indicates source of Spf has not been parsed.
     pub fn is_has_not_been_parsed(&self) -> bool {
+        matches!(self, Self::HasNotBeenParsed)
+    }
+    /// Returns `true` if the SpfError indicates source of Spf has not been parsed.
+    pub fn has_not_been_parsed(&self) -> bool {
         matches!(self, Self::HasNotBeenParsed)
     }
     /// Returns `true` if the SpfError indicates this is an invalid Spf Record.
