@@ -149,7 +149,7 @@ impl FromStr for Spf {
                     let valid_ip4 = raw_ip4.parse();
                     match valid_ip4 {
                         Ok(ip4) => {
-                            let network = Mechanism::create_ip4(qualifier_and_modified_str.0, ip4);
+                            let network = Mechanism::create_ip(qualifier_and_modified_str.0, ip4);
                             vec_of_ip4.push(network);
                         }
                         Err(ip4) => return Err(SpfError::InvalidIPAddr(ip4)),
@@ -162,7 +162,7 @@ impl FromStr for Spf {
                     let valid_ip6 = raw_ip6.parse();
                     match valid_ip6 {
                         Ok(ip6) => {
-                            let network = Mechanism::create_ip6(qualifier_and_modified_str.0, ip6);
+                            let network = Mechanism::create_ip(qualifier_and_modified_str.0, ip6);
                             vec_of_ip6.push(network);
                         }
                         Err(ip6) => return Err(SpfError::InvalidIPAddr(ip6)),

@@ -31,7 +31,7 @@ fn main() {
 
     println!("\nNew spf 2: >{}<", spf2);
     println!("Attempt to create invalid mx to spf2");
-    match Mechanism::create_mx(Qualifier::Pass).with_rrdata(String::from("example.xx")) {
+    match Mechanism::create_mx(Qualifier::Pass).with_rrdata("example.xx") {
         Ok(m) => {
             spf2.append_mechanism(m);
         }

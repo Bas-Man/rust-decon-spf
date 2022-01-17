@@ -248,25 +248,25 @@ impl<T> Mechanism<T> {
 impl Mechanism<String> {
     /// Create a new Mechanism struct of `Redirect`
     #[deprecated(
-        note = "This will  be depreciated in 0.3.0. Please use `create_redirect()` instead"
+        note = "This will be depreciated in 0.3.0. Please use `create_redirect()` instead"
     )]
     pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::generic_inclusive(Kind::Redirect, qualifier, Some(mechanism))
     }
 
     /// Create a new Mechanism struct of `Redirect`
-    pub fn create_redirect(qualifier: Qualifier, rrdata: String) -> Result<Self, MechanismError> {
+    pub fn create_redirect(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Redirect, qualifier).with_rrdata(rrdata)?)
     }
     /// Create a new Mechanism struct of `A` with no string value.
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `create_a()` instead")]
+    #[deprecated(note = "This will be depreciated in 0.3.0. Please use `create_a()` instead")]
     pub fn new_a_without_mechanism(qualifier: Qualifier) -> Self {
         Mechanism::generic_inclusive(Kind::A, qualifier, None)
     }
 
     /// Create a new Mechanism struct of `A` with string value.
     #[deprecated(
-        note = "This will  be depreciated in 0.3.0. Please use `create_a().with_rrdata()` instead"
+        note = "This will be depreciated in 0.3.0. Please use `create_a().with_rrdata()` instead"
     )]
     pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
         Mechanism::generic_inclusive(Kind::A, qualifier, Some(mechanism))
@@ -287,20 +287,20 @@ impl Mechanism<String> {
     /// assert_eq!(m.mechanism().is_none(), true);
     /// // Create `A` with rrdata
     /// if let Ok(m_with_rrdata) = Mechanism::create_a(Qualifier::Pass)
-    ///                                                .with_rrdata(String::from("example.com")) {
+    ///                                                .with_rrdata("example.com") {
     ///   assert_eq!(m_with_rrdata.raw(), "example.com".to_string());
     ///   assert_eq!(m_with_rrdata.to_string(), "a:example.com".to_string());
     /// }
     /// // Create `A` with bad rrdata and `strict-dns` is disabled
     /// if let Ok(bad_rrdata) = Mechanism::create_a(Qualifier::Pass)
-    ///                                             .with_rrdata(String::from("example.xx")) {
+    ///                                             .with_rrdata("example.xx") {
     ///   assert_eq!(bad_rrdata.raw(), "example.xx".to_string());
     ///   assert_eq!(bad_rrdata.to_string(), "a:example.xx".to_string());
     /// }
     /// // Create `A` with bad rrdata and `strict-dns` is enabled
     /// # #[cfg(feature = "strict-dns")] {
     /// if let Err(bad_rrdata) = Mechanism::create_a(Qualifier::Pass)
-    ///                                              .with_rrdata(String::from("example.xx")) {
+    ///                                              .with_rrdata("example.xx") {
     ///   assert_eq!(bad_rrdata, MechanismError::NotValidDomainHost("example.xx".to_string()));
     /// }
     /// # }
@@ -333,11 +333,12 @@ impl Mechanism<String> {
     /// assert_eq!(mx.kind().is_mx(), true);
     /// assert_eq!(mx.raw(), "mx");
     /// // with rrdata
-    /// let mx = Mechanism::new_mx_with_mechanism(Qualifier::Pass,
-    ///                                           String::from("example.com"));
-    /// assert_eq!(mx.kind().is_mx(), true);
-    /// assert_eq!(mx.raw(), "example.com".to_string());
-    /// assert_eq!(mx.to_string(), "mx:example.com".to_string());
+    /// if let Ok(mx) = Mechanism::create_mx(Qualifier::Pass)
+    ///                               .with_rrdata("example.com") {
+    ///   assert_eq!(mx.kind().is_mx(), true);
+    ///   assert_eq!(mx.raw(), "example.com".to_string());
+    ///   assert_eq!(mx.to_string(), "mx:example.com".to_string());
+    /// }
     /// ```
     pub fn create_mx(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::MX, qualifier)
@@ -356,16 +357,16 @@ impl Mechanism<String> {
     /// ```rust
     /// use decon_spf::mechanism::Qualifier;
     /// use decon_spf::mechanism::Mechanism;
-    /// let include = Mechanism::new_include(Qualifier::Pass,
-    ///                                         String::from("example.com"));
+    /// let include = Mechanism::create_include(Qualifier::Pass,
+    ///                                         "example.com").unwrap();
     /// assert_eq!(include.qualifier().as_str(), "");
     /// assert_eq!(include.raw(), "example.com");
     /// assert_eq!(include.to_string(), "include:example.com");
-    /// let include2 = Mechanism::new_include(Qualifier::SoftFail,
-    ///                                          String::from("example.com"));
+    /// let include2 = Mechanism::create_include(Qualifier::SoftFail,
+    ///                                          "example.com").unwrap();
     /// assert_eq!(include2.to_string(), "~include:example.com")
     /// ```
-    pub fn create_include(qualifier: Qualifier, rrdata: String) -> Result<Self, MechanismError> {
+    pub fn create_include(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Include, qualifier).with_rrdata(rrdata)?)
     }
 
@@ -391,8 +392,8 @@ impl Mechanism<String> {
     /// let ptr = Mechanism::create_ptr(Qualifier::Fail);
     /// assert_eq!(ptr.to_string(), "-ptr");
     /// // with rrdata
-    /// let ptr = Mechanism::new_ptr_with_mechanism(Qualifier::Fail,
-    ///                                             String::from("example.com"));
+    /// let ptr = Mechanism::create_ptr(Qualifier::Fail)
+    ///                                 .with_rrdata("example.com").unwrap();
     /// assert_eq!(ptr.to_string(), "-ptr:example.com");
     /// ```
     pub fn create_ptr(qualifier: Qualifier) -> Self {
@@ -408,21 +409,21 @@ impl Mechanism<String> {
     }
 
     /// Create a new Mechanism struct of `Exists`
-    pub fn create_exists(qualifier: Qualifier, rrdata: String) -> Result<Self, MechanismError> {
+    pub fn create_exists(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Exists, qualifier).with_rrdata(rrdata)?)
     }
     /// Set the rrdata for Mechanism
     /// # Note: This is only applicable for Mechanisms of `A`, `MX` and `Ptr`.  
     /// All other Mechanism types require `rrdata` to be set. That is to say that `rrdata` is
     /// **optional** for `A`, `MX` and `PTR`  
-    /// See: [create_a(Mechanism<String>::create_a) for an example.
-    pub fn with_rrdata(mut self, rrdata: String) -> Result<Self, MechanismError> {
+    /// See: [`create_a`](Mechanism<String>::create_a) for an example.
+    pub fn with_rrdata(mut self, rrdata: &str) -> Result<Self, MechanismError> {
         #[cfg(feature = "strict-dns")]
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
                     if !helpers::dns_is_valid(helpers::get_domain_before_slash(&rrdata)) {
-                        return Err(MechanismError::NotValidDomainHost(rrdata));
+                        return Err(MechanismError::NotValidDomainHost(rrdata.to_string()));
                     };
                 }
                 _ => {}
@@ -431,7 +432,7 @@ impl Mechanism<String> {
         match self.kind() {
             // Ensure that `All` is always None even if with_rrdata() is called
             Kind::All => self.rrdata = None,
-            _ => self.rrdata = Some(rrdata),
+            _ => self.rrdata = Some(rrdata.to_string()),
         }
         Ok(self)
     }
@@ -559,25 +560,26 @@ impl Mechanism<IpNetwork> {
     /// # Examples:
     /// ```
     /// # use ipnetwork::IpNetwork;
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::mechanism::{Mechanism, Qualifier};
     ///
     /// // Requires: use ipnetwork::IpNetwork;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    /// let mechanism = Mechanism::new_ip(Qualifier::Pass, ip);
+    /// let mechanism = Mechanism::create_ip(Qualifier::Pass, ip);
     /// assert_eq!(mechanism.kind().is_ip_v4(), true);
     /// assert_eq!(mechanism.raw(), "192.168.11.0/24".to_string());
     /// assert_eq!(mechanism.as_network().to_string(), "192.168.11.0/24".to_string());
     /// assert_eq!(mechanism.as_network().prefix(), 24);
     ///
     /// // This section does not require use of ipnetwork::IpNetwork;
-    /// let mechanism_ip4 = Mechanism::new_ip(Qualifier::Pass,
+    /// let mechanism_ip4 = Mechanism::create_ip(Qualifier::Pass,
     ///                                       "203.32.160.0/23".parse().unwrap());
     /// assert_eq!(mechanism_ip4.kind().is_ip(), true);
+    /// assert_eq!(mechanism_ip4.kind().is_ip_v4(), true);
     /// assert_eq!(mechanism_ip4.to_string(), "ip4:203.32.160.0/23".to_string());
-    /// let mechanism_ip6 = Mechanism::new_ip(Qualifier::Pass,
+    /// let mechanism_ip6 = Mechanism::create_ip(Qualifier::Pass,
     ///                                       "2001:4860:4000::/36".parse().unwrap());
     /// assert_eq!(mechanism_ip6.kind().is_ip(), true);
+    /// assert_eq!(mechanism_ip6.kind().is_ip_v6(),true);
     /// assert_eq!(mechanism_ip6.to_string(), "ip6:2001:4860:4000::/36".to_string());
     ///```
     pub fn create_ip(qualifier: Qualifier, rrdata: IpNetwork) -> Mechanism<IpNetwork> {
@@ -591,25 +593,23 @@ impl Mechanism<IpNetwork> {
     /// Create a new Mechanism<IpNetwork> of IP4
     #[doc(hidden)]
     #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `create_ip4()` instead")]
-    pub fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
+    fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV4, qualifier, Some(mechanism))
     }
 
     /// Create a new Mechanism<IpNetwork> of IP4
-    #[doc(hidden)]
-    pub fn create_ip4(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
+    fn create_ip4(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV4, qualifier, Some(rrdata))
     }
     /// Create a new Mechanism<IpNetwork> of IP6
     #[doc(hidden)]
     #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `create_ip6()` instead")]
-    pub fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
+    fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV6, qualifier, Some(mechanism))
     }
 
     /// Create a new Mechanism<IpNetwork> of IP6
-    #[doc(hidden)]
-    pub fn create_ip6(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
+    fn create_ip6(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV6, qualifier, Some(rrdata))
     }
     /// Returns the simple string representation of the mechanism
@@ -620,7 +620,7 @@ impl Mechanism<IpNetwork> {
     /// use decon_spf::mechanism::Qualifier;
     /// use decon_spf::mechanism::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
+    /// let ip_mechanism = Mechanism::create_ip(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
     /// assert_eq!(ip_mechanism.kind().is_ip(), true);
     ///```
@@ -638,7 +638,7 @@ impl Mechanism<IpNetwork> {
     /// use decon_spf::mechanism::Qualifier;
     /// use decon_spf::mechanism::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    /// let ip_mechanism = Mechanism::new_ip4(Qualifier::Pass, ip);
+    /// let ip_mechanism = Mechanism::create_ip(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.to_string(), "ip4:192.168.11.0/24");
     /// assert_eq!(ip_mechanism.as_network(), &ip);
     /// ```
