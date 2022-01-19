@@ -6,14 +6,16 @@ fn main() {
     spf1.set_v1();
     let ip_m_1 = ParsedMechanism::new("+ip4:203.32.160.0/24");
     let ip_m_2 = ParsedMechanism::new("+ip4:203.32.166.0/24");
-    let mx = ParsedMechanism::new("mx").unwrap();
     if let Ok(ip1) = ip_m_1 {
         spf1.append_ip_mechanism(ip1.network());
     }
     if let Ok(ip2) = ip_m_2 {
         spf1.append_ip_mechanism(ip2.network());
     }
-    spf1.append_mechanism(mx.txt());
+
+    if let Ok(mx) = ParsedMechanism::new("mx") {
+        spf1.append_mechanism(mx.txt());
+    }
 
     // example.xx is not a valid domain. There is no TLD of xx
     if let Ok(m) = "a:test.xx".parse() {

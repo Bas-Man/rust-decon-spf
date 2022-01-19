@@ -250,11 +250,6 @@ impl Spf {
     pub fn new() -> Self {
         Spf::default()
     }
-    /// Check that the source string was parsed and was valid.
-    //pub fn source_is_vaid(&self) -> bool {
-    //  // Should I check was validated?
-    //    self.source_is_valid
-    //}
     /// Check that data stored in the Spf Struct is considered a valid Spf Record.
     pub fn is_valid(&self) -> bool {
         if self.was_parsed || self.was_validated {

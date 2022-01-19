@@ -1,3 +1,12 @@
+0.2.4 2022-01-19
+================
+
+- Remove code which has been deprecated since 0.2.0
+- Implement `strict-dns` feature
+  - Use crate `addr` to validate *domain* information for `a`, `mx`, `ptr`, `include`, and `exists`
+  - See: `examples/build-spf-strict.rs`
+- Deprecate `Mechanism::new_` functions.
+
 0.2.3 2021-12-09
 ================
 

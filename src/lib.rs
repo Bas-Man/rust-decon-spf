@@ -18,10 +18,11 @@
 //!
 //! # Feature Flags:
 //! - `warn-dns` (Disabled by default.)
-//!     - This feature only applies to the Spf parser and only warns of possible problems.
-//! - `strict-dns` (Disabled by default.)
-//!
+//!     - This feature only applies to the Spf Parser and only warns of possible problems.
+//! - `strict-dns` (Disabled by default.)  
 //!   This enables syntactical checking of Domain Names.
+//!     - When enabled it changes the behavour of `FromStr` for `Mechanism<String>` and
+//! `ParsedMechanism`
 //!
 mod helpers;
 pub mod mechanism;

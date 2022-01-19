@@ -35,14 +35,14 @@ pub(crate) fn check_lookup_count(spf: &Spf) -> usize {
     if spf.redirect().is_some() {
         lookup_count += 1;
     }
-    if spf.a().is_some() {
-        lookup_count += spf.a().unwrap().len();
+    if let Some(a) = spf.a() {
+        lookup_count += a.len();
     }
-    if spf.mx().is_some() {
-        lookup_count += spf.mx().unwrap().len();
+    if let Some(mx) = spf.mx() {
+        lookup_count += mx.len();
     }
-    if spf.includes().is_some() {
-        lookup_count += spf.includes().unwrap().len();
+    if let Some(includes) = spf.includes() {
+        lookup_count += includes.len();
     }
     lookup_count
 }

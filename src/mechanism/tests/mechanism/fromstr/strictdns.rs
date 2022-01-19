@@ -18,7 +18,7 @@ mod a {
 }
 #[cfg(feature = "strict-dns")]
 #[cfg(test)]
-mod includes {
+mod include {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
