@@ -23,12 +23,12 @@ fn main() {
     let mut spf2 = Spf::new();
     spf2.set_v1();
     let ip = "203.32.166.0/24".parse().unwrap();
-    let m = Mechanism::create_ip(Qualifier::Pass, ip);
+    let m = Mechanism::ip(Qualifier::Pass, ip);
     spf2.append_ip_mechanism(m);
 
     println!("\nNew spf 2: >{}<", spf2);
     println!("Add mx to spf2");
-    spf2.append_mechanism(Mechanism::create_mx(Qualifier::Pass));
+    spf2.append_mechanism(Mechanism::mx(Qualifier::Pass));
     println!("Altered spf 2: >{}<", spf2);
     println!("Clear mx from spf2");
     spf2.clear_mechanism(Kind::MX);
@@ -36,11 +36,11 @@ fn main() {
 
     let mut spf3 = Spf::new();
     spf3.set_v2_pra();
-    spf3.append_mechanism(Mechanism::create_a(Qualifier::Pass));
-    spf3.append_mechanism(Mechanism::create_all(Qualifier::Neutral));
+    spf3.append_mechanism(Mechanism::a(Qualifier::Pass));
+    spf3.append_mechanism(Mechanism::all(Qualifier::Neutral));
 
     println!("\nNew spf 3: >{}<", spf3);
     println!("Change spf3 all to Fail");
-    spf3.append_mechanism(Mechanism::create_all(Qualifier::Fail));
+    spf3.append_mechanism(Mechanism::all(Qualifier::Fail));
     println!("Altered spf 3: >{}<", spf3);
 }

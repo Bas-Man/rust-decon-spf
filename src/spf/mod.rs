@@ -149,7 +149,7 @@ impl FromStr for Spf {
                     let valid_ip4 = raw_ip4.parse();
                     match valid_ip4 {
                         Ok(ip4) => {
-                            let network = Mechanism::create_ip(qualifier_and_modified_str.0, ip4);
+                            let network = Mechanism::ip(qualifier_and_modified_str.0, ip4);
                             vec_of_ip4.push(network);
                         }
                         Err(ip4) => return Err(SpfError::InvalidIPAddr(ip4)),
@@ -162,14 +162,14 @@ impl FromStr for Spf {
                     let valid_ip6 = raw_ip6.parse();
                     match valid_ip6 {
                         Ok(ip6) => {
-                            let network = Mechanism::create_ip(qualifier_and_modified_str.0, ip6);
+                            let network = Mechanism::ip(qualifier_and_modified_str.0, ip6);
                             vec_of_ip6.push(network);
                         }
                         Err(ip6) => return Err(SpfError::InvalidIPAddr(ip6)),
                     }
                 }
             } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
-                spf.all = Some(Mechanism::create_all(
+                spf.all = Some(Mechanism::all(
                     helpers::return_and_remove_qualifier(record, 'a').0,
                 ));
             // Handle A, MX and PTR types.
@@ -322,8 +322,8 @@ impl Spf {
     /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
-    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
-    /// new_spf_record.append_mechanism(Mechanism::create_a(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::a(Qualifier::Pass));
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                                      "203.32.160.0/23".parse().unwrap()));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
@@ -409,7 +409,7 @@ impl Spf {
     /// new_spf_record.set_v1();
     /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
     ///                                 "_spf.example.com".to_string()));
-    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
     ///
@@ -439,7 +439,7 @@ impl Spf {
     /// new_spf_record.set_v1();
     /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
-    /// new_spf_record.append_mechanism(Mechanism::create_all(Qualifier::Pass));
+    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {

@@ -106,7 +106,7 @@ impl ParsedMechanism {
     ///```
     pub fn network(&self) -> Mechanism<IpNetwork> {
         match *self {
-            ParsedMechanism::IP(ref m) => Mechanism::create_ip(*m.qualifier(), *m.as_network()),
+            ParsedMechanism::IP(ref m) => Mechanism::ip(*m.qualifier(), *m.as_network()),
             ParsedMechanism::TXT(_) => unreachable!(),
         }
     }
