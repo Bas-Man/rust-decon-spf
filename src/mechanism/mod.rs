@@ -462,24 +462,6 @@ impl Mechanism<String> {
         }
     }
 
-    /// Rebuild and return the string representation of the given mechanism
-    ///
-    /// # Example:
-    /// ```
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
-    /// let mechanism_a = Mechanism::a(Qualifier::Neutral);
-    /// assert_eq!(mechanism_a.to_string(), "?a");
-    /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Pass,
-    ///                                                          String::from("example.com"));
-    /// assert_eq!(mechanism_a_string.to_string(), "a:example.com");
-    #[deprecated(
-        since = "0.2.0",
-        note = "This will be removed in a future release. Use `to_string()` which is implemented through Display trait."
-    )]
-    pub fn string(&self) -> String {
-        self.build_string()
-    }
     fn build_string(&self) -> String {
         let mut mechanism_str = String::new();
         let tmp_mechanism_str;
@@ -628,26 +610,6 @@ impl Mechanism<IpNetwork> {
         self.rrdata.unwrap().to_string()
     }
 
-    /// Returns the mechanism string representation of an IP4/6 mechanism.
-    /// # Example
-    ///
-    /// ```
-    /// use ipnetwork::IpNetwork;
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
-    /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
-    /// let ip_mechanism = Mechanism::ip(Qualifier::Pass, ip);
-    /// assert_eq!(ip_mechanism.to_string(), "ip4:192.168.11.0/24");
-    /// assert_eq!(ip_mechanism.as_network(), &ip);
-    /// ```
-    ///
-    #[deprecated(
-        since = "0.2.0",
-        note = "This will be removed in a future release. Use to_string() which is implemented through Display trait."
-    )]
-    pub fn string(&self) -> String {
-        self.build_string()
-    }
     fn build_string(&self) -> String {
         let mut ip_mechanism_str = String::new();
         if self.qualifier != Qualifier::Pass {
