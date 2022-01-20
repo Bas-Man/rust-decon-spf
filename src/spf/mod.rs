@@ -263,7 +263,7 @@ impl Spf {
     #[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
     #[cfg(feature = "warn-dns")]
     pub fn has_warnings(&self) -> bool {
-        !self.warnings.is_none()
+        self.warnings.is_some()
     }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {

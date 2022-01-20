@@ -103,7 +103,7 @@ impl FromStr for Mechanism<String> {
             #[cfg(feature = "strict-dns")]
             {
                 if !helpers::dns_is_valid(helpers::get_domain_before_slash(&value.raw())) {
-                    return Err(MechanismError::InvalidDomainHost(value.raw().to_string()));
+                    return Err(MechanismError::InvalidDomainHost(value.raw()));
                 }
             }
             return Ok(value);
@@ -513,11 +513,7 @@ impl Mechanism<IpNetwork> {
     /// Create a new V4 or V6 Mechanism<IpNetwork>  
     #[deprecated(note = "This will be depreciated in 0.3.0. Please use `ip()` instead")]
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Mechanism<IpNetwork> {
-        if mechanism.is_ipv4() {
-            Mechanism::ip(qualifier, mechanism)
-        } else {
-            Mechanism::ip(qualifier, mechanism)
-        }
+        Mechanism::ip(qualifier, mechanism)
     }
     /// Create a new V4 or V6 Mechanism from a string representation.
     ///```

@@ -16,8 +16,8 @@ pub enum ParsedMechanism {
 impl std::fmt::Display for ParsedMechanism {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            ParsedMechanism::TXT(ref m) => write!(f, "{}", m.to_string()),
-            ParsedMechanism::IP(ref m) => write!(f, "{}", m.to_string()),
+            ParsedMechanism::TXT(ref m) => write!(f, "{}", m),
+            ParsedMechanism::IP(ref m) => write!(f, "{}", m),
         }
     }
 }
