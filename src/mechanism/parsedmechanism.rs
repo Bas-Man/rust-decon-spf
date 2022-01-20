@@ -34,12 +34,12 @@ impl std::fmt::Display for ParsedMechanism {
 /// let mechanism_not_ip4 = "ip4:example.com".parse::<ParsedMechanism>();
 /// assert_eq!(mechanism_not_ip4.is_err(), true);
 /// assert_eq!(mechanism_not_ip4.unwrap_err(),
-///            MechanismError::NotValidIPNetwork("invalid address: example.com".to_string()));
+///            MechanismError::InvalidIPNetwork("invalid address: example.com".to_string()));
 ///
 /// let mechanism_malformed: Result<ParsedMechanism, MechanismError> =
 ///     "ab.com".parse::<ParsedMechanism>();
 /// assert_eq!(mechanism_malformed.unwrap_err().to_string(),
-///            "ab.com does not conform to any Mechanism format.");
+///            "ab.com does not conform to any Mechanism format");
 ///```
 impl FromStr for ParsedMechanism {
     type Err = MechanismError;
@@ -71,7 +71,7 @@ impl ParsedMechanism {
     /// let error: Result<ParsedMechanism, MechanismError> =
     ///     ParsedMechanism::new("ab.com");
     /// assert_eq!(error.unwrap_err(),
-    ///            MechanismError::NotValidMechanismFormat("ab.com".to_string()));
+    ///            MechanismError::InvalidMechanismFormat("ab.com".to_string()));
     ///```
     pub fn new(s: &str) -> Result<ParsedMechanism, MechanismError> {
         if s.contains("ip4:") || s.contains("ip6:") {

@@ -13,7 +13,7 @@ mod general {
         let err = m.unwrap_err();
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
         assert_eq!(err.is_invalid_format(), true);
     }
@@ -27,7 +27,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -40,7 +40,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -53,7 +53,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -66,7 +66,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -79,7 +79,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -92,7 +92,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
     #[test]
@@ -105,7 +105,7 @@ mod general {
         assert_eq!(err.is_invalid_format(), true);
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat(input.to_string())
+            MechanismError::InvalidMechanismFormat(input.to_string())
         );
     }
 }

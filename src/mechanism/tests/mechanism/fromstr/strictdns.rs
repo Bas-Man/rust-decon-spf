@@ -10,10 +10,7 @@ mod a {
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -28,10 +25,7 @@ mod include {
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -46,10 +40,7 @@ mod mx {
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -64,10 +55,7 @@ mod ptr {
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -82,9 +70,6 @@ mod exists {
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }

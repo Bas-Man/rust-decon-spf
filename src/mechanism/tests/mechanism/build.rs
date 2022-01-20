@@ -193,7 +193,7 @@ mod Ip4 {
         let unwrapped = ip4.unwrap_err();
         assert_eq!(
             unwrapped,
-            MechanismError::NotValidMechanismFormat(String::from("ip:203.32.160.10/32"))
+            MechanismError::InvalidMechanismFormat(String::from("ip:203.32.160.10/32"))
         );
     }
 }
@@ -249,7 +249,7 @@ mod ip6 {
         let unwrapped = ip6.unwrap_err();
         assert_eq!(
             unwrapped,
-            MechanismError::NotValidMechanismFormat(String::from("ip:2001:4860:4000::/36"))
+            MechanismError::InvalidMechanismFormat(String::from("ip:2001:4860:4000::/36"))
         );
     }
 }

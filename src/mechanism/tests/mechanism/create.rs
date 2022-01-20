@@ -33,7 +33,7 @@ mod a {
             Err(e) => {
                 assert_eq!(
                     e,
-                    MechanismError::NotValidDomainHost("example.xx".to_string())
+                    MechanismError::InvalidDomainHost("example.xx".to_string())
                 );
             }
         }
@@ -45,7 +45,7 @@ mod a {
             Err(e) => {
                 assert_eq!(
                     e,
-                    MechanismError::NotValidDomainHost("example.xx".to_string())
+                    MechanismError::InvalidDomainHost("example.xx".to_string())
                 );
             }
         }
@@ -94,7 +94,7 @@ mod mx {
             Err(e) => {
                 assert_eq!(
                     e,
-                    MechanismError::NotValidDomainHost("example.xx".to_string()),
+                    MechanismError::InvalidDomainHost("example.xx".to_string()),
                 )
             }
         }
@@ -110,7 +110,7 @@ mod mx {
             Err(e) => {
                 assert_eq!(
                     e,
-                    MechanismError::NotValidDomainHost("example.xx".to_string()),
+                    MechanismError::InvalidDomainHost("example.xx".to_string()),
                 )
             }
         }
@@ -122,7 +122,7 @@ mod mx {
             Err(e) => {
                 assert_eq!(
                     e,
-                    MechanismError::NotValidDomainHost("example.xx".to_string()),
+                    MechanismError::InvalidDomainHost("example.xx".to_string()),
                 )
             }
         }
@@ -217,7 +217,7 @@ mod redirect {
         if let Err(redirect) = Mechanism::redirect(Qualifier::Pass, "_spf.example.") {
             assert_eq!(
                 redirect,
-                MechanismError::NotValidDomainHost("redirect=_spf.example.com".to_string())
+                MechanismError::InvalidDomainHost("redirect=_spf.example.com".to_string())
             );
         }
     }

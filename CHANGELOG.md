@@ -6,6 +6,7 @@
   - Use crate `addr` to validate *domain* information for `a`, `mx`, `ptr`, `include`, and `exists`
   - See: `examples/build-spf-strict.rs`
 - Deprecate `Mechanism::new_` functions.
+- Breaking Change: Rename some `MechanismError::` messages.
 
 0.2.3 2021-12-09
 ================

@@ -52,11 +52,11 @@ mod test_a {
         let err = m.unwrap_err();
         assert_eq!(
             err,
-            MechanismError::NotValidMechanismFormat("ab".to_string())
+            MechanismError::InvalidMechanismFormat("ab".to_string())
         );
         assert_eq!(
             err.to_string(),
-            "ab does not conform to any Mechanism format."
+            "ab does not conform to any Mechanism format"
         );
     }
 }
@@ -83,10 +83,7 @@ mod a_invalid {
         let input = "-a:example.xx";
         let m = ParsedMechanism::new(input);
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -99,10 +96,7 @@ mod mx_invalid {
         let input = "+mx:example.xx";
         let m = ParsedMechanism::new(input);
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -115,10 +109,7 @@ mod include_invalid {
         let input = "+include:example.xx";
         let m = ParsedMechanism::new(input);
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -131,10 +122,7 @@ mod ptr_invalid {
         let input = "ptr:example.xx";
         let m = ParsedMechanism::new(input);
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
 #[cfg(feature = "strict-dns")]
@@ -147,9 +135,6 @@ mod exists_invalid {
         let input = "exists:example.xx";
         let m = ParsedMechanism::new(input);
         let err = m.unwrap_err();
-        assert_eq!(
-            err.to_string(),
-            "example.xx is not a valid string for a host record."
-        );
+        assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }

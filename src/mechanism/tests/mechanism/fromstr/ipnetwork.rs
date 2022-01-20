@@ -51,7 +51,7 @@ mod invalid_ip4 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "ip:203.32.160.0/24 does not conform to any Mechanism format."
+            "ip:203.32.160.0/24 does not conform to any Mechanism format"
         );
     }
     #[test]
@@ -62,7 +62,7 @@ mod invalid_ip4 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "invalid address: 203.32.160.0/33."
+            "invalid address: 203.32.160.0/33"
         );
     }
     #[test]
@@ -73,7 +73,7 @@ mod invalid_ip4 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "Was given ip4:2001:4860:4000::/36. This is not an ip4 network."
+            "2001:4860:4000::/36 is not an ip4 network"
         );
     }
 }
@@ -128,7 +128,7 @@ mod invalid_ip6 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "p6:2001:4860:4000::/36 does not conform to any Mechanism format."
+            "p6:2001:4860:4000::/36 does not conform to any Mechanism format"
         );
     }
 
@@ -140,7 +140,7 @@ mod invalid_ip6 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "invalid address: 2001:4860:4000::/129."
+            "invalid address: 2001:4860:4000::/129"
         );
     }
     #[test]
@@ -151,7 +151,7 @@ mod invalid_ip6 {
         assert_eq!(m.is_err(), true);
         assert_eq!(
             m.unwrap_err().to_string(),
-            "Was given ip6:203.32.160.0/24. This is not an ip6 network."
+            "203.32.160.0/24 is not an ip6 network"
         );
     }
 }

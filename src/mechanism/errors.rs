@@ -2,44 +2,44 @@
 #[derive(Debug, PartialEq)]
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
-    NotValidMechanismFormat(String),
+    InvalidMechanismFormat(String),
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
     NotIP4Network(String),
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
     NotIP6Network(String),
     /// Indicates that the provided string does not contain any valid IpNetwork.
-    NotValidIPNetwork(String),
+    InvalidIPNetwork(String),
     /// Attempted to access a Mechanism as a `Mechanism<IpNetwork>` but is `Mechanism<String>`
     NotIpNetworkMechanism,
     /// Attempted to access a Mechanism as a `Mechanism<String>` but is `Mechanism<IpNetwork>`
     NotStringMechanism,
     /// Indicates that the host record is not valid. Does not conform to RFC1123
-    NotValidDomainHost(String),
+    InvalidDomainHost(String),
 }
 
 impl std::fmt::Display for MechanismError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MechanismError::NotValidMechanismFormat(mesg) => {
-                write!(f, "{} does not conform to any Mechanism format.", mesg)
+            MechanismError::InvalidMechanismFormat(mesg) => {
+                write!(f, "{} does not conform to any Mechanism format", mesg)
             }
             MechanismError::NotIP4Network(mesg) => {
-                write!(f, "Was given ip4:{}. This is not an ip4 network.", mesg)
+                write!(f, "{} is not an ip4 network", mesg)
             }
             MechanismError::NotIP6Network(mesg) => {
-                write!(f, "Was given ip6:{}. This is not an ip6 network.", mesg)
+                write!(f, "{} is not an ip6 network", mesg)
             }
-            MechanismError::NotValidIPNetwork(mesg) => {
-                write!(f, "{}.", mesg)
+            MechanismError::InvalidIPNetwork(mesg) => {
+                write!(f, "{}", mesg)
             }
             MechanismError::NotIpNetworkMechanism => {
-                write!(f, "Attempt to access TXT as IP.")
+                write!(f, "Attempt to access TXT as IP")
             }
             MechanismError::NotStringMechanism => {
-                write!(f, "Attempt to access IP as TXT.")
+                write!(f, "Attempt to access IP as TXT")
             }
-            MechanismError::NotValidDomainHost(host) => {
-                write!(f, "{} is not a valid string for a host record.", host)
+            MechanismError::InvalidDomainHost(host) => {
+                write!(f, "Invalid DNS string: {}", host)
             }
         }
     }
@@ -47,7 +47,7 @@ impl std::fmt::Display for MechanismError {
 impl MechanismError {
     /// Returns `true` if it is not a valid Mechanism format.
     pub fn is_invalid_format(&self) -> bool {
-        matches!(self, Self::NotValidMechanismFormat(_))
+        matches!(self, Self::InvalidMechanismFormat(_))
     }
     /// Return `true` if it is a valid IpNetwork but not an IP4 network.
     /// # Example:
@@ -67,7 +67,7 @@ impl MechanismError {
     /// # Example:
     /// "ip4:203.32.160.0/33" would give this error. This applies to IP6 networks.
     pub fn is_invalid_ip(&self) -> bool {
-        matches!(self, Self::NotValidIPNetwork(_))
+        matches!(self, Self::InvalidIPNetwork(_))
     }
 }
 

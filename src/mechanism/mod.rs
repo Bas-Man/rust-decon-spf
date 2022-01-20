@@ -59,10 +59,10 @@ impl FromStr for Mechanism<String> {
     fn from_str(s: &str) -> Result<Mechanism<String>, Self::Err> {
         // A String ending wiith either ':' or "/" is always invalid.
         if s.ends_with(':') || s.ends_with('/') {
-            return Err(MechanismError::NotValidMechanismFormat(s.to_string()));
+            return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         };
         if s.contains("ip4:") || s.contains("ip6:") {
-            return Err(MechanismError::NotValidMechanismFormat(s.to_string()));
+            return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         }
         let mut m: Option<Mechanism<String>> = None;
 
@@ -103,12 +103,12 @@ impl FromStr for Mechanism<String> {
             #[cfg(feature = "strict-dns")]
             {
                 if !helpers::dns_is_valid(helpers::get_domain_before_slash(&value.raw())) {
-                    return Err(MechanismError::NotValidDomainHost(value.raw().to_string()));
+                    return Err(MechanismError::InvalidDomainHost(value.raw().to_string()));
                 }
             }
             return Ok(value);
         }
-        Err(MechanismError::NotValidMechanismFormat(s.to_string()))
+        Err(MechanismError::InvalidMechanismFormat(s.to_string()))
     }
 }
 
@@ -133,12 +133,12 @@ impl TryFrom<&str> for Mechanism<String> {
 /// assert_eq!(ip6.kind().is_ip_v6(), true);
 ///
 /// let bad_ip4: Result<Mechanism<IpNetwork>, MechanismError> = "ip4:203.32.160.0/33".parse();
-/// assert_eq!(bad_ip4.unwrap_err().to_string(), "invalid address: 203.32.160.0/33.");
+/// assert_eq!(bad_ip4.unwrap_err().to_string(), "invalid address: 203.32.160.0/33");
 ///
 /// let ip6_but_ip4: Result<Mechanism<IpNetwork>, MechanismError> = "ip6:203.32.160.0/24".parse();
 /// let err = ip6_but_ip4.unwrap_err();
 /// assert_eq!(err, MechanismError::NotIP6Network("203.32.160.0/24".to_string()));
-/// assert_eq!(err.to_string(), "Was given ip6:203.32.160.0/24. This is not an ip6 network.");
+/// assert_eq!(err.to_string(), "203.32.160.0/24 is not an ip6 network");
 ///```
 impl FromStr for Mechanism<IpNetwork> {
     type Err = MechanismError;
@@ -177,13 +177,13 @@ impl FromStr for Mechanism<IpNetwork> {
                     return Err(MechanismError::NotIP4Network(ip.to_string()));
                 };
             } else {
-                return Err(MechanismError::NotValidIPNetwork(
+                return Err(MechanismError::InvalidIPNetwork(
                     parsed.unwrap_err().to_string(),
                 ));
             };
         }
         // Catch all. This is not an ip4 or ip6 spf string.
-        Err(MechanismError::NotValidMechanismFormat(s.to_string()))
+        Err(MechanismError::InvalidMechanismFormat(s.to_string()))
     }
 }
 
@@ -299,7 +299,7 @@ impl Mechanism<String> {
     /// # #[cfg(feature = "strict-dns")] {
     /// if let Err(bad_rrdata) = Mechanism::a(Qualifier::Pass)
     ///                                              .with_rrdata("example.xx") {
-    ///   assert_eq!(bad_rrdata, MechanismError::NotValidDomainHost("example.xx".to_string()));
+    ///   assert_eq!(bad_rrdata, MechanismError::InvalidDomainHost("example.xx".to_string()));
     /// }
     /// # }
     ///```
@@ -419,7 +419,7 @@ impl Mechanism<String> {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
                     if !helpers::dns_is_valid(helpers::get_domain_before_slash(&rrdata)) {
-                        return Err(MechanismError::NotValidDomainHost(rrdata.to_string()));
+                        return Err(MechanismError::InvalidDomainHost(rrdata.to_string()));
                     };
                 }
                 _ => {}
@@ -505,7 +505,7 @@ impl std::fmt::Display for Mechanism<String> {
 
 impl From<IpNetworkError> for MechanismError {
     fn from(err: IpNetworkError) -> Self {
-        MechanismError::NotValidIPNetwork(err.to_string())
+        MechanismError::InvalidIPNetwork(err.to_string())
     }
 }
 
