@@ -10,11 +10,11 @@
 //! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
 //!
 //! # Abilities:
-//! - Check and Set Spf record version: [`Spf Versions`](spf::Spf::set_v1)
+//! - Check and Set Spf record version. See: [`Spf Versions`](spf::Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
 //!     - [`Mechanism`](mechanism::Mechanism)
-//!     - [`Check Qualifier Type`](mechanism::Mechanism::is_pass)
-//!     - [`Check Mechanism Type`](mechanism::Mechanism::kind)
+//!     - [`Mechanism Qualifier`](mechanism::Mechanism::is_pass)
+//!     - [`Mechanism Kind`](mechanism::Mechanism::kind)
 //!
 //! # Feature Flags:
 //! - `warn-dns` (Disabled by default.)
@@ -22,7 +22,7 @@
 //! - `strict-dns` (Disabled by default.)  
 //!   This enables syntactical checking of Domain Names.
 //!     - When enabled it changes the behavour of `FromStr` for `Mechanism<String>` and
-//! `ParsedMechanism`
+//! `ParsedMechanism`. By default `Mechanism<String>`'s `rrdata` is not checked.
 //!
 mod helpers;
 pub mod mechanism;

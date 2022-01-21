@@ -54,12 +54,12 @@ impl std::fmt::Display for Spf {
 /// use decon_spf::SpfError;
 /// // Successful
 /// let input = "v=spf1 a mx -all";
-/// let spf: Spf = input.to_string().parse().unwrap();
+/// let spf: Spf = input.parse().unwrap();
 /// assert_eq!(spf.to_string(), input);
 ///
 /// // Additional Space between `A` and `MX`
 /// let bad_input = "v=spf1 a   mx -all";
-/// let err: SpfError = bad_input.to_string().parse::<Spf>().unwrap_err();
+/// let err: SpfError = bad_input.parse::<Spf>().unwrap_err();
 /// assert_eq!(err.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///
@@ -525,15 +525,6 @@ impl Spf {
             spf.push_str(self.all().unwrap().to_string().as_str());
         }
         spf
-    }
-    /// Returns a new string representation of the spf record if possible.
-    /// This does not use the `source` attribute.
-    #[deprecated(
-        since = "0.2.0",
-        note = "This has been deprecated. Use to_string() instead."
-    )]
-    pub fn as_spf(&self) -> Result<String, SpfError> {
-        unimplemented!("Spf struct now has a Display trait. Start using to_string()")
     }
     /// Returns a reference to the string stored in `source`
     pub fn source(&self) -> &String {
