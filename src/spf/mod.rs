@@ -3,6 +3,7 @@
 //! It is not intended to validate the spf record.
 
 mod errors;
+#[cfg(test)]
 mod tests;
 mod validate;
 

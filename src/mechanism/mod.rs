@@ -16,6 +16,7 @@ mod errors;
 mod kind;
 mod parsedmechanism;
 mod qualifier;
+#[cfg(test)]
 mod tests;
 
 pub use crate::mechanism::errors::MechanismError;

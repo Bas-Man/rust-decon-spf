@@ -1,3 +1,4 @@
+#[cfg(test)]
 mod tests;
 use crate::helpers;
 use crate::spf::{Spf, SpfError};
