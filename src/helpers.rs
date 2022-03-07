@@ -63,8 +63,7 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
                     // Check that we can convert this to an integer. If we can. Its ok.
                     // convert mechanism_string from "num" to "/num"
                     if num.is_ok() {
-                        new_mechanism.push('/');
-                        new_mechanism.push_str(mechanism_string.as_str());
+                        new_mechanism.push_str(&format!("/{}", mechanism_string.as_str()));
                     } else {
                         // Did not match a number. Probably [a-z]. This makes it invalid.
                         return None;
@@ -108,8 +107,7 @@ pub(crate) fn char_to_qualifier(c: char) -> Qualifier {
 pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
-        partial_spf.push(' ');
-        partial_spf.push_str(i.to_string().as_str());
+        partial_spf.push_str(&format!(" {}", i.to_string().as_str()));
     }
     partial_spf
 }
@@ -117,8 +115,7 @@ pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
 pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
-        partial_spf.push(' ');
-        partial_spf.push_str(i.to_string().as_str());
+        partial_spf.push_str(&format!(" {}", i.to_string().as_str()));
     }
     partial_spf
 }
