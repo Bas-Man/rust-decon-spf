@@ -414,13 +414,13 @@ impl Mechanism<String> {
     /// All other Mechanism types require `rrdata` to be set. That is to say that `rrdata` is
     /// **optional** for `A`, `MX` and `PTR`  
     /// See: [`a`](Mechanism<String>::a) for an example.
-    pub fn with_rrdata(mut self, rrdata: &str) -> Result<Self, MechanismError> {
+    pub fn with_rrdata(mut self, rrdata: impl Into<String>) -> Result<Self, MechanismError> {
         #[cfg(feature = "strict-dns")]
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
                     if !helpers::dns_is_valid(helpers::get_domain_before_slash(&rrdata)) {
-                        return Err(MechanismError::InvalidDomainHost(rrdata.to_string()));
+                        return Err(MechanismError::InvalidDomainHost(rrdata.into()));
                     };
                 }
                 _ => {}
@@ -429,7 +429,7 @@ impl Mechanism<String> {
         match self.kind() {
             // Ensure that `All` is always None even if with_rrdata() is called
             Kind::All => self.rrdata = None,
-            _ => self.rrdata = Some(rrdata.to_string()),
+            _ => self.rrdata = Some(rrdata.into()),
         }
         Ok(self)
     }
