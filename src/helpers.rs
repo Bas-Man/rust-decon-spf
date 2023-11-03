@@ -21,7 +21,7 @@ pub(crate) const MECHANISM_MX_PATTERN: &str =
 pub(crate) const MECHANISM_PTR_PATTERN: &str = r"(?i)^(?P<qualifier>[+?~-])?ptr(?:$|[^a-z./])(?P<mechanism>(?:[[:word:]]+\.)*[[:word:]]+
 ?)?$";
 pub(crate) const MECHANISM_EXISTS_PATTERN: &str =
-    r"(?i)^(?P<qualifier>[+?~-])?exists:(?:$|)(?P<mechanism>\w.*)";
+    r"(?i)^(?P<qualifier>[+?~-])?exists:(?:$|)(?P<mechanism>(%|\w).*)";
 // All Regex is currently not being used.
 pub(crate) const MECHANISM_ALL_PATTERN: &str = r"^(?P<qualifier>[+?~-])?all(?P<mechanism>\s)?$";
 // Create a new mechanism for a matched regular expression.
