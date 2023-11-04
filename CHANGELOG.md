@@ -1,3 +1,9 @@
+0.2.5 2023-11-04
+================
+
+- Add support to Mechanism `exist` for Macro Expansion. Strings starting with `%` will now be matched.
+    Support contributed by [22ca54d00f05391d6ffee4bc23a5ba60](phttps://github.com/22ca54d00f05391d6ffeoe4bc23a5ba60)
+    
 0.2.4 2022-01-19
 ================
 
