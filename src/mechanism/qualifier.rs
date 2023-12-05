@@ -1,10 +1,11 @@
 //! An enumeration of possible qualifiers that are used in Mechanism record.
 
 /// Declaration for possible `Qualifier` of a given Mechanism
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Qualifier {
     /// This is the default value for a qualifier if the value is not present in the SPF record.
     /// It is denoted by '+' (Plus Sign)
+    #[default]
     Pass,
     /// It is denoted by '-' (Minus Sign)
     Fail,
@@ -12,12 +13,6 @@ pub enum Qualifier {
     SoftFail,
     /// It is denoted by '?' (Question Mark)
     Neutral,
-}
-
-impl Default for Qualifier {
-    fn default() -> Self {
-        Self::Pass
-    }
 }
 
 impl Qualifier {

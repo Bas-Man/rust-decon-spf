@@ -4,7 +4,7 @@
 //! small as to not require any distinction in the current code base.
 //!
 /// Defines the possible mechanisms.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Kind {
     /// Represents a *Modifier* of type redirect=  
     /// If this is present, the *All* mechanism should not be present.  
@@ -17,9 +17,10 @@ pub enum Kind {
     /// a:example.com  
     /// a:example.com/24  
     /// ```
+    #[default]
     A,
     /// Represents a Mechanism of type *MX*  
-    /// Possible values follow the same loyout as for [`A`](Kind::A)
+    /// Possible values follow the same loy out as for [`A`](Kind::A)
     MX,
     /// Represents a Mechanism of type *Include*  
     /// ```test
@@ -146,12 +147,6 @@ impl std::fmt::Display for Kind {
             Kind::Exists => write!(f, "exists:"),
             Kind::All => write!(f, "all"),
         }
-    }
-}
-
-impl Default for Kind {
-    fn default() -> Self {
-        Self::A
     }
 }
 

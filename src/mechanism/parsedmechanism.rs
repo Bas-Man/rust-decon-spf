@@ -5,7 +5,7 @@ use std::{convert::TryFrom, str::FromStr};
 
 /// Stores the result of a successful parsing of a Mechanism String.  
 /// This will either contain a `Mechanism<String>` or `Mechanism<IpNetwork>`
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ParsedMechanism {
     /// This variant represents a Mechanism containing a String  
     TXT(Mechanism<String>),

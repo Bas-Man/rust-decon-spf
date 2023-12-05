@@ -30,7 +30,7 @@ use ipnetwork::{IpNetwork, IpNetworkError};
 use std::{convert::TryFrom, str::FromStr};
 
 /// Stores its [`Kind`](Kind), [`Qualifier`](Qualifier), and its `Value`
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Mechanism<T> {
     kind: Kind,
     qualifier: Qualifier,
@@ -58,7 +58,7 @@ impl FromStr for Mechanism<String> {
     type Err = MechanismError;
 
     fn from_str(s: &str) -> Result<Mechanism<String>, Self::Err> {
-        // A String ending wiith either ':' or "/" is always invalid.
+        // A String ending with either ':' or "/" is always invalid.
         if s.ends_with(':') || s.ends_with('/') {
             return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         };
@@ -455,6 +455,7 @@ impl Mechanism<String> {
     /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Neutral,
     ///                                                          String::from("example.com"));
     /// assert_eq!(mechanism_a_string.raw(), "example.com");
+    /// ```
     pub fn raw(&self) -> String {
         if self.rrdata.is_none() {
             self.kind().to_string()

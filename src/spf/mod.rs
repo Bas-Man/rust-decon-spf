@@ -18,7 +18,7 @@ use std::{convert::TryFrom, str::FromStr};
 
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Spf {
     source: String,
     version: String,
