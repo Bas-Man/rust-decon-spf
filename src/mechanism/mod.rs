@@ -4,12 +4,12 @@
 //! of the `Spf` record. It contains a number of methods for transversing and accessing this data.
 //!
 //! The module also contains a number of ways to create the `Mechanism` instances.
-//! - [`ParsedMechanism`](parsedmechanism::ParsedMechanism)
+//! - [`ParsedMechanism`](ParsedMechanism)
 //!     - This provides a unified method for parsing any mechanism string. It will either contain a `Mechanism<String>`
-//! or a `Mechanism<IpNetwork>` if the string is succesfully parsed.
+//! or a `Mechanism<IpNetwork>` if the string is successfully parsed.
 //! - Both `Mechanism<String>` and `Mechanism<IpNetwork>` have the `FromStr` trait implemented. Allowing for the strings
 //! to be `parsed()`
-//! - The `Mechanism` struct also has a number of specfic methods which can be used to create related mechanisms; which are
+//! - The `Mechanism` struct also has a number of specific methods which can be used to create related mechanisms; which are
 //! used with the `FromStr` trait.
 //!
 mod errors;
@@ -26,17 +26,47 @@ pub use crate::mechanism::qualifier::Qualifier;
 
 use crate::helpers;
 use ipnetwork::{IpNetwork, IpNetworkError};
-
 use std::{convert::TryFrom, str::FromStr};
+
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 
 /// Stores its [`Kind`](Kind), [`Qualifier`](Qualifier), and its `Value`
 #[derive(Default, Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
     kind: Kind,
     qualifier: Qualifier,
     rrdata: Option<T>,
 }
 
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod serde_test {
+    use super::*;
+    use serde_json;
+
+    #[test]
+    fn a() {
+        let a: Mechanism<String> = "a".parse().unwrap();
+        let json = serde_json::to_string(&a).unwrap();
+
+        assert_eq!(json,
+                   "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}");
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, a);
+    }
+    #[test]
+    fn mx() {
+        let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
+        let json = serde_json::to_string(&mx).unwrap();
+
+        assert_eq!(json,
+                   "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}");
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, mx);
+    }
+}
 /// Create a Mechanism<String> from the provided string.
 ///
 /// # Examples:

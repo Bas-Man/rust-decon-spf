@@ -9,3 +9,7 @@ mod mx;
 mod parse;
 mod ptr;
 mod warndns;
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod serde;

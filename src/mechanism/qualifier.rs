@@ -1,7 +1,11 @@
 //! An enumeration of possible qualifiers that are used in Mechanism record.
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+
 /// Declaration for possible `Qualifier` of a given Mechanism
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Qualifier {
     /// This is the default value for a qualifier if the value is not present in the SPF record.
     /// It is denoted by '+' (Plus Sign)
@@ -56,6 +60,17 @@ impl Qualifier {
         }
     }
 }
+
+impl std::fmt::Display for Qualifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Qualifier::Pass => write!(f, ""),
+            Qualifier::Fail => write!(f, "-"),
+            Qualifier::SoftFail => write!(f, "~"),
+            Qualifier::Neutral => write!(f, "?"),
+        }
+    }
+}
 #[test]
 fn is_pass() {
     let q = Qualifier::Pass;
@@ -95,4 +110,30 @@ fn as_softfail() {
 fn as_neutral() {
     let q = Qualifier::Neutral;
     assert_eq!(q.as_str(), "?");
+}
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod serde_test {
+    use crate::mechanism::Qualifier;
+    use serde_json;
+
+    #[test]
+    fn pass() {
+        let q = Qualifier::Pass;
+        let json = serde_json::to_string(&q).unwrap();
+        assert_eq!(json, "\"Pass\"");
+        let deserialized: Qualifier = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized,q);
+    }
+
+    #[test]
+    fn fail() {
+        let q = Qualifier::Fail;
+        let json = serde_json::to_string(&q).unwrap();
+        assert_eq!(json, "\"Fail\"");
+        let deserialized: Qualifier = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, q);
+    }
+
 }

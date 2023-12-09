@@ -3,8 +3,16 @@
 //! Whilst *Mechanisms* and *Modifiers* differ slightly. This difference is so
 //! small as to not require any distinction in the current code base.
 //!
+//!
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+//#[cfg(feature = "serde")]
+//use serde_json;
+
+
 /// Defines the possible mechanisms.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Kind {
     /// Represents a *Modifier* of type redirect=  
     /// If this is present, the *All* mechanism should not be present.  
@@ -194,4 +202,29 @@ fn exists() {
 fn all() {
     let a = Kind::All;
     assert_eq!(a.to_string(), "all");
+}
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod serde_tests {
+    use crate::mechanism::Kind;
+    use serde_json;
+
+    #[test]
+    fn default() {
+        let a = Kind::default();
+        let json = serde_json::to_string(&a).unwrap();
+        assert_eq!(json, "\"A\"");
+        let deserialized:Kind = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, a);
+    }
+
+    #[test]
+    fn redirect() {
+        let redirect = Kind::Redirect;
+        let json = serde_json::to_string(&redirect).unwrap();
+        assert_eq!(json, "\"Redirect\"");
+        let deserialized: Kind = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, redirect);
+    }
 }

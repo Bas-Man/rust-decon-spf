@@ -16,9 +16,12 @@ use ipnetwork::IpNetwork;
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use std::{convert::TryFrom, str::FromStr};
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Spf {
     source: String,
     version: String,
@@ -449,7 +452,7 @@ impl Spf {
     }
     /// # Note: Experimential
     /// *Do not use.*
-    /// Very rudementary validation check.
+    /// Very rudimentary validation check.
     /// - Will fail if the length of `source` is more than MAX_SPF_STRING_LENGTH characters See:
     /// [`SourceLengthExceeded`](SpfError::SourceLengthExceeded)
     /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
@@ -464,7 +467,7 @@ impl Spf {
                 return Err(SpfError::HasNotBeenParsed);
             };
         };
-        // Rediect should be the only mechanism present. Any additional values are not permitted.
+        // Redirect should be the only mechanism present. Any additional values are not permitted.
         if self.redirect().is_some() && self.all().is_some() {
             return Err(SpfError::RedirectWithAllMechanism);
         }
