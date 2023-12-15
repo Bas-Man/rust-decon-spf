@@ -6,9 +6,6 @@
 //!
 #[cfg(feature = "serde")]
 use serde::{Serialize, Deserialize};
-//#[cfg(feature = "serde")]
-//use serde_json;
-
 
 /// Defines the possible mechanisms.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
