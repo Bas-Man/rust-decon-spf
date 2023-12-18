@@ -25,7 +25,7 @@ pub enum Kind {
     #[default]
     A,
     /// Represents a Mechanism of type *MX*  
-    /// Possible values follow the same loy out as for [`A`](Kind::A)
+    /// Possible values follow the same layout as for [`A`](Kind::A)
     MX,
     /// Represents a Mechanism of type *Include*  
     /// ```test
