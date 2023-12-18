@@ -40,6 +40,11 @@ name = "build-spf-strict"
 path = "examples/build-spf-strict.rs"
 required-features = ["strict-dns"]
 
+[[example]]
+name = "serde-demo"
+path = "examples/serde-demo.rs"
+required-features = ["serde"]
+
 [dependencies]
 ipnetwork = "0.20.0"
 regex = "1.10.2"
