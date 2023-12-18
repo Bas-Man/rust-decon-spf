@@ -21,8 +21,9 @@
 //!     - This feature only applies to the Spf Parser and only warns of possible problems.
 //! - `strict-dns` (Disabled by default.)  
 //!   This enables syntactical checking of Domain Names.
-//!     - When enabled it changes the behavour of `FromStr` for `Mechanism<String>` and
+//!     - When enabled it changes the behaviour of `FromStr` for `Mechanism<String>` and
 //! `ParsedMechanism`. By default `Mechanism<String>`'s `rrdata` is not checked.
+//! - `serde` (Disabled by default.)
 //!
 mod helpers;
 pub mod mechanism;

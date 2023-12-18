@@ -4,7 +4,7 @@
 //! of the `Spf` record. It contains a number of methods for transversing and accessing this data.
 //!
 //! The module also contains a number of ways to create the `Mechanism` instances.
-//! - [`ParsedMechanism`](ParsedMechanism)
+//! - [`ParsedMechanism`]
 //!     - This provides a unified method for parsing any mechanism string. It will either contain a `Mechanism<String>`
 //! or a `Mechanism<IpNetwork>` if the string is successfully parsed.
 //! - Both `Mechanism<String>` and `Mechanism<IpNetwork>` have the `FromStr` trait implemented. Allowing for the strings
@@ -31,7 +31,7 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Serialize, Deserialize};
 
-/// Stores its [`Kind`](Kind), [`Qualifier`](Qualifier), and its `Value`
+/// Stores its [`Kind`], [`Qualifier`], and its `Value`
 #[derive(Default, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
@@ -67,7 +67,7 @@ mod serde_test {
         assert_eq!(deserialized, mx);
     }
 }
-/// Create a Mechanism<String> from the provided string.
+/// Create a `Mechanism<String>` from the provided string.
 ///
 /// # Examples:
 ///```rust
@@ -151,7 +151,7 @@ impl TryFrom<&str> for Mechanism<String> {
     }
 }
 
-/// Create a Mechanism<IpNetwork> from the provided string.
+/// Create a `Mechanism<IpNetwork>` from the provided string.
 ///
 /// # Examples:
 ///```rust
@@ -528,7 +528,7 @@ impl Mechanism<String> {
     }
 }
 
-/// Provide to_string for Mechanism<String>
+/// Provide to_string for `Mechanism<String>`
 
 impl std::fmt::Display for Mechanism<String> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -543,7 +543,7 @@ impl From<IpNetworkError> for MechanismError {
 }
 
 impl Mechanism<IpNetwork> {
-    /// Create a new V4 or V6 Mechanism<IpNetwork>  
+    /// Create a new V4 or V6 `Mechanism<IpNetwork>`
     #[deprecated(note = "This will be depreciated in 0.3.0. Please use `ip()` instead")]
     pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Mechanism<IpNetwork> {
         Mechanism::ip(qualifier, mechanism)
@@ -561,7 +561,7 @@ impl Mechanism<IpNetwork> {
         Ok(Mechanism::<IpNetwork>::from_str(string)?)
     }
 
-    /// Create a new V4 or V6 Mechanism<IpNetwork>  
+    /// Create a new V4 or V6 `Mechanism<IpNetwork>`
     /// Will correctly set its `kind` based on the `IpNetwork` type.
     ///
     /// # Examples:
@@ -655,7 +655,7 @@ impl Mechanism<IpNetwork> {
     }
 }
 
-/// Provide to_string for Mechanism<IpNetwork>
+/// Provide to_string for `Mechanism<IpNetwork`>
 impl std::fmt::Display for Mechanism<IpNetwork> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())
