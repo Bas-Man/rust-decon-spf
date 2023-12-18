@@ -13,10 +13,12 @@ Lookup and deconstruct Spf record.
 
 - [trust-dns-resolver](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/trust-dns-demo.rs)
 - [build-spf](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-spf.rs)
-- [serde-demo](https:://github.com/Bas-Man/rust-decon-spf/blob/master/examples/serde-demo.rs)
+- [serde-demo](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/serde-demo.rs)
 
 ### Run example
+
 To see a list of available examples.
+
 ```bash
 $ cargo run --example
 ```
@@ -31,7 +33,8 @@ $ cargo run -F serde --example serde-demo
 ## Syntax Validation
 
 This crate is not intended to provide syntax validation.  
-If you are looking to validate your SPF record. I would suggest you use one of the following.
+If you are looking to validate your SPF record. I would suggest you use one of 
+the following:
 
 1. [VamSoft.com](https://vamsoft.com/support/tools/spf-syntax-validator)
 2. [Spf-Record.com](https://www.spf-record.com/analyzer)
