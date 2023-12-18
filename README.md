@@ -13,6 +13,7 @@ Lookup and deconstruct Spf record.
 
 - [trust-dns-resolver](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/trust-dns-demo.rs)
 - [build-spf](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-spf.rs)
+- [serde-demo](https:://github.com/Bas-Man/rust-decon-spf/blob/master/examples/serde-demo.rs)
 
 ### Run example
 To see a list of available examples.
@@ -23,6 +24,8 @@ $ cargo run --example
 ```bash
 $ cargo run --example trust-dns-demo
 $ cargo run --example build-spf
+$ cargo run -F strict-dns --example build-spf-strict
+$ cargo run -F serde --example serde-demo
 ```
 
 ## Syntax Validation

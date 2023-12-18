@@ -1,3 +1,9 @@
+0.2.6 2023-12-18
+================
+
+- Add Serialize and Deserialize Support
+  - Requires the serde feature to be enabled.
+
 0.2.5 2023-11-04
 ================
 
