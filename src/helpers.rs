@@ -8,7 +8,7 @@ use std::num::ParseIntError;
 #[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
 use addr::parse_dns_name;
 
-/// This is the maximnum number of characters that an Spf Record can store.
+/// This is the maximum number of characters that an Spf Record can store.
 pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
 
 // List of Regular Expressions used to parse Spf Mechanisms.
@@ -52,7 +52,6 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
                 qualifier_char = qualifier.as_str().chars().next().unwrap();
                 qualifier_result = char_to_qualifier(qualifier_char);
             }
-            //if caps.name("mechanism").is_some() {
             if let Some(mechanism_value) = caps.name("mechanism") {
                 let mut new_mechanism: String = String::new();
                 mechanism_string = mechanism_value.as_str().to_string();
