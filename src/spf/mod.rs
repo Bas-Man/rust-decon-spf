@@ -84,7 +84,7 @@ impl FromStr for Spf {
         if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
             return Err(SpfError::InvalidSource);
         };
-        if source.len() > helpers::MAX_SPF_STRING_LENGTH {
+        if source.len() > crate::core::MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
         if helpers::spf_check_whitespace(source.as_str()) {
@@ -461,7 +461,7 @@ impl Spf {
     #[deprecated(note = "This is expected to be depreciated.")]
     pub fn try_validate(&mut self) -> Result<(), SpfError> {
         if self.from_src {
-            if self.source.len() > helpers::MAX_SPF_STRING_LENGTH {
+            if self.source.len() > crate::core::MAX_SPF_STRING_LENGTH {
                 return Err(SpfError::SourceLengthExceeded);
             } else if !self.was_parsed {
                 return Err(SpfError::HasNotBeenParsed);

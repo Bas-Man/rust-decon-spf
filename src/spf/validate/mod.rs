@@ -54,7 +54,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
         return Ok(spf);
     };
     if spf.from_src {
-        if spf.source.len() > helpers::MAX_SPF_STRING_LENGTH {
+        if spf.source.len() > crate::core::MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
         if !helpers::spf_check_whitespace(&spf.to_string()) {

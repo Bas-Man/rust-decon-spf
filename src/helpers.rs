@@ -8,9 +8,6 @@ use std::num::ParseIntError;
 #[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
 use addr::parse_dns_name;
 
-/// This is the maximum number of characters that an Spf Record can store.
-pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
-
 // List of Regular Expressions used to parse Spf Mechanisms.
 // Note: This Regex has errors. Needs to be reworked.
 // Tends to match any string starting with 'a'
