@@ -26,6 +26,7 @@
 //! - `serde` (Disabled by default.)
 //!
 mod helpers;
+mod core;
 pub mod mechanism;
 mod spf;
 
