@@ -25,7 +25,6 @@
 //! `ParsedMechanism`. By default `Mechanism<String>`'s `rrdata` is not checked.
 //! - `serde` (Disabled by default.)
 //!
-mod helpers;
 mod core;
 pub mod mechanism;
 mod spf;

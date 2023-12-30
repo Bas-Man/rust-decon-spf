@@ -1,6 +1,4 @@
 #[cfg(test)]
-use crate::helpers;
-#[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
 use crate::mechanism::Mechanism;
@@ -10,7 +8,7 @@ fn test_match_on_a_only() {
     let string = "a";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::A);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
@@ -22,7 +20,7 @@ fn test_match_on_a_colon() {
     let string = "-a:example.com";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::A);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
@@ -34,7 +32,7 @@ fn test_match_on_a_slash() {
     let string = "~a/24";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::A);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
@@ -46,7 +44,7 @@ fn test_match_on_a_colon_slash() {
     let string = "+a:example.com/24";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::A);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::A);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);

@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests;
-use crate::helpers;
 use crate::spf::{Spf, SpfError};
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
@@ -57,7 +56,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
         if spf.source.len() > crate::core::MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
-        if !helpers::spf_check_whitespace(&spf.to_string()) {
+        if !crate::core::spf_check_whitespace(&spf.to_string()) {
             return Err(SpfError::WhiteSpaceSyntaxError);
         }
     } else {

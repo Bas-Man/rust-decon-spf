@@ -1,6 +1,4 @@
 #[cfg(test)]
-use crate::helpers;
-#[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
 use crate::mechanism::Mechanism;
@@ -10,7 +8,7 @@ fn match_on_ptr() {
     let string = "ptr";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::Ptr);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::Ptr);
     assert!(option_test.is_some());
 
     let test = option_test.unwrap();
@@ -23,7 +21,7 @@ fn match_on_ptr_colon() {
     let string = "ptr:example.com";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::Ptr);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::Ptr);
     assert!(option_test.is_some());
 
     let test = option_test.unwrap();

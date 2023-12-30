@@ -24,12 +24,13 @@ pub use crate::mechanism::kind::Kind;
 pub use crate::mechanism::parsedmechanism::ParsedMechanism;
 pub use crate::mechanism::qualifier::Qualifier;
 
-use crate::helpers;
+use crate::core;
+
 use ipnetwork::{IpNetwork, IpNetworkError};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Stores its [`Kind`], [`Qualifier`], and its `Value`
 #[derive(Default, Debug, Clone, PartialEq)]
@@ -107,7 +108,7 @@ impl FromStr for Mechanism<String> {
                 ));
             }
         } else if s.contains("include:") {
-            let qualifier_and_modified_str = helpers::return_and_remove_qualifier(s, 'i');
+            let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             if let Some(rrdata) = s.rsplit(':').next() {
                 m = Some(Mechanism::generic_inclusive(
                     Kind::Include,
@@ -117,15 +118,15 @@ impl FromStr for Mechanism<String> {
             }
         } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
             m = Some(Mechanism::all(
-                helpers::return_and_remove_qualifier(s, 'a').0,
+                core::return_and_remove_qualifier(s, 'a').0,
             ));
-        } else if let Some(a_mechanism) = helpers::capture_matches(s, Kind::A) {
+        } else if let Some(a_mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(a_mechanism);
-        } else if let Some(mx_mechanism) = helpers::capture_matches(s, Kind::MX) {
+        } else if let Some(mx_mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
             m = Some(mx_mechanism);
-        } else if let Some(ptr_mechanism) = helpers::capture_matches(s, Kind::Ptr) {
+        } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
             m = Some(ptr_mechanism);
-        } else if let Some(exists_mechanism) = helpers::capture_matches(s, Kind::Exists) {
+        } else if let Some(exists_mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
             if !exists_mechanism.raw().contains('/') {
                 m = Some(exists_mechanism);
             }
@@ -133,7 +134,7 @@ impl FromStr for Mechanism<String> {
         if let Some(value) = m {
             #[cfg(feature = "strict-dns")]
             {
-                if !helpers::dns_is_valid(helpers::get_domain_before_slash(&value.raw())) {
+                if !core::dns::dns_is_valid(core::dns::get_domain_before_slash(&value.raw())) {
                     return Err(MechanismError::InvalidDomainHost(value.raw()));
                 }
             }
@@ -178,7 +179,7 @@ impl FromStr for Mechanism<IpNetwork> {
         if s.contains("ip4:") || s.contains("ip6:") {
             let mut kind = Kind::IpV4;
             let mut raw_ip: Option<&str> = None;
-            let qualifier_and_modified_str = helpers::return_and_remove_qualifier(s, 'i');
+            let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             if qualifier_and_modified_str.1.contains("ip4") {
                 kind = Kind::IpV4;
                 raw_ip = qualifier_and_modified_str.1.strip_prefix("ip4:");
@@ -450,7 +451,7 @@ impl Mechanism<String> {
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
-                    if !helpers::dns_is_valid(helpers::get_domain_before_slash(rrdata_string.as_str())) {
+                    if !core::dns::dns_is_valid(core::dns::get_domain_before_slash(rrdata_string.as_str())) {
                         return Err(MechanismError::InvalidDomainHost(rrdata_string));
                     };
                 }

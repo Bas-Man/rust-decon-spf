@@ -7,9 +7,9 @@ mod errors;
 mod tests;
 mod validate;
 
-use crate::helpers;
+use crate::core;
 use crate::mechanism::Kind;
-pub use crate::mechanism::{Mechanism, ParsedMechanism, Qualifier};
+pub use crate::mechanism::{Mechanism , Qualifier};
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -17,7 +17,7 @@ use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -84,10 +84,10 @@ impl FromStr for Spf {
         if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
             return Err(SpfError::InvalidSource);
         };
-        if source.len() > crate::core::MAX_SPF_STRING_LENGTH {
+        if source.len() > core::MAX_SPF_STRING_LENGTH {
             return Err(SpfError::SourceLengthExceeded);
         };
-        if helpers::spf_check_whitespace(source.as_str()) {
+        if core::spf_check_whitespace(source.as_str()) {
             return Err(SpfError::WhiteSpaceSyntaxError);
         };
         // Basic Checks are ok.
@@ -116,13 +116,13 @@ impl FromStr for Spf {
                     );
                     #[cfg(feature = "warn-dns")]
                     {
-                        helpers::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
+                        core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
                     }
                     spf.redirect = Some(m);
                     spf.is_redirected = true;
                 }
             } else if record.contains("include:") {
-                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
                 if let Some(rrdata) = record.rsplit(':').next() {
                     let m = Mechanism::generic_inclusive(
                         Kind::Include,
@@ -131,15 +131,15 @@ impl FromStr for Spf {
                     );
                     #[cfg(feature = "warn-dns")]
                     {
-                        helpers::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
+                        core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
                     }
                     vec_of_includes.push(m);
                 }
-            } else if let Some(exists_mechanism) = helpers::capture_matches(record, Kind::Exists) {
+            } else if let Some(exists_mechanism) = core::spf_regex::capture_matches(record, Kind::Exists) {
                 if !exists_mechanism.raw().contains('/') {
                     #[cfg(feature = "warn-dns")]
                     {
-                        helpers::check_for_dns_warning(
+                        core::dns::warn::check_for_dns_warning(
                             &mut vec_of_warnings,
                             &exists_mechanism.raw(),
                         );
@@ -148,7 +148,7 @@ impl FromStr for Spf {
                 }
             } else if record.contains("ip4:") {
                 // Match an ip4
-                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
                     let valid_ip4 = raw_ip4.parse();
                     match valid_ip4 {
@@ -161,7 +161,7 @@ impl FromStr for Spf {
                 }
             } else if record.contains("ip6:") {
                 // Match an ip6
-                let qualifier_and_modified_str = helpers::return_and_remove_qualifier(record, 'i');
+                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
                     let valid_ip6 = raw_ip6.parse();
                     match valid_ip6 {
@@ -174,14 +174,14 @@ impl FromStr for Spf {
                 }
             } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
                 spf.all = Some(Mechanism::all(
-                    helpers::return_and_remove_qualifier(record, 'a').0,
+                    core::return_and_remove_qualifier(record, 'a').0,
                 ));
             // Handle A, MX and PTR types.
-            } else if let Some(a_mechanism) = helpers::capture_matches(record, Kind::A) {
+            } else if let Some(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
                 #[cfg(feature = "warn-dns")]
                 {
                     if !a_mechanism.raw().starts_with('/')
-                        && !helpers::dns_is_valid(helpers::get_domain_before_slash(
+                        && !core::dns::dns_is_valid(core::dns::get_domain_before_slash(
                             &a_mechanism.raw(),
                         ))
                     {
@@ -189,11 +189,11 @@ impl FromStr for Spf {
                     }
                 }
                 vec_of_a.push(a_mechanism);
-            } else if let Some(mx_mechanism) = helpers::capture_matches(record, Kind::MX) {
+            } else if let Some(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
                 #[cfg(feature = "warn-dns")]
                 {
                     if !mx_mechanism.raw().starts_with('/')
-                        && !helpers::dns_is_valid(helpers::get_domain_before_slash(
+                        && !core::dns::dns_is_valid(core::dns::get_domain_before_slash(
                             &mx_mechanism.raw(),
                         ))
                     {
@@ -201,10 +201,10 @@ impl FromStr for Spf {
                     }
                 }
                 vec_of_mx.push(mx_mechanism);
-            } else if let Some(ptr_mechanism) = helpers::capture_matches(record, Kind::Ptr) {
+            } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr) {
                 #[cfg(feature = "warn-dns")]
                 {
-                    helpers::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
+                    core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
                 }
                 spf.ptr = Some(ptr_mechanism);
             }
@@ -313,7 +313,7 @@ impl Spf {
     /// Sets the passed mechanism to `None`
     ///
     /// # Note:
-    /// This method clears all assocated Mechanism for the [`Kind`](Kind) provided.
+    /// This method clears all associated Mechanism for the [`Kind`](Kind) provided.
     ///
     /// # Example:
     /// ```
@@ -450,7 +450,7 @@ impl Spf {
             }
         }
     }
-    /// # Note: Experimential
+    /// # Note: Experimental
     /// *Do not use.*
     /// Very rudimentary validation check.
     /// - Will fail if the length of `source` is more than MAX_SPF_STRING_LENGTH characters See:
@@ -461,7 +461,7 @@ impl Spf {
     #[deprecated(note = "This is expected to be depreciated.")]
     pub fn try_validate(&mut self) -> Result<(), SpfError> {
         if self.from_src {
-            if self.source.len() > crate::core::MAX_SPF_STRING_LENGTH {
+            if self.source.len() > core::MAX_SPF_STRING_LENGTH {
                 return Err(SpfError::SourceLengthExceeded);
             } else if !self.was_parsed {
                 return Err(SpfError::HasNotBeenParsed);
@@ -498,22 +498,22 @@ impl Spf {
         let mut spf = String::new();
         spf.push_str(self.version());
         if let Some(a) = self.a() {
-            spf.push_str(helpers::build_spf_str(a).as_str());
+            spf.push_str(core::build_spf_str(a).as_str());
         };
         if let Some(mx) = self.mx() {
-            spf.push_str(helpers::build_spf_str(mx).as_str());
+            spf.push_str(core::build_spf_str(mx).as_str());
         };
         if let Some(includes) = self.includes() {
-            spf.push_str(helpers::build_spf_str(includes).as_str());
+            spf.push_str(core::build_spf_str(includes).as_str());
         }
         if let Some(ip4) = self.ip4() {
-            spf.push_str(helpers::build_spf_str_from_ip(ip4).as_str());
+            spf.push_str(core::build_spf_str_from_ip(ip4).as_str());
         }
         if let Some(ip6) = self.ip6() {
-            spf.push_str(helpers::build_spf_str_from_ip(ip6).as_str());
+            spf.push_str(core::build_spf_str_from_ip(ip6).as_str());
         }
         if let Some(exists) = self.exists() {
-            spf.push_str(helpers::build_spf_str(exists).as_str());
+            spf.push_str(core::build_spf_str(exists).as_str());
         }
         if let Some(ptr) = self.ptr() {
             spf.push(' ');

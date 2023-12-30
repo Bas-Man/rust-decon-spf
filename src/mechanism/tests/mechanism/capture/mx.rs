@@ -1,6 +1,4 @@
 #[cfg(test)]
-use crate::helpers;
-#[cfg(test)]
 use crate::mechanism::Kind;
 #[cfg(test)]
 use crate::mechanism::Mechanism;
@@ -10,7 +8,7 @@ fn match_on_mx_only() {
     let string = "mx";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::MX);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
@@ -22,7 +20,7 @@ fn match_on_mx_colon() {
     let string = "-mx:example.com";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::MX);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_fail(), true);
@@ -34,7 +32,7 @@ fn match_on_mx_slash() {
     let string = "~mx/24";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::MX);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_softfail(), true);
@@ -46,7 +44,7 @@ fn match_on_mx_colon_slash() {
     let string = "+mx:example.com/24";
     let option_test: Option<Mechanism<String>>;
 
-    option_test = helpers::capture_matches(&string, Kind::MX);
+    option_test = crate::core::spf_regex::capture_matches(&string, Kind::MX);
 
     let test = option_test.unwrap();
     assert_eq!(test.is_pass(), true);
