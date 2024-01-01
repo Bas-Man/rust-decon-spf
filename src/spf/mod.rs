@@ -93,7 +93,7 @@ impl FromStr for Spf {
         };
         // Basic Checks are ok.
         let mut spf = Spf::new();
-        // Setup Vecs
+        // Setup Vectors
         let records = source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
@@ -263,7 +263,7 @@ impl Spf {
         false
     }
     /// Check if there were any warnings when parsing the Spf String.
-    /// This can only be changed to `true` when `warn-dns` feature has been eabled. Other wise it
+    /// This can only be changed to `true` when `warn-dns` feature has been enabled. Other wise it
     /// will always be `false`
     #[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
     #[cfg(feature = "warn-dns")]
@@ -407,8 +407,8 @@ impl Spf {
     /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
-    /// new_spf_record.append_mechanism(Mechanism::new_redirect(Qualifier::Pass,
-    ///                                 "_spf.example.com".to_string()));
+    /// new_spf_record.append_mechanism(Mechanism::redirect(Qualifier::Pass,
+    ///                                 "_spf.example.com").unwrap());
     /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
