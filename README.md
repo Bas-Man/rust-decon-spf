@@ -13,6 +13,7 @@ Lookup and deconstruct Spf record.
 
 - [trust-dns-resolver](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/trust-dns-demo.rs)
 - [build-spf](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-spf.rs)
+- [build-spf-strict](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/build-spf-strict.rs)
 - [serde-demo](https://github.com/Bas-Man/rust-decon-spf/blob/master/examples/serde-demo.rs)
 
 ### Run example
