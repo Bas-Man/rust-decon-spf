@@ -13,7 +13,7 @@ pub enum Qualifier {
     Pass,
     /// It is denoted by '-' (Minus Sign)
     Fail,
-    /// It is denoted by '~' (Tidle Mark)
+    /// It is denoted by '~' (Tilde Mark)
     SoftFail,
     /// It is denoted by '?' (Question Mark)
     Neutral,

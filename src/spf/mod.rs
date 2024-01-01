@@ -18,6 +18,7 @@ use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -71,10 +72,10 @@ impl std::fmt::Display for Spf {
 /// // Spf contains an invalid DNS host entry
 /// let bad_spf2: Spf = "v=spf1 a mx:example.m/24 -all".parse().unwrap();
 /// // Note: `warn-dns` will check `example.m` ignoring `/24`
-/// #[cfg(feature = "warn-dns")]
+/// #[cfg(feature = "warn-dns")] {
 /// assert_eq!(bad_spf2.has_warnings(), true);
-/// #[cfg(feature = "warn-dns")]
 /// assert_eq!(bad_spf2.warnings().unwrap()[0], "example.m/24");
+/// }
 ///```
 ///
 impl FromStr for Spf {
@@ -323,8 +324,8 @@ impl Spf {
     /// new_spf_record.set_v1();
     /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// new_spf_record.append_mechanism(Mechanism::a(Qualifier::Pass));
-    /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
-    ///                                                      "203.32.160.0/23".parse().unwrap()));
+    /// new_spf_record.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
+    ///                                                  "203.32.160.0/23".parse().unwrap()));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
     /// // Remove ip4 Mechanism
     /// new_spf_record.clear_mechanism(Kind::IpV4);
@@ -436,7 +437,7 @@ impl Spf {
     /// use decon_spf::Spf;
     /// let mut new_spf_record = Spf::new();
     /// new_spf_record.set_v1();
-    /// new_spf_record.append_ip_mechanism(Mechanism::new_ip(Qualifier::Pass,
+    /// new_spf_record.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
     /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());

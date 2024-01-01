@@ -74,6 +74,7 @@ impl ParsedMechanism {
     ///            MechanismError::InvalidMechanismFormat("ab.com".to_string()));
     ///```
     pub fn new(s: &str) -> Result<ParsedMechanism, MechanismError> {
+        // Should this use the try_from() call? Duplicated code.
         if s.contains("ip4:") || s.contains("ip6:") {
             Ok(ParsedMechanism::IP(Mechanism::<IpNetwork>::from_str(s)?))
         } else {
@@ -131,7 +132,7 @@ impl ParsedMechanism {
             ParsedMechanism::IP(ref m) => m.raw(),
         }
     }
-    /// Returns `true` if the mechanim is an `IpNetwork` or `false` if it contains any other; A, MX, etc.
+    /// Returns `true` if the mechanism is an `IpNetwork` or `false` if it contains any other; A, MX, etc.
     pub fn is_network(&self) -> bool {
         match *self {
             ParsedMechanism::TXT(_) => false,

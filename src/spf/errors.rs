@@ -69,11 +69,11 @@ impl SpfError {
     pub fn source_is_invalid(&self) -> bool {
         matches!(self, Self::InvalidSource)
     }
-    /// Returns `true` if the SpfError indictes source length exceeds 255 characters.
+    /// Returns `true` if the SpfError indicates source length exceeds 255 characters.
     pub fn is_source_length_exceeded(&self) -> bool {
         matches!(self, Self::SourceLengthExceeded)
     }
-    /// Returns `true` if the SpfError indictes source length exceeds 255 characters.
+    /// Returns `true` if the SpfError indicates source length exceeds 255 characters.
     pub fn source_length_exceeded(&self) -> bool {
         matches!(self, Self::SourceLengthExceeded)
     }

@@ -311,7 +311,7 @@ impl Mechanism<String> {
     /// # #[cfg(feature = "strict-dns")]
     /// # use decon_spf::mechanism::MechanismError;
     /// // New `A` without rrdata.
-    /// let m = Mechanism::new_a_without_mechanism(Qualifier::Pass);
+    /// let m = Mechanism::a(Qualifier::Pass);
     /// assert_eq!(m.kind().is_a(), true);
     /// assert_eq!(m.raw(), "a".to_string());
     /// assert_eq!(m.mechanism().is_none(), true);
@@ -482,10 +482,10 @@ impl Mechanism<String> {
     /// ```
     /// use decon_spf::mechanism::Qualifier;
     /// use decon_spf::mechanism::Mechanism;
-    /// let mechanism_a = Mechanism::new_a_without_mechanism(Qualifier::Neutral);
+    /// let mechanism_a = Mechanism::a(Qualifier::Neutral);
     /// assert_eq!(mechanism_a.raw(), "a");
-    /// let mechanism_a_string = Mechanism::new_a_with_mechanism(Qualifier::Neutral,
-    ///                                                          String::from("example.com"));
+    /// let mechanism_a_string = Mechanism::a(Qualifier::Neutral)
+    ///                                     .with_rrdata("example.com").unwrap();
     /// assert_eq!(mechanism_a_string.raw(), "example.com");
     /// ```
     pub fn raw(&self) -> String {
