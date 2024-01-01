@@ -210,7 +210,7 @@ impl FromStr for Spf {
                 spf.ptr = Some(ptr_mechanism);
             }
         }
-        // Move vec_of_* int the SPF struct
+        // Move vec_of_* into the SPF struct
         if !vec_of_includes.is_empty() {
             spf.include = Some(vec_of_includes);
         };
