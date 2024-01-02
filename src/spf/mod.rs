@@ -82,15 +82,10 @@ impl FromStr for Spf {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let source = String::from(s);
-        if !source.starts_with("v=spf1") && !source.starts_with("spf2.0") {
-            return Err(SpfError::InvalidSource);
-        };
-        if source.len() > core::MAX_SPF_STRING_LENGTH {
-            return Err(SpfError::SourceLengthExceeded);
-        };
-        if core::spf_check_whitespace(source.as_str()) {
-            return Err(SpfError::WhiteSpaceSyntaxError);
-        };
+        validate::check_start_of_spf(s)?;
+        validate::check_spf_length(s)?;
+        validate::check_whitespaces(s)?;
+
         // Basic Checks are ok.
         let mut spf = Spf::new();
         // Setup Vectors
