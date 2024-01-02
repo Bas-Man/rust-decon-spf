@@ -8,9 +8,10 @@ pub(crate) mod spf_regex;
 pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
 
 
-// Check for white space in spf record.
-// Return true if there is a space at the end of the string or
-// if there are two consecutive spaces within the string.
+/// Check for white space in spf record.
+///
+/// Return true if there is a space at the end of the string or
+/// if there are two consecutive spaces within the string.
 pub(crate) fn spf_check_whitespace(s: &str) -> bool {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"\s{2,}").unwrap();
