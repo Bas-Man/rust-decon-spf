@@ -131,7 +131,8 @@ impl FromStr for Spf {
                     }
                     vec_of_includes.push(m);
                 }
-            } else if let Some(exists_mechanism) = core::spf_regex::capture_matches(record, Kind::Exists) {
+            } else if let Some(exists_mechanism) =
+                core::spf_regex::capture_matches(record, Kind::Exists) {
                 if !exists_mechanism.raw().contains('/') {
                     #[cfg(feature = "warn-dns")]
                     {
