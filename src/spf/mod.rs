@@ -291,9 +291,8 @@ impl Spf {
         self.version.contains("v=spf1")
     }
     /// Check that version is v2
-    // todo: May need to change this to check for both /pra or /mfrom to be a valid check.
     pub fn is_v2(&self) -> bool {
-        self.version.starts_with("spf2.0")
+        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
     }
     /// Return a reference to version
     pub fn version(&self) -> &String {
