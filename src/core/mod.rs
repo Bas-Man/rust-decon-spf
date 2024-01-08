@@ -121,6 +121,14 @@ pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
 pub(crate) mod dns {
     use addr::parse_dns_name;
 
+    /// If there is a string preceeding the '/' character. This string should be returned.
+    ///
+    /// Example:
+    /// bogus.com/24
+    ///
+    /// Returns "bogus.com"
+    /// If there is no '/' or the string starts with a '/' than an unmodified `str`
+    /// is returned.
     pub(crate) fn get_domain_before_slash(s: &str) -> &str {
         if !s.starts_with('/') && s.contains('/') {
             s.split('/').next().unwrap()
@@ -128,7 +136,12 @@ pub(crate) mod dns {
             s
         }
     }
-    pub(crate) fn dns_is_valid(name: &str) -> bool {
+
+    /// Checks that the domain name string has a valid suffix, meaning that it is
+    /// listed in the public suffix list.
+    ///
+    /// Returns: a boolean value
+    pub(crate) fn is_dns_suffix_valid(name: &str) -> bool {
         // These can not be and do not need to be tested. They are always valid.
         if name == "a" || name == "mx" || name == "ptr" || name == "all" || name.starts_with('/') {
             true
@@ -141,16 +154,16 @@ pub(crate) mod dns {
     }
     #[cfg(feature = "warn-dns")]
     pub(crate) mod warn {
-        use crate::core::dns::dns_is_valid;
+        use crate::core::dns::is_dns_suffix_valid;
 
         pub(crate) fn check_for_dns_warning(warning_vec: &mut Vec<String>, name: &str) {
-            if !dns_is_valid(name) {
+            if !is_dns_suffix_valid(name) {
                 warning_vec.push(name.to_string());
             }
         }
         #[cfg(test)]
         mod test {
-            use crate::core::dns::{dns_is_valid, get_domain_before_slash};
+            use crate::core::dns::{is_dns_suffix_valid, get_domain_before_slash};
 
             #[test]
             fn start_with_slash() {
@@ -169,23 +182,23 @@ pub(crate) mod dns {
             }
             #[test]
             fn invalid_tld() {
-                assert_eq!(dns_is_valid("t.xx"), false);
+                assert_eq!(is_dns_suffix_valid("t.xx"), false);
             }
             #[test]
             fn valid_domain() {
-                assert_eq!(dns_is_valid("test.com"), true);
+                assert_eq!(is_dns_suffix_valid("test.com"), true);
             }
             #[test]
             fn valid_a() {
-                assert_eq!(dns_is_valid("a"), true);
+                assert_eq!(is_dns_suffix_valid("a"), true);
             }
             #[test]
             fn valid_mx() {
-                assert_eq!(dns_is_valid("mx"), true);
+                assert_eq!(is_dns_suffix_valid("mx"), true);
             }
             #[test]
             fn valid_ptr() {
-                assert_eq!(dns_is_valid("ptr"), true);
+                assert_eq!(is_dns_suffix_valid("ptr"), true);
             }
 
 

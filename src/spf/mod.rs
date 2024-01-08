@@ -180,7 +180,7 @@ impl FromStr for Spf {
                 #[cfg(feature = "warn-dns")]
                 {
                     if !a_mechanism.raw().starts_with('/')
-                        && !core::dns::dns_is_valid(core::dns::get_domain_before_slash(
+                        && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
                             &a_mechanism.raw(),
                         ))
                     {
@@ -192,7 +192,7 @@ impl FromStr for Spf {
                 #[cfg(feature = "warn-dns")]
                 {
                     if !mx_mechanism.raw().starts_with('/')
-                        && !core::dns::dns_is_valid(core::dns::get_domain_before_slash(
+                        && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
                             &mx_mechanism.raw(),
                         ))
                     {

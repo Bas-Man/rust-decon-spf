@@ -134,7 +134,7 @@ impl FromStr for Mechanism<String> {
         if let Some(value) = m {
             #[cfg(feature = "strict-dns")]
             {
-                if !core::dns::dns_is_valid(core::dns::get_domain_before_slash(&value.raw())) {
+                if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(&value.raw())) {
                     return Err(MechanismError::InvalidDomainHost(value.raw()));
                 }
             }
@@ -451,7 +451,7 @@ impl Mechanism<String> {
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
-                    if !core::dns::dns_is_valid(core::dns::get_domain_before_slash(rrdata_string.as_str())) {
+                    if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(rrdata_string.as_str())) {
                         return Err(MechanismError::InvalidDomainHost(rrdata_string));
                     };
                 }
