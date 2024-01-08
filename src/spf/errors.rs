@@ -1,6 +1,6 @@
 use ipnetwork::IpNetworkError;
 
-/// A list of expected possible errors for SPF records.
+/// A list of expected and possible errors for SPF records.
 #[derive(Debug, PartialEq)]
 pub enum SpfError {
     /// Source is invalid, SPF struct was not created using `from_str()`
