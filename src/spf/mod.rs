@@ -143,6 +143,8 @@ impl FromStr for Spf {
                     }
                     vec_of_exists.push(exists_mechanism);
                 }
+            // Todo: This ip4/ip6 if case should be refactored to remove code duplication. But it can wait
+            // until I think about about doing code optimisation to avoid code slow down.
             } else if record.contains("ip4:") {
                 // Match an ip4
                 let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
