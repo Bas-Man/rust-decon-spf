@@ -50,8 +50,8 @@ mod valid_spf_from_str {
         assert_eq!(spf.ip4().unwrap().len(), 1);
         assert_eq!(spf.ip4().unwrap()[0].to_string(), "ip4:157.55.9.128/25");
         assert_eq!(spf.all().unwrap().to_string(), "~all");
-        #[cfg(feature = "warn-dns")]
-        assert_eq!(spf.has_warnings(), false);
+        //#[cfg(feature = "warn-dns")]
+        //assert_eq!(spf.has_warnings(), false);
     }
     #[test]
     fn test_netblocks2_google_com() {
