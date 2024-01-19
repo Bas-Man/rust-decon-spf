@@ -9,7 +9,7 @@ mod validate;
 
 use crate::core;
 use crate::mechanism::Kind;
-pub use crate::mechanism::{Mechanism , Qualifier};
+pub use crate::mechanism::{Mechanism, Qualifier};
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -62,8 +62,8 @@ impl std::fmt::Display for Spf {
 ///
 /// // Additional Space between `A` and `MX`
 /// let bad_input = "v=spf1 a   mx -all";
-/// let err: SpfError = bad_input.parse::<Spf>().unwrap_err();
-/// assert_eq!(err.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
+/// let errs: SpfError = bad_input.parse::<Spf>().unwrap_err();
+/// assert_eq!(errs.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///
 /// // Example with warn-dns feature enabled.
@@ -102,10 +102,10 @@ impl FromStr for Spf {
                         Qualifier::Pass,
                         Some(rrdata.to_string()),
                     );
-        //            #[cfg(feature = "warn-dns")]
-        //            {
-        //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
-        //            }
+                    //            #[cfg(feature = "warn-dns")]
+                    //            {
+                    //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
+                    //            }
                     spf.redirect = Some(m);
                     spf.is_redirected = true;
                 }
@@ -117,22 +117,23 @@ impl FromStr for Spf {
                         qualifier_and_modified_str.0,
                         Some(rrdata.to_string()),
                     );
-        //            #[cfg(feature = "warn-dns")]
-        //            {
-        //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
-        //            }
+                    //            #[cfg(feature = "warn-dns")]
+                    //            {
+                    //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
+                    //            }
                     vec_of_includes.push(m);
                 }
             } else if let Some(exists_mechanism) =
-                core::spf_regex::capture_matches(record, Kind::Exists) {
+                core::spf_regex::capture_matches(record, Kind::Exists)
+            {
                 if !exists_mechanism.raw().contains('/') {
-        //            #[cfg(feature = "warn-dns")]
-        //            {
-        //                core::dns::warn::check_for_dns_warning(
-        //                    &mut vec_of_warnings,
-        //                    &exists_mechanism.raw(),
-        //                );
-        //            }
+                    //            #[cfg(feature = "warn-dns")]
+                    //            {
+                    //                core::dns::warn::check_for_dns_warning(
+                    //                    &mut vec_of_warnings,
+                    //                    &exists_mechanism.raw(),
+                    //                );
+                    //            }
                     vec_of_exists.push(exists_mechanism);
                 }
             // Todo: This ip4/ip6 if case should be refactored to remove code duplication. But it can wait
@@ -169,34 +170,35 @@ impl FromStr for Spf {
                 ));
             // Handle A, MX and PTR types.
             } else if let Some(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
-        //        #[cfg(feature = "warn-dns")]
-        //        {
-        //            if !a_mechanism.raw().starts_with('/')
-        //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
-        //                    &a_mechanism.raw(),
-        //                ))
-        //            {
-        //                vec_of_warnings.push(a_mechanism.raw());
-        //            }
-        //        }
+                //        #[cfg(feature = "warn-dns")]
+                //        {
+                //            if !a_mechanism.raw().starts_with('/')
+                //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
+                //                    &a_mechanism.raw(),
+                //                ))
+                //            {
+                //                vec_of_warnings.push(a_mechanism.raw());
+                //            }
+                //        }
                 vec_of_a.push(a_mechanism);
             } else if let Some(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
-        //        #[cfg(feature = "warn-dns")]
-        //        {
-        //            if !mx_mechanism.raw().starts_with('/')
-        //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
-        //                    &mx_mechanism.raw(),
-        //                ))
-        //            {
-        //                vec_of_warnings.push(mx_mechanism.raw());
-         //           }
-          //      }
+                //        #[cfg(feature = "warn-dns")]
+                //        {
+                //            if !mx_mechanism.raw().starts_with('/')
+                //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
+                //                    &mx_mechanism.raw(),
+                //                ))
+                //            {
+                //                vec_of_warnings.push(mx_mechanism.raw());
+                //           }
+                //      }
                 vec_of_mx.push(mx_mechanism);
-            } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr) {
-        //        #[cfg(feature = "warn-dns")]
-        //        {
-        //            core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
-        //        }
+            } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr)
+            {
+                //        #[cfg(feature = "warn-dns")]
+                //        {
+                //            core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
+                //        }
                 spf.ptr = Some(ptr_mechanism);
             }
         }
@@ -571,5 +573,5 @@ impl Spf {
     //#[cfg(feature = "warn-dns")]
     //pub fn warnings(&self) -> Option<&Vec<String>> {
     //    self.warnings.as_ref()
-   // }
+    // }
 }

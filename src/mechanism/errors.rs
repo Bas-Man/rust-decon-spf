@@ -1,5 +1,5 @@
 /// Error message when unable to construct a new Mechanism.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
     InvalidMechanismFormat(String),

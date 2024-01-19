@@ -1,7 +1,8 @@
+use crate::mechanism::MechanismError;
 use ipnetwork::IpNetworkError;
 
 /// A list of expected and possible errors for SPF records.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SpfError {
     /// Source is invalid, SPF struct was not created using `from_str()`
     InvalidSource,
@@ -19,7 +20,9 @@ pub enum SpfError {
     RedirectWithAllMechanism,
     /// Network Address is not valid
     InvalidIPAddr(IpNetworkError),
+    InvalidMechanism(MechanismError),
 }
+
 impl std::fmt::Display for SpfError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -38,6 +41,7 @@ impl std::fmt::Display for SpfError {
                 write!(f, "Redirect with unexpected 'All' Mechanism")
             }
             SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
+            SpfError::InvalidMechanism(err) => write!(f, "{}", err),
         }
     }
 }
@@ -48,6 +52,11 @@ impl From<IpNetworkError> for SpfError {
     }
 }
 
+impl From<MechanismError> for SpfError {
+    fn from(err: MechanismError) -> Self {
+        SpfError::InvalidMechanism(err)
+    }
+}
 impl std::error::Error for SpfError {}
 
 impl SpfError {
@@ -106,7 +115,40 @@ impl SpfError {
         matches!(self, Self::InvalidIPAddr(_))
     }
 }
+/// [SpfErrors] contains a vector of parsing or validation errors which are represented using
+/// various [SpfError] codes.
+#[derive(Debug, Default, Clone)]
+pub struct SpfErrors {
+    errors: Vec<SpfError>,
+    source: String,
+}
 
+impl SpfErrors {
+    pub fn new() -> Self {
+        Self {
+            errors: Vec::new(),
+            source: String::new(),
+        }
+    }
+    pub fn register_error(&mut self, error: SpfError) {
+        self.errors.push(error);
+    }
+    pub fn register_source(&mut self, source: String) {
+        self.source = source;
+    }
+    pub fn source(&self) -> &String {
+        &self.source
+    }
+    pub fn errors(&self) -> &Vec<SpfError> {
+        self.errors.as_ref()
+    }
+}
+
+#[test]
+fn create_spf_errors() {
+    let errors = SpfErrors::new();
+    assert_eq!(errors.errors.len(), 0);
+}
 #[test]
 fn is_any_spf_error() {
     let err = SpfError::InvalidSource;
