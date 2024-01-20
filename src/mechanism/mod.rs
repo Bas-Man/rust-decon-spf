@@ -52,8 +52,10 @@ mod serde_test {
         let a: Mechanism<String> = "a".parse().unwrap();
         let json = serde_json::to_string(&a).unwrap();
 
-        assert_eq!(json,
-                   "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}");
+        assert_eq!(
+            json,
+            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
+        );
         let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, a);
     }
@@ -62,8 +64,10 @@ mod serde_test {
         let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
         let json = serde_json::to_string(&mx).unwrap();
 
-        assert_eq!(json,
-                   "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}");
+        assert_eq!(
+            json,
+            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
+        );
         let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, mx);
     }
@@ -117,24 +121,23 @@ impl FromStr for Mechanism<String> {
                 ));
             }
         } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
-            m = Some(Mechanism::all(
-                core::return_and_remove_qualifier(s, 'a').0,
-            ));
-        } else if let Some(a_mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
-            m = Some(a_mechanism);
-        } else if let Some(mx_mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
-            m = Some(mx_mechanism);
-        } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
-            m = Some(ptr_mechanism);
-        } else if let Some(exists_mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
-            if !exists_mechanism.raw().contains('/') {
-                m = Some(exists_mechanism);
+            m = Some(Mechanism::all(core::return_and_remove_qualifier(s, 'a').0));
+        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
+            m = Some(mechanism);
+        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
+            m = Some(mechanism);
+        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
+            m = Some(mechanism);
+        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
+            if !mechanism.raw().contains('/') {
+                m = Some(mechanism);
             }
         }
         if let Some(value) = m {
             #[cfg(feature = "strict-dns")]
             {
-                if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(&value.raw())) {
+                if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(&value.raw()))
+                {
                     return Err(MechanismError::InvalidDomainHost(value.raw()));
                 }
             }
@@ -451,7 +454,9 @@ impl Mechanism<String> {
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
-                    if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(rrdata_string.as_str())) {
+                    if !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
+                        rrdata_string.as_str(),
+                    )) {
                         return Err(MechanismError::InvalidDomainHost(rrdata_string));
                     };
                 }
