@@ -99,19 +99,8 @@ impl FromStr for Spf {
                 spf.redirect = Some(m);
                 spf.is_redirected = true;
             } else if record.contains("include:") {
-                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
-                if let Some(rrdata) = record.rsplit(':').next() {
-                    let m = Mechanism::generic_inclusive(
-                        Kind::Include,
-                        qualifier_and_modified_str.0,
-                        Some(rrdata.to_string()),
-                    );
-                    //            #[cfg(feature = "warn-dns")]
-                    //            {
-                    //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
-                    //            }
-                    vec_of_includes.push(m);
-                }
+                let m: Mechanism<String> = record.parse()?;
+                vec_of_includes.push(m);
             } else if let Some(exists_mechanism) =
                 core::spf_regex::capture_matches(record, Kind::Exists)
             {
