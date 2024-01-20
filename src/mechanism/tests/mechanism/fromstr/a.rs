@@ -65,3 +65,13 @@ fn basic_pass_slash() {
     assert_eq!(m.raw(), "/24");
     assert_eq!(m.to_string(), input);
 }
+#[test]
+//#[should_panic]
+fn slash_num_over_128() {
+    let input = "a/129";
+
+    let m: Mechanism<String> = input.parse().unwrap();
+    assert_eq!(m.kind().is_a(), true);
+    assert_eq!(m.raw(), "/129");
+    assert_eq!(m.to_string(), input);
+}

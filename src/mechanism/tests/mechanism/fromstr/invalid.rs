@@ -96,7 +96,20 @@ mod general {
         );
     }
     #[test]
-    fn blank_exists_slash() {
+    fn exists_slash() {
+        let input = "exists:test.com/";
+
+        let m: Result<Mechanism<String>, MechanismError> = input.parse();
+        assert_eq!(m.is_err(), true);
+        let err = m.unwrap_err();
+        assert_eq!(err.is_invalid_format(), true);
+        assert_eq!(
+            err,
+            MechanismError::InvalidMechanismFormat(input.to_string())
+        );
+    }
+    #[test]
+    fn exists_slash_cidr() {
         let input = "exists:test.com/24";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();

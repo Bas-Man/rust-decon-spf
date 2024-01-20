@@ -30,10 +30,18 @@ fn neutral() {
     assert_eq!(m.to_string(), "~include:example.com");
 }
 #[test]
+fn fail_with_slash() {
+    let input = "include:example.com/";
+
+    let m = input.parse::<Mechanism<String>>().unwrap_err();
+    assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
+}
+#[test]
 #[cfg(feature = "strict-dns")]
 fn invalid_include_domain() {
     let input = "include:example.aa";
+    let text = "example.aa";
 
     let m: MechanismError = input.parse::<Mechanism<String>>().unwrap_err();
-    assert_eq!(m.to_string(), "Invalid DNS string: example.aa");
+    assert_eq!(m, MechanismError::InvalidDomainHost(text.to_string()));
 }

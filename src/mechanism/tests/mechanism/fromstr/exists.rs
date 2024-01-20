@@ -27,6 +27,16 @@ fn with_pass() {
     assert_eq!(m.to_string(), "exists:example.com");
 }
 #[test]
+fn failing_exists_slash() {
+    let input = "+exists:example.com/";
+
+    let m = input.parse::<Mechanism<String>>().unwrap_err();
+    assert_eq!(
+        m.to_string(),
+        "+exists:example.com/ does not conform to any Mechanism format"
+    );
+}
+#[test]
 fn neutral() {
     let input = "~exists:example.com";
 

@@ -3,7 +3,7 @@
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
     InvalidMechanismFormat(String),
-    //. Indicates that the provided string does not match the required format for the Mechanism Kind.
+    ///. Indicates that the provided string does not match the required format for the Mechanism Kind.
     InvalidMechanismFormatByKind(String, String),
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
     NotIP4Network(String),

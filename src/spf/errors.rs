@@ -20,6 +20,7 @@ pub enum SpfError {
     RedirectWithAllMechanism,
     /// Network Address is not valid
     InvalidIPAddr(IpNetworkError),
+    /// SpfError for an invalid Mechanism
     InvalidMechanism(MechanismError),
 }
 

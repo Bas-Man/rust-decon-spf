@@ -1,5 +1,6 @@
 #[cfg(test)]
 use crate::mechanism::Mechanism;
+use crate::mechanism::MechanismError;
 
 #[test]
 fn basic_ptr() {
@@ -10,6 +11,26 @@ fn basic_ptr() {
     assert_eq!(m.is_pass(), true);
     assert_eq!(m.raw(), "ptr");
     assert_eq!(m.to_string(), input);
+}
+#[test]
+fn ptr_with_slash_error() {
+    let input = "ptr:test.com/";
+
+    let m = input.parse::<Mechanism<String>>().unwrap_err();
+    assert_eq!(
+        m.to_string(),
+        "ptr:test.com/ does not conform to any Mechanism format"
+    );
+}
+#[test]
+fn ptr_with_colon_only_error() {
+    let input = "ptr:";
+
+    let m = input.parse::<Mechanism<String>>().unwrap_err();
+    assert_eq!(
+        m.to_string(),
+        "ptr: does not conform to any Mechanism format"
+    );
 }
 #[test]
 fn with_pass() {

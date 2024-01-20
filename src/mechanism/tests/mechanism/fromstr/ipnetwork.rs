@@ -47,34 +47,28 @@ mod invalid_ip4 {
     fn mechanism_name_malformed() {
         let input = "ip:203.32.160.0/24";
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "ip:203.32.160.0/24 does not conform to any Mechanism format"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
     }
     #[test]
     fn mechanism_ip_malformed() {
         let input = "ip4:203.32.160.0/33";
+        let ip_error = "203.32.160.0/33"
+            .parse::<ipnetwork::IpNetwork>()
+            .unwrap_err();
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "invalid address: 203.32.160.0/33"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::InvalidIPNetwork(ip_error.to_string()));
     }
     #[test]
     fn mechanism_ip6_as_ip4_malformed() {
         let input = "ip4:2001:4860:4000::/36";
+        let ip = "2001:4860:4000::/36"
+            .parse::<ipnetwork::IpNetwork>()
+            .unwrap();
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "2001:4860:4000::/36 is not an ip4 network"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::NotIP4Network(ip.to_string()));
     }
 }
 
@@ -124,34 +118,26 @@ mod invalid_ip6 {
     fn basic_fail_ip_str() {
         let input = "p6:2001:4860:4000::/36";
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "p6:2001:4860:4000::/36 does not conform to any Mechanism format"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
     }
 
     #[test]
     fn mechanism_ip_malformed() {
         let input = "ip6:2001:4860:4000::/129";
+        let ip_error = "2001:4860:4000::/129"
+            .parse::<ipnetwork::IpNetwork>()
+            .unwrap_err();
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "invalid address: 2001:4860:4000::/129"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::InvalidIPNetwork(ip_error.to_string()));
     }
     #[test]
     fn mechanism_ip4_as_ip6_malformed() {
         let input = "ip6:203.32.160.0/24";
+        let ip = "203.32.160.0/24".parse::<ipnetwork::IpNetwork>().unwrap();
 
-        let m: Result<Mechanism<IpNetwork>, MechanismError> = input.parse();
-        assert_eq!(m.is_err(), true);
-        assert_eq!(
-            m.unwrap_err().to_string(),
-            "203.32.160.0/24 is not an ip6 network"
-        );
+        let m: MechanismError = input.parse::<Mechanism<IpNetwork>>().unwrap_err();
+        assert_eq!(m, MechanismError::NotIP6Network(ip.to_string()));
     }
 }
