@@ -1,7 +1,7 @@
+use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::num::ParseIntError;
-use crate::mechanism::{Kind, Mechanism, Qualifier};
 
 // List of Regular Expressions used to parse Spf Mechanisms.
 // Note: This Regex has errors. Needs to be reworked.
@@ -18,7 +18,10 @@ pub(crate) const MECHANISM_EXISTS_PATTERN: &str =
 pub(crate) const MECHANISM_ALL_PATTERN: &str = r"^(?P<qualifier>[+?~-])?all(?P<mechanism>\s)?$";
 
 // Create a new mechanism for a matched regular expression.
-pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<String>> {
+pub(crate) fn capture_matches(
+    string: &str,
+    kind: Kind,
+) -> Result<Mechanism<String>, MechanismError> {
     lazy_static! {
         static ref A_RE: Regex = Regex::new(MECHANISM_A_PATTERN).unwrap();
         static ref MX_RE: Regex = Regex::new(MECHANISM_MX_PATTERN).unwrap();
@@ -38,7 +41,7 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
     let mut mechanism_string: String;
     let mechanism;
     match caps {
-        None => None,
+        None => return Err(MechanismError::InvalidMechanismFormat(string.to_string())),
         Some(caps) => {
             // There was a match
             if let Some(qualifier) = caps.name("qualifier") {
@@ -58,7 +61,7 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
                         new_mechanism.push_str(&format!("/{}", mechanism_string.as_str()));
                     } else {
                         // Did not match a number. Probably [a-z]. This makes it invalid.
-                        return None;
+                        return Err(MechanismError::InvalidMechanismFormat(string.to_string()));
                     }
                 }
                 if !new_mechanism.is_empty() {
@@ -72,7 +75,14 @@ pub(crate) fn capture_matches(string: &str, kind: Kind) -> Option<Mechanism<Stri
             } else {
                 mechanism = Mechanism::generic_inclusive(kind, qualifier_result, None);
             }
-            Some(mechanism)
+            if mechanism.kind().is_exists() && mechanism.raw().contains('/') {
+                return Err(MechanismError::InvalidMechanismFormatByKind(
+                    Kind::Exists.to_string(),
+                    mechanism.raw(),
+                ));
+            } else {
+                Ok(mechanism)
+            }
         }
     }
 }

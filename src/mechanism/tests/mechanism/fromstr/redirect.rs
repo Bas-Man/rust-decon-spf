@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::mechanism::{Mechanism, MechanismError};
+use crate::mechanism::Mechanism;
 
 #[test]
 fn default() {

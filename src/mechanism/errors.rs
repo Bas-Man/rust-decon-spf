@@ -3,6 +3,8 @@
 pub enum MechanismError {
     /// Indicates that the provided string is not correctly formed.
     InvalidMechanismFormat(String),
+    //. Indicates that the provided string does not match the required format for the Mechanism Kind.
+    InvalidMechanismFormatByKind(String, String),
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP4 though it is a valid IpNetwork.
     NotIP4Network(String),
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
@@ -22,6 +24,13 @@ impl std::fmt::Display for MechanismError {
         match self {
             MechanismError::InvalidMechanismFormat(mesg) => {
                 write!(f, "{} does not conform to any Mechanism format", mesg)
+            }
+            MechanismError::InvalidMechanismFormatByKind(kind, text) => {
+                write!(
+                    f,
+                    "{} does not conform to Mechanism `{}` format",
+                    text, kind
+                )
             }
             MechanismError::NotIP4Network(mesg) => {
                 write!(f, "{} is not an ip4 network", mesg)
@@ -48,6 +57,7 @@ impl MechanismError {
     /// Returns `true` if it is not a valid Mechanism format.
     pub fn is_invalid_format(&self) -> bool {
         matches!(self, Self::InvalidMechanismFormat(_))
+            || matches!(self, Self::InvalidMechanismFormatByKind(_, _))
     }
     /// Return `true` if it is a valid IpNetwork but not an IP4 network.
     /// # Example:

@@ -122,13 +122,13 @@ impl FromStr for Mechanism<String> {
             }
         } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
             m = Some(Mechanism::all(core::return_and_remove_qualifier(s, 'a').0));
-        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
+        } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(mechanism);
-        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
+        } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
             m = Some(mechanism);
-        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
+        } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
             m = Some(mechanism);
-        } else if let Some(mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
+        } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
             if !mechanism.raw().contains('/') {
                 m = Some(mechanism);
             }

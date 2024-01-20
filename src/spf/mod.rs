@@ -9,7 +9,7 @@ mod validate;
 
 use crate::core;
 use crate::mechanism::Kind;
-pub use crate::mechanism::{Mechanism, Qualifier};
+pub use crate::mechanism::Mechanism;
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -101,7 +101,7 @@ impl FromStr for Spf {
             } else if record.contains("include:") {
                 let m: Mechanism<String> = record.parse()?;
                 vec_of_includes.push(m);
-            } else if let Some(exists_mechanism) =
+            } else if let Ok(exists_mechanism) =
                 core::spf_regex::capture_matches(record, Kind::Exists)
             {
                 if !exists_mechanism.raw().contains('/') {
@@ -147,7 +147,7 @@ impl FromStr for Spf {
                     core::return_and_remove_qualifier(record, 'a').0,
                 ));
             // Handle A, MX and PTR types.
-            } else if let Some(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
+            } else if let Ok(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
                 //        #[cfg(feature = "warn-dns")]
                 //        {
                 //            if !a_mechanism.raw().starts_with('/')
@@ -159,7 +159,7 @@ impl FromStr for Spf {
                 //            }
                 //        }
                 vec_of_a.push(a_mechanism);
-            } else if let Some(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
+            } else if let Ok(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
                 //        #[cfg(feature = "warn-dns")]
                 //        {
                 //            if !mx_mechanism.raw().starts_with('/')
@@ -171,8 +171,7 @@ impl FromStr for Spf {
                 //           }
                 //      }
                 vec_of_mx.push(mx_mechanism);
-            } else if let Some(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr)
-            {
+            } else if let Ok(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr) {
                 //        #[cfg(feature = "warn-dns")]
                 //        {
                 //            core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
