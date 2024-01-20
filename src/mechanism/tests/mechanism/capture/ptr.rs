@@ -1,7 +1,5 @@
 #[cfg(test)]
-use crate::mechanism::Kind;
-#[cfg(test)]
-use crate::mechanism::Mechanism;
+use crate::mechanism::{Kind, Mechanism};
 
 #[test]
 fn match_on_ptr() {

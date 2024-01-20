@@ -1,7 +1,5 @@
 #[cfg(test)]
-use crate::mechanism::Kind;
-#[cfg(test)]
-use crate::mechanism::Mechanism;
+use crate::mechanism::{Kind, Mechanism};
 
 #[test]
 fn test_match_on_a_only() {
