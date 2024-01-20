@@ -95,20 +95,9 @@ impl FromStr for Spf {
             if record.contains("v=spf1") || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
-                let mut items = record.rsplit('=');
-                if let Some(rrdata) = items.next() {
-                    let m = Mechanism::generic_inclusive(
-                        Kind::Redirect,
-                        Qualifier::Pass,
-                        Some(rrdata.to_string()),
-                    );
-                    //            #[cfg(feature = "warn-dns")]
-                    //            {
-                    //                core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &m.raw());
-                    //            }
-                    spf.redirect = Some(m);
-                    spf.is_redirected = true;
-                }
+                let m: Mechanism<String> = record.parse()?;
+                spf.redirect = Some(m);
+                spf.is_redirected = true;
             } else if record.contains("include:") {
                 let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
                 if let Some(rrdata) = record.rsplit(':').next() {
