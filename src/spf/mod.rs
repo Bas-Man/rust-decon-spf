@@ -101,22 +101,9 @@ impl FromStr for Spf {
             } else if record.contains("include:") {
                 let m: Mechanism<String> = record.parse()?;
                 vec_of_includes.push(m);
-            } else if let Ok(exists_mechanism) =
-                core::spf_regex::capture_matches(record, Kind::Exists)
-            {
-                if !exists_mechanism.raw().contains('/') {
-                    //            #[cfg(feature = "warn-dns")]
-                    //            {
-                    //                core::dns::warn::check_for_dns_warning(
-                    //                    &mut vec_of_warnings,
-                    //                    &exists_mechanism.raw(),
-                    //                );
-                    //            }
-                    vec_of_exists.push(exists_mechanism);
-                }
-            // Todo: This ip4/ip6 if case should be refactored to remove code duplication. But it can wait
-            // until I think about about doing code optimisation to avoid code slow down.
             } else if record.contains("ip4:") {
+                // Todo: This ip4/ip6 if case should be refactored to remove code duplication. But it can wait
+                // until I think about about doing code optimisation to avoid code slow down.
                 // Match an ip4
                 let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
                 if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
@@ -146,37 +133,17 @@ impl FromStr for Spf {
                 spf.all = Some(Mechanism::all(
                     core::return_and_remove_qualifier(record, 'a').0,
                 ));
-            // Handle A, MX and PTR types.
+            // Handle A, MX, Exists and PTR types.
             } else if let Ok(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
-                //        #[cfg(feature = "warn-dns")]
-                //        {
-                //            if !a_mechanism.raw().starts_with('/')
-                //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
-                //                    &a_mechanism.raw(),
-                //                ))
-                //            {
-                //                vec_of_warnings.push(a_mechanism.raw());
-                //            }
-                //        }
                 vec_of_a.push(a_mechanism);
             } else if let Ok(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
-                //        #[cfg(feature = "warn-dns")]
-                //        {
-                //            if !mx_mechanism.raw().starts_with('/')
-                //                && !core::dns::is_dns_suffix_valid(core::dns::get_domain_before_slash(
-                //                    &mx_mechanism.raw(),
-                //                ))
-                //            {
-                //                vec_of_warnings.push(mx_mechanism.raw());
-                //           }
-                //      }
                 vec_of_mx.push(mx_mechanism);
             } else if let Ok(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr) {
-                //        #[cfg(feature = "warn-dns")]
-                //        {
-                //            core::dns::warn::check_for_dns_warning(&mut vec_of_warnings, &ptr_mechanism.raw());
-                //        }
                 spf.ptr = Some(ptr_mechanism);
+            } else if let Ok(exists_mechanism) =
+                core::spf_regex::capture_matches(record, Kind::Exists)
+            {
+                vec_of_exists.push(exists_mechanism);
             }
         }
         // Move vec_of_* into the SPF struct
@@ -198,12 +165,6 @@ impl FromStr for Spf {
         if !vec_of_exists.is_empty() {
             spf.exists = Some(vec_of_exists);
         }
-        //#[cfg(feature = "warn-dns")]
-        //{
-        //    if !vec_of_warnings.is_empty() {
-        //        spf.warnings = Some(vec_of_warnings);
-        //    }
-        //}
 
         spf.was_parsed = true;
         spf.is_valid = true;

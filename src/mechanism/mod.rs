@@ -129,9 +129,7 @@ impl FromStr for Mechanism<String> {
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::Ptr) {
             m = Some(mechanism);
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::Exists) {
-            if !mechanism.raw().contains('/') {
-                m = Some(mechanism);
-            }
+            m = Some(mechanism);
         }
         if let Some(value) = m {
             #[cfg(feature = "strict-dns")]
