@@ -86,3 +86,164 @@ pub(crate) fn capture_matches(
         }
     }
 }
+
+#[cfg(test)]
+mod a {
+    use crate::mechanism::Kind;
+
+    #[test]
+    fn test_match_on_a_only() {
+        let string = "a";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::A).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "a");
+        assert_eq!(mechanism.to_string(), "a");
+    }
+    #[test]
+    fn test_match_on_a_colon() {
+        let string = "-a:example.com";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::A).unwrap();
+
+        assert_eq!(mechanism.is_fail(), true);
+        assert_eq!(mechanism.raw(), "example.com");
+        assert_eq!(mechanism.to_string(), "-a:example.com");
+    }
+    #[test]
+    fn test_match_on_a_slash() {
+        let string = "~a/24";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::A).unwrap();
+
+        assert_eq!(mechanism.is_softfail(), true);
+        assert_eq!(mechanism.raw(), "/24");
+        assert_eq!(mechanism.to_string(), "~a/24");
+    }
+    #[test]
+    fn test_match_on_a_colon_slash() {
+        let string = "+a:example.com/24";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::A).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "example.com/24");
+        assert_eq!(mechanism.to_string(), "a:example.com/24");
+    }
+}
+#[cfg(test)]
+mod exists {
+    use crate::mechanism::Kind;
+
+    #[test]
+    fn basic() {
+        let string = "exists:a.example.com";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::Exists).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "a.example.com");
+        assert_eq!(mechanism.to_string(), "exists:a.example.com");
+    }
+    #[test]
+    fn basic_with_slash_error() {
+        let string = "exists:a.example.com/";
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::Exists).unwrap_err();
+
+        assert_eq!(
+            mechanism.to_string(),
+            "a.example.com/ does not conform to Mechanism `exists:` format"
+        );
+    }
+    #[test]
+    fn basic_with_slash_num_error() {
+        let string = "exists:a.example.com/32";
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::Exists).unwrap_err();
+
+        assert_eq!(
+            mechanism.to_string(),
+            "a.example.com/32 does not conform to Mechanism `exists:` format"
+        );
+    }
+}
+#[cfg(test)]
+mod mx {
+    use crate::mechanism::Kind;
+
+    #[test]
+    fn match_on_mx_only() {
+        let string = "mx";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::MX).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "mx");
+        assert_eq!(mechanism.to_string(), "mx");
+    }
+    #[test]
+    fn match_on_mx_colon() {
+        let string = "-mx:example.com";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::MX).unwrap();
+
+        assert_eq!(mechanism.is_fail(), true);
+        assert_eq!(mechanism.raw(), "example.com");
+        assert_eq!(mechanism.to_string(), "-mx:example.com");
+    }
+    #[test]
+    fn match_on_mx_slash() {
+        let string = "~mx/24";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::MX).unwrap();
+
+        assert_eq!(mechanism.is_softfail(), true);
+        assert_eq!(mechanism.raw(), "/24");
+        assert_eq!(mechanism.to_string(), "~mx/24");
+    }
+    #[test]
+    fn match_on_mx_colon_slash() {
+        let string = "+mx:example.com/24";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::MX).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "example.com/24");
+        assert_eq!(mechanism.to_string(), "mx:example.com/24");
+    }
+}
+#[cfg(test)]
+mod ptr {
+
+    use crate::mechanism::Kind;
+
+    #[test]
+    fn match_on_ptr() {
+        let string = "ptr";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::Ptr).unwrap();
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "ptr");
+        assert_eq!(mechanism.to_string(), "ptr");
+    }
+    #[test]
+    fn match_on_ptr_colon() {
+        let string = "ptr:example.com";
+
+        let mechanism = crate::core::spf_regex::capture_matches(&string, Kind::Ptr).unwrap();
+
+        assert_eq!(mechanism.is_pass(), true);
+        assert_eq!(mechanism.raw(), "example.com");
+    }
+    #[test]
+    fn match_on_ptr_colon_with_slash_error() {
+        let string = "ptr:example.com/";
+
+        let error = crate::core::spf_regex::capture_matches(&string, Kind::Ptr).unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "ptr:example.com/ does not conform to any Mechanism format"
+        );
+    }
+}
