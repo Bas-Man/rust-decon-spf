@@ -1,12 +1,11 @@
-use lazy_static::lazy_static;
-use ipnetwork::IpNetwork;
-use regex::Regex;
 use crate::mechanism::{Mechanism, Qualifier};
+use ipnetwork::IpNetwork;
+use lazy_static::lazy_static;
+use regex::Regex;
 pub(crate) mod spf_regex;
 
 /// This is the maximum number of characters that an Spf Record can store.
 pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
-
 
 /// Check for white space in spf record.
 ///
@@ -50,42 +49,49 @@ pub(crate) fn return_and_remove_qualifier(record: &str, c: char) -> (Qualifier, 
     }
 }
 
-#[test]
-fn return_and_remove_qualifier_no_qualifier() {
-    let source = "no prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Pass, c);
-    assert_eq!(source, new_str);
-}
-#[test]
-fn return_and_remove_qualifier_pass() {
-    let source = "+prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Pass, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_fail() {
-    let source = "-prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Fail, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_softfail() {
-    let source = "~prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::SoftFail, c);
-    assert_eq!("prefix", new_str);
-}
-#[test]
-fn return_and_remove_qualifier_neutral() {
-    let source = "?prefix";
-    let (c, new_str) = return_and_remove_qualifier(source, 'n');
-    assert_eq!(Qualifier::Neutral, c);
-    assert_eq!("prefix", new_str);
-}
+#[cfg(test)]
+mod return_and_remove_qualifier_tests {
+    use super::*;
+    #[test]
+    fn return_and_remove_qualifier_no_qualifier() {
+        let source = "no prefix";
+        let (c, new_str) = return_and_remove_qualifier(source, 'n');
+        assert_eq!(Qualifier::Pass, c);
+        assert_eq!(source, new_str);
+    }
 
+    #[test]
+    fn return_and_remove_qualifier_pass() {
+        let source = "+prefix";
+        let (c, new_str) = return_and_remove_qualifier(source, 'n');
+        assert_eq!(Qualifier::Pass, c);
+        assert_eq!("prefix", new_str);
+    }
+
+    #[test]
+    fn return_and_remove_qualifier_fail() {
+        let source = "-prefix";
+        let (c, new_str) = return_and_remove_qualifier(source, 'n');
+        assert_eq!(Qualifier::Fail, c);
+        assert_eq!("prefix", new_str);
+    }
+
+    #[test]
+    fn return_and_remove_qualifier_softfail() {
+        let source = "~prefix";
+        let (c, new_str) = return_and_remove_qualifier(source, 'n');
+        assert_eq!(Qualifier::SoftFail, c);
+        assert_eq!("prefix", new_str);
+    }
+
+    #[test]
+    fn return_and_remove_qualifier_neutral() {
+        let source = "?prefix";
+        let (c, new_str) = return_and_remove_qualifier(source, 'n');
+        assert_eq!(Qualifier::Neutral, c);
+        assert_eq!("prefix", new_str);
+    }
+}
 #[doc(hidden)]
 pub(crate) fn remove_qualifier(record: &str) -> &str {
     // Remove leading (+,-,~,?) character and return an updated str
@@ -99,6 +105,7 @@ fn test_remove_qualifier() {
     let result = remove_qualifier(test_str);
     assert_eq!(result, "bc");
 }
+
 // builds a string representation of of the mechanisms stored in the Vec<Mechanism<String>>
 pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     let mut partial_spf = String::new();
@@ -163,7 +170,7 @@ pub(crate) mod dns {
         }
         #[cfg(test)]
         mod test {
-            use crate::core::dns::{is_dns_suffix_valid, get_domain_before_slash};
+            use crate::core::dns::{get_domain_before_slash, is_dns_suffix_valid};
 
             #[test]
             fn start_with_slash() {
@@ -200,8 +207,6 @@ pub(crate) mod dns {
             fn valid_ptr() {
                 assert_eq!(is_dns_suffix_valid("ptr"), true);
             }
-
-
         }
     }
     pub(crate) mod strict {
