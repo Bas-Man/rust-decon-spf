@@ -44,4 +44,22 @@ mod parse {
         assert_eq!(spf.a().unwrap()[0].qualifier().is_softfail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "~a:example.com/24");
     }
+    mod invalid {
+        use crate::mechanism::MechanismError;
+        use crate::spf::{Spf, SpfError};
+
+        #[test]
+        fn invalid_a_colon() {
+            let input = "v=spf1 a: -all";
+            let err_mechanism = "a:";
+
+            let err = input.parse::<Spf>().unwrap_err();
+            assert_eq!(
+                err,
+                SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
+                    err_mechanism.to_string()
+                ))
+            )
+        }
+    }
 }
