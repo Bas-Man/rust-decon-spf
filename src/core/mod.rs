@@ -106,7 +106,7 @@ fn test_remove_qualifier() {
     assert_eq!(result, "bc");
 }
 
-// builds a string representation of of the mechanisms stored in the Vec<Mechanism<String>>
+// builds a string representation of the mechanisms stored in the Vec<Mechanism<String>>
 pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
@@ -115,7 +115,7 @@ pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     partial_spf
 }
 
-// builds a string representation of of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
+// builds a string representation of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
 pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
@@ -128,7 +128,7 @@ pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
 pub(crate) mod dns {
     use addr::parse_dns_name;
 
-    /// If there is a string preceeding the '/' character. This string should be returned.
+    /// If there is a string preceding the '/' character. This string should be returned.
     ///
     /// Example:
     /// bogus.com/24
