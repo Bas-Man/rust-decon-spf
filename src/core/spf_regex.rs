@@ -1,7 +1,6 @@
 use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::num::ParseIntError;
 
 // List of Regular Expressions used to parse Spf Mechanisms.
 // Note: This Regex has errors. Needs to be reworked.
@@ -60,7 +59,7 @@ pub(crate) fn capture_matches(
                 // Regex matches [ domain, domain/num, num] so we handle the "num" case here
                 if mechanism_string.len() < 4 {
                     let num = mechanism_string.parse::<i32>();
-                    // Check that we can convert this to an integer. If we can. Its ok.
+                    // Check that we can convert this to an integer. If we can. It's ok.
                     // convert mechanism_string from "num" to "/num"
                     match num {
                         Ok(_) => new_mechanism.push_str(&format!("/{}", mechanism_string.as_str())),
@@ -231,6 +230,7 @@ mod mx {
     mod invalid {
         use crate::mechanism::{Kind, Mechanism, MechanismError};
 
+        #[test]
         fn mx_colon_only() {
             let input = "mx:";
             let m = crate::core::spf_regex::capture_matches(&input, Kind::A).unwrap_err();
