@@ -8,8 +8,8 @@ mod tests;
 mod validate;
 
 use crate::core;
-use crate::mechanism::Kind;
 pub use crate::mechanism::Mechanism;
+use crate::mechanism::{Kind, MechanismError};
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -144,6 +144,10 @@ impl FromStr for Spf {
                 core::spf_regex::capture_matches(record, Kind::Exists)
             {
                 vec_of_exists.push(exists_mechanism);
+            } else {
+                return Err(SpfError::InvalidMechanism(
+                    MechanismError::InvalidMechanismFormat(record.to_string()),
+                ));
             }
         }
         // Move vec_of_* into the SPF struct
