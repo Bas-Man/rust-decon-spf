@@ -178,44 +178,37 @@ impl FromStr for Mechanism<IpNetwork> {
 
     fn from_str(s: &str) -> Result<Mechanism<IpNetwork>, Self::Err> {
         if s.contains("ip4:") || s.contains("ip6:") {
-            let mut kind = Kind::IpV4;
-            let mut raw_ip: Option<&str> = None;
+            let kind;
+            let raw_ip: Option<&str>;
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
-            if qualifier_and_modified_str.1.contains("ip4") {
-                kind = Kind::IpV4;
-                raw_ip = qualifier_and_modified_str.1.strip_prefix("ip4:");
-            } else if qualifier_and_modified_str.1.contains("ip6") {
-                kind = Kind::IpV6;
-                raw_ip = qualifier_and_modified_str.1.strip_prefix("ip6:")
-            };
-            // Consider changing this to if let Some() = {}
-            let parsed = raw_ip.unwrap().parse();
-            if let Ok(parsed_ip) = parsed {
-                let ip: IpNetwork = parsed_ip;
-                if ip.is_ipv4() && kind.is_ip_v4() {
-                    return Ok(Mechanism::generic_inclusive(
+            match qualifier_and_modified_str {
+                (_, str) if str.contains("ip4") => {
+                    kind = Kind::IpV4;
+                }
+                (_, str) if str.contains("ip6") => {
+                    kind = Kind::IpV6;
+                }
+                _ => return Err(MechanismError::InvalidMechanismFormat(s.to_string())),
+            }
+            raw_ip = qualifier_and_modified_str.1.splitn(2, ":").last();
+            return match raw_ip.unwrap().parse::<IpNetwork>() {
+                Err(e) => Err(MechanismError::InvalidIPNetwork(e.to_string())),
+                Ok(ip) => {
+                    if ip.is_ipv4() && !kind.is_ip_v4() {
+                        return Err(MechanismError::NotIP6Network(ip.to_string()));
+                    }
+                    if ip.is_ipv6() && !kind.is_ip_v6() {
+                        return Err(MechanismError::NotIP4Network(ip.to_string()));
+                    }
+                    Ok(Mechanism::generic_inclusive(
                         kind,
                         qualifier_and_modified_str.0,
                         Some(ip),
-                    ));
-                } else if ip.is_ipv4() && !kind.is_ip_v4() {
-                    return Err(MechanismError::NotIP6Network(ip.to_string()));
-                } else if ip.is_ipv6() && kind.is_ip_v6() {
-                    return Ok(Mechanism::generic_inclusive(
-                        kind,
-                        qualifier_and_modified_str.0,
-                        Some(ip),
-                    ));
-                } else if ip.is_ipv6() && !kind.is_ip_v6() {
-                    return Err(MechanismError::NotIP4Network(ip.to_string()));
-                };
-            } else {
-                return Err(MechanismError::InvalidIPNetwork(
-                    parsed.unwrap_err().to_string(),
-                ));
+                    ))
+                }
             };
         }
-        // Catch all. This is not an ip4 or ip6 spf string.
+        // Catch all. This is not an ip4 or ip6 mechanism string.
         Err(MechanismError::InvalidMechanismFormat(s.to_string()))
     }
 }
