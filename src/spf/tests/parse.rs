@@ -1,5 +1,3 @@
-#[cfg(test)]
-
 mod valid_spf_from_str {
 
     use crate::spf::Spf;
@@ -135,11 +133,10 @@ mod invalid_spf_from_str {
 
 #[cfg(test)]
 mod invalid_ip {
-    use crate::mechanism::MechanismError::{InvalidIPNetwork, InvalidMechanismFormat};
+    use crate::mechanism::MechanismError::InvalidIPNetwork;
     use crate::spf::Spf;
     use crate::spf::SpfError;
-    use crate::SpfError::{InvalidIPAddr, InvalidMechanism};
-    use ipnetwork::IpNetworkError;
+    use crate::SpfError::InvalidMechanism;
     use ipnetwork::IpNetworkError::InvalidAddr;
 
     #[test]
