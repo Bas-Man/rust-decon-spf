@@ -101,33 +101,12 @@ impl FromStr for Spf {
             } else if record.contains("include:") {
                 let m: Mechanism<String> = record.parse()?;
                 vec_of_includes.push(m);
-            } else if record.contains("ip4:") {
-                // Todo: This ip4/ip6 if case should be refactored to remove code duplication. But it can wait
-                // until I think about about doing code optimisation to avoid code slow down.
-                // Match an ip4
-                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
-                if let Some(raw_ip4) = qualifier_and_modified_str.1.strip_prefix("ip4:") {
-                    let valid_ip4 = raw_ip4.parse();
-                    match valid_ip4 {
-                        Ok(ip4) => {
-                            let network = Mechanism::ip(qualifier_and_modified_str.0, ip4);
-                            vec_of_ip4.push(network);
-                        }
-                        Err(ip4) => return Err(SpfError::InvalidIPAddr(ip4)),
-                    }
-                }
-            } else if record.contains("ip6:") {
-                // Match an ip6
-                let qualifier_and_modified_str = core::return_and_remove_qualifier(record, 'i');
-                if let Some(raw_ip6) = qualifier_and_modified_str.1.strip_prefix("ip6:") {
-                    let valid_ip6 = raw_ip6.parse();
-                    match valid_ip6 {
-                        Ok(ip6) => {
-                            let network = Mechanism::ip(qualifier_and_modified_str.0, ip6);
-                            vec_of_ip6.push(network);
-                        }
-                        Err(ip6) => return Err(SpfError::InvalidIPAddr(ip6)),
-                    }
+            } else if record.contains("ip4:") || record.contains("ip6:") {
+                let m = record.parse::<Mechanism<IpNetwork>>()?;
+                match m.kind() {
+                    Kind::IpV4 => vec_of_ip4.push(m),
+                    Kind::IpV6 => vec_of_ip6.push(m),
+                    _ => unreachable!(),
                 }
             } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
                 spf.all = Some(Mechanism::all(
