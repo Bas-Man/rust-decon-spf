@@ -188,11 +188,12 @@ impl FromStr for Mechanism<IpNetwork> {
                 (_, str) if str.contains("ip6") => {
                     kind = Kind::IpV6;
                 }
+                // This is probably unreachable.
                 _ => return Err(MechanismError::InvalidMechanismFormat(s.to_string())),
             }
             raw_ip = qualifier_and_modified_str.1.splitn(2, ":").last();
             return match raw_ip.unwrap().parse::<IpNetwork>() {
-                Err(e) => Err(MechanismError::InvalidIPNetwork(e.to_string())),
+                Err(e) => Err(MechanismError::InvalidIPNetwork(e)),
                 Ok(ip) => {
                     if ip.is_ipv4() && !kind.is_ip_v4() {
                         return Err(MechanismError::NotIP6Network(ip.to_string()));
@@ -321,7 +322,7 @@ impl Mechanism<String> {
     ///   assert_eq!(bad_rrdata.raw(), "example.xx".to_string());
     ///   assert_eq!(bad_rrdata.to_string(), "a:example.xx".to_string());
     /// }
-    /// // Create `A` with bad rrdata and `strict-dns` is enabled
+    /// // Create `A` with bad rrdata and`strict-dns` is enabled
     /// # #[cfg(feature = "strict-dns")] {
     /// if let Err(bad_rrdata) = Mechanism::a(Qualifier::Pass)
     ///                                              .with_rrdata("example.xx") {
@@ -535,7 +536,7 @@ impl std::fmt::Display for Mechanism<String> {
 
 impl From<IpNetworkError> for MechanismError {
     fn from(err: IpNetworkError) -> Self {
-        MechanismError::InvalidIPNetwork(err.to_string())
+        MechanismError::InvalidIPNetwork(err)
     }
 }
 

@@ -1,3 +1,5 @@
+use ipnetwork::{IpNetwork, IpNetworkError};
+
 /// Error message when unable to construct a new Mechanism.
 #[derive(Debug, Clone, PartialEq)]
 pub enum MechanismError {
@@ -10,7 +12,7 @@ pub enum MechanismError {
     /// Indicates that the provided string could not be parsed into an IpNetwork::IP6 though it is a valid IpNetwork.
     NotIP6Network(String),
     /// Indicates that the provided string does not contain any valid IpNetwork.
-    InvalidIPNetwork(String),
+    InvalidIPNetwork(ipnetwork::IpNetworkError),
     /// Attempted to access a Mechanism as a `Mechanism<IpNetwork>` but is `Mechanism<String>`
     NotIpNetworkMechanism,
     /// Attempted to access a Mechanism as a `Mechanism<String>` but is `Mechanism<IpNetwork>`
@@ -38,8 +40,8 @@ impl std::fmt::Display for MechanismError {
             MechanismError::NotIP6Network(mesg) => {
                 write!(f, "{} is not an ip6 network", mesg)
             }
-            MechanismError::InvalidIPNetwork(mesg) => {
-                write!(f, "{}", mesg)
+            MechanismError::InvalidIPNetwork(ip_error) => {
+                write!(f, "{}", ip_error)
             }
             MechanismError::NotIpNetworkMechanism => {
                 write!(f, "Attempt to access TXT as IP")

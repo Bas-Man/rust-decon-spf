@@ -26,19 +26,20 @@ impl std::fmt::Display for ParsedMechanism {
 /// Provides the ability to parse any supported `Spf Mechanisms`. See [`Kind`](Kind)
 /// # Examples:
 ///```rust
+/// use ipnetwork::IpNetworkError::InvalidAddr;
 /// use decon_spf::mechanism::{ParsedMechanism, MechanismError};
 /// let mechanism_a: ParsedMechanism = "a:test.com/24".parse().unwrap();
 /// let mechanism_mx = "mx:example.com".parse::<ParsedMechanism>().unwrap();
 /// let mechanism_ip4 = "ip4:203.32.160.10/24".parse::<ParsedMechanism>().unwrap();
 ///
-/// let mechanism_not_ip4 = "ip4:example.com".parse::<ParsedMechanism>();
-/// assert_eq!(mechanism_not_ip4.is_err(), true);
-/// assert_eq!(mechanism_not_ip4.unwrap_err(),
-///            MechanismError::InvalidIPNetwork("invalid address: example.com".to_string()));
+/// let mechanism_not_ip4 = "ip4:example.com".parse::<ParsedMechanism>().unwrap_err();
+/// assert_eq!(mechanism_not_ip4,
+///            MechanismError::InvalidIPNetwork(InvalidAddr("example.com".to_string())));
+/// assert_eq!(mechanism_not_ip4.to_string(), "invalid address: example.com".to_string());
 ///
-/// let mechanism_malformed: Result<ParsedMechanism, MechanismError> =
-///     "ab.com".parse::<ParsedMechanism>();
-/// assert_eq!(mechanism_malformed.unwrap_err().to_string(),
+/// let mechanism_malformed: MechanismError =
+///     "ab.com".parse::<ParsedMechanism>().unwrap_err();
+/// assert_eq!(mechanism_malformed.to_string(),
 ///            "ab.com does not conform to any Mechanism format");
 ///```
 impl FromStr for ParsedMechanism {
@@ -68,9 +69,9 @@ impl ParsedMechanism {
     /// // This is clearly not and `IpNetwork` so use `.txt()`
     /// let mechanism = parsed_mechanism.txt();
     /// // How parse errors are handled.
-    /// let error: Result<ParsedMechanism, MechanismError> =
-    ///     ParsedMechanism::new("ab.com");
-    /// assert_eq!(error.unwrap_err(),
+    /// let error: MechanismError =
+    ///     ParsedMechanism::new("ab.com").unwrap_err();
+    /// assert_eq!(error,
     ///            MechanismError::InvalidMechanismFormat("ab.com".to_string()));
     ///```
     pub fn new(s: &str) -> Result<ParsedMechanism, MechanismError> {
@@ -83,12 +84,18 @@ impl ParsedMechanism {
     /// let parsed_mechanism = ParsedMechanism::new("mx").unwrap();
     /// let mechanism = parsed_mechanism.txt();
     /// assert_eq!(mechanism.kind().is_mx(), true);
+    /// let parsed_mechanism = ParsedMechanism::new("ip4:203.32.160.10").unwrap();
+    /// let mechanism = parsed_mechanism.network();
+    /// assert_eq!(mechanism.kind().is_ip(), true);
+    /// assert_eq!(mechanism.kind().is_ip_v4(), true);
+    /// assert_eq!(mechanism.kind().is_ip_v6(), false);
     ///```
     pub fn txt(&self) -> Mechanism<String> {
         match *self {
             ParsedMechanism::TXT(ref m) => {
                 Mechanism::<String>::from_str(m.to_string().as_str()).unwrap()
             }
+            // This needs to be changed to return an Err when called on network
             ParsedMechanism::IP(_) => unreachable!(),
         }
     }
@@ -103,6 +110,7 @@ impl ParsedMechanism {
     pub fn network(&self) -> Mechanism<IpNetwork> {
         match *self {
             ParsedMechanism::IP(ref m) => Mechanism::ip(*m.qualifier(), *m.as_network()),
+            // This needs to be changed to return an Err when called on txt
             ParsedMechanism::TXT(_) => unreachable!(),
         }
     }
