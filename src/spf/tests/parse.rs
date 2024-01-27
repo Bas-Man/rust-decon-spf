@@ -135,9 +135,12 @@ mod invalid_spf_from_str {
 
 #[cfg(test)]
 mod invalid_ip {
-
+    use crate::mechanism::MechanismError::{InvalidIPNetwork, InvalidMechanismFormat};
     use crate::spf::Spf;
     use crate::spf::SpfError;
+    use crate::SpfError::{InvalidIPAddr, InvalidMechanism};
+    use ipnetwork::IpNetworkError;
+    use ipnetwork::IpNetworkError::InvalidAddr;
 
     #[test]
     fn invalid_ip4() {
@@ -145,6 +148,10 @@ mod invalid_ip {
         let spf: Result<Spf, SpfError> = input.parse();
         assert_eq!(spf.is_err(), true);
         let error = spf.unwrap_err();
+        assert_eq!(
+            error,
+            InvalidMechanism(InvalidIPNetwork(InvalidAddr("203.32.10.0/33".to_string())))
+        );
         assert_eq!(error.is_invalid_ip_addr(), true);
         assert_eq!(error.to_string(), "invalid address: 203.32.10.0/33");
     }
@@ -155,6 +162,7 @@ mod invalid_ip {
 
         assert_eq!(spf.is_err(), true);
         let error = spf.unwrap_err();
+        assert_eq!(error.is_invalid_ip_addr(), true);
         assert_eq!(error.to_string(), "invalid address: 2001:4860:4000::/129");
     }
 }
