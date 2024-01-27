@@ -1,5 +1,3 @@
-#[cfg(test)]
-
 mod parse {
 
     use crate::spf::Spf;
