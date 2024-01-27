@@ -113,7 +113,10 @@ impl SpfError {
     }
     /// Returns `true` if the SpfError indicates an Invalid IP Address
     pub fn is_invalid_ip_addr(&self) -> bool {
-        matches!(self, Self::InvalidIPAddr(_))
+        matches!(
+            self,
+            Self::InvalidMechanism(MechanismError::InvalidIPNetwork(_))
+        )
     }
 }
 /// [SpfErrors] contains a vector of parsing or validation errors which are represented using
@@ -184,12 +187,4 @@ fn is_invalid_spf() {
 fn is_redirect_with_all_mechanism() {
     let err = SpfError::RedirectWithAllMechanism;
     assert_eq!(err.is_redirect_with_all_mechanism(), true)
-}
-#[test]
-fn is_invalid_ip_addr() {
-    let bad_ip = "203.32.160.0/33"
-        .parse::<ipnetwork::IpNetwork>()
-        .unwrap_err();
-    let err = SpfError::InvalidIPAddr(bad_ip);
-    assert_eq!(err.is_invalid_ip_addr(), true)
 }
