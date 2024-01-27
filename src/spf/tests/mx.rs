@@ -1,5 +1,3 @@
-#[cfg(test)]
-
 mod parse {
 
     use crate::spf::Spf;
@@ -43,5 +41,8 @@ mod parse {
         assert!(spf.mx().is_some());
         assert_eq!(spf.mx().unwrap()[0].qualifier().is_softfail(), true);
         assert_eq!(spf.mx().unwrap()[0].to_string(), "~mx:example.com/24");
+    }
+    mod invalid {
+        // needs fail tests : / only tests and strict-dns
     }
 }

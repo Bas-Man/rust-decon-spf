@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod spf1 {
 
     use crate::spf::Spf;
@@ -12,7 +11,6 @@ mod spf1 {
         assert_eq!(spf.is_v1(), true);
     }
 }
-#[cfg(test)]
 mod spf2 {
 
     use crate::spf::Spf;
@@ -48,7 +46,6 @@ mod spf2 {
     }
 }
 
-#[cfg(test)]
 #[allow(deprecated)]
 mod build {
 
