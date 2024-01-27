@@ -8,7 +8,6 @@ mod ip6;
 mod mx;
 mod parse;
 mod ptr;
-//mod warndns;
 
 #[cfg(feature = "serde")]
 mod serde;
