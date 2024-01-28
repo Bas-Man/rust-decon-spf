@@ -92,9 +92,7 @@ impl ParsedMechanism {
     ///```
     pub fn txt(&self) -> Mechanism<String> {
         match *self {
-            ParsedMechanism::TXT(ref m) => {
-                Mechanism::<String>::from_str(m.to_string().as_str()).unwrap()
-            }
+            ParsedMechanism::TXT(ref m) => m.clone(),
             // This needs to be changed to return an Err when called on network
             ParsedMechanism::IP(_) => unreachable!(),
         }
@@ -109,7 +107,7 @@ impl ParsedMechanism {
     ///```
     pub fn network(&self) -> Mechanism<IpNetwork> {
         match *self {
-            ParsedMechanism::IP(ref m) => Mechanism::ip(*m.qualifier(), *m.as_network()),
+            ParsedMechanism::IP(ref m) => m.clone(),
             // This needs to be changed to return an Err when called on txt
             ParsedMechanism::TXT(_) => unreachable!(),
         }
