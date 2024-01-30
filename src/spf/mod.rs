@@ -489,10 +489,4 @@ impl Spf {
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
     }
-    // /// Return a reference to the list of domains that gave warnings.
-    //#[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
-    //#[cfg(feature = "warn-dns")]
-    //pub fn warnings(&self) -> Option<&Vec<String>> {
-    //    self.warnings.as_ref()
-    // }
 }
