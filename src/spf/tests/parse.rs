@@ -76,7 +76,7 @@ mod valid_spf_from_str {
     }
     #[test]
     fn valid_spf2() {
-        let input = "spf2.0 a";
+        let input = "spf2.0/pra a";
         let spf: Spf = input.parse().unwrap();
         assert_eq!(spf.source(), input);
     }
