@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod tests;
 #[cfg(feature = "warn-dns")]
 mod warn;
@@ -58,6 +57,13 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
         return Err(SpfError::SourceLengthExceeded);
     };
     Ok(())
+}
+pub(crate) fn check_ptr(spf: &Spf) -> Result<(), SpfError> {
+    if let Some(_) = &spf.ptr {
+        Err(SpfError::DeprecatedPtrPresent)
+    } else {
+        Ok(())
+    }
 }
 pub(crate) fn check_lookup_count(spf: &Spf) -> usize {
     let mut lookup_count: usize = 0;
