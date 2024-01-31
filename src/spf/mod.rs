@@ -74,10 +74,10 @@ impl std::fmt::Display for Spf {
 impl FromStr for Spf {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let source = String::from(s);
         validate::check_start_of_spf(s)?;
         validate::check_spf_length(s)?;
         validate::check_whitespaces(s)?;
+        let source = String::from(s);
 
         // Basic Checks are ok.
         let mut spf = Spf::new();
