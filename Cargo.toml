@@ -60,6 +60,7 @@ serde_json = { version = "1.0.108" }
 warn-dns = ["dep:addr"]
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
+spf2 = []
 
 [package.metadata.docs.rs]
 all-features = true
