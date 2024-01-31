@@ -150,7 +150,6 @@ impl FromStr for Spf {
         }
 
         spf.was_parsed = true;
-        spf.is_valid = true;
         spf.source = source;
         Ok(spf)
     }

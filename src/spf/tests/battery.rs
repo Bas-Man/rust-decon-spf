@@ -10,7 +10,7 @@ mod spf_v1 {
 
             for item in list.into_iter() {
                 let valid_spf: Spf = item.parse().unwrap();
-                assert_eq!(valid_spf.is_valid(), true);
+                assert_eq!(valid_spf.is_valid(), false);
             }
         }
     }

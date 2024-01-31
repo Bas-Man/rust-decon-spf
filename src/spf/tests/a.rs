@@ -5,7 +5,7 @@ fn mechanism() {
     let input = "v=spf1 a ~all";
 
     let spf: Spf = input.parse().unwrap();
-    assert_eq!(spf.is_valid(), true);
+    assert_eq!(spf.is_valid(), false);
     assert_eq!(spf.version(), "v=spf1");
     assert!(spf.a().is_some());
     assert_eq!(spf.a().unwrap()[0].qualifier().is_pass(), true);
