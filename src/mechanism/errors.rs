@@ -1,5 +1,3 @@
-use ipnetwork::{IpNetwork, IpNetworkError};
-
 /// Error message when unable to construct a new Mechanism.
 #[derive(Debug, Clone, PartialEq)]
 pub enum MechanismError {
