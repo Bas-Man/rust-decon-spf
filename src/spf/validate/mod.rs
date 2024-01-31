@@ -3,8 +3,8 @@ mod tests;
 #[cfg(feature = "warn-dns")]
 mod warn;
 
-use crate::spf::{Spf, SpfError};
 use crate::core::{self, spf_check_whitespace};
+use crate::spf::{Spf, SpfError};
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
@@ -29,10 +29,16 @@ impl<'a> std::fmt::Display for SpfValidationResult<'a> {
 /// "spf2.0"
 /// Returns Ok() or and [`InvalidSource`](SpfError::InvalidSource)
 pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
-    if !spf_string.starts_with("v=spf1") && !spf_string.starts_with("spf2.0") {
-        return Err(SpfError::InvalidSource);
-    };
-    Ok(())
+    if spf_string.starts_with("v=spf1 ")
+        || spf_string.starts_with("spf2.0/pra ")
+        || spf_string.starts_with("spf2.0/mfrom ")
+        || spf_string.starts_with("spf2.0/pra,mfrom ")
+        || spf_string.starts_with("spf2.0/mfrom,pra ")
+    {
+        Ok(())
+    } else {
+        Err(SpfError::InvalidSource)
+    }
 }
 
 /// Checks for incorrect white spacing.
