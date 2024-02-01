@@ -3,6 +3,7 @@ mod validate {
     use crate::mechanism::{Mechanism, Qualifier};
     use crate::spf::Spf;
     use crate::spf::SpfRfcStandard;
+    use crate::SpfError;
 
     #[test]
     fn validate() {
@@ -20,6 +21,7 @@ mod validate {
             spf.validate_to_string(SpfRfcStandard::Rfc4408).to_string(),
             "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()
         );
+        assert_eq!(spf.is_valid(), true);
         let res = spf.validate(SpfRfcStandard::Rfc4408);
         assert_eq!(res.is_ok(), true);
         let res2 = res.unwrap();
@@ -49,5 +51,13 @@ mod validate {
         assert_eq!(res.is_err(), true);
         let res2 = res.unwrap_err();
         assert_eq!(res2.to_string(), "Source string not valid.".to_string());
+    }
+    #[test]
+    fn invalidate_with_ptr() {
+        let input = "v=spf1 a ptr -all";
+        let mut spf: Spf = input.parse().unwrap();
+
+        let res = spf.validate(SpfRfcStandard::Rfc4408).unwrap_err();
+        assert_eq!(res, SpfError::DeprecatedPtrPresent);
     }
 }
