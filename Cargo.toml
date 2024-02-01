@@ -34,16 +34,17 @@ path = "examples/trust-dns-demo.rs"
 [[example]]
 name = "build-spf"
 path = "examples/build-spf.rs"
+required-features = ["spf2"]
 
 [[example]]
 name = "build-spf-strict"
 path = "examples/build-spf-strict.rs"
-required-features = ["strict-dns"]
+required-features = ["strict-dns", "spf2"]
 
 [[example]]
 name = "serde-demo"
 path = "examples/serde-demo.rs"
-required-features = ["serde"]
+required-features = ["serde", "spf2"]
 
 [dependencies]
 ipnetwork = "0.20.0"

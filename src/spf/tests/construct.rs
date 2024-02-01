@@ -11,6 +11,7 @@ mod spf1 {
         assert_eq!(spf.is_v1(), true);
     }
 }
+#[cfg(feature = "spf2")]
 mod spf2 {
 
     use crate::spf::Spf;
