@@ -174,29 +174,9 @@ impl Spf {
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
     }
-    /// Set version to `spf2.0/pra`
-    pub fn set_v2_pra(&mut self) {
-        self.version = String::from("spf2.0/pra");
-    }
-    /// Set version to `spf2.0/mfrom`
-    pub fn set_v2_mfrom(&mut self) {
-        self.version = String::from("spf2.0/mfrom");
-    }
-    /// Set version to `spf2.0/pra,mfrom`
-    pub fn set_v2_pra_mfrom(&mut self) {
-        self.version = String::from("spf2.0/pra,mfrom");
-    }
-    /// Set version to `spf2.0/mfrom,pra`
-    pub fn set_v2_mfrom_pra(&mut self) {
-        self.version = String::from("spf2.0/mfrom,pra");
-    }
     /// Check that version is v1
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
-    }
-    /// Check that version is v2
-    pub fn is_v2(&self) -> bool {
-        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
     }
     /// Return a reference to version
     pub fn version(&self) -> &String {
@@ -475,5 +455,29 @@ impl Spf {
     /// Returns a reference to `Mechanism<String>` for `All`
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
+    }
+}
+
+#[cfg(feature = "spf2")]
+impl Spf {
+    /// Set version to `spf2.0/pra`
+    pub fn set_v2_pra(&mut self) {
+        self.version = String::from("spf2.0/pra");
+    }
+    /// Set version to `spf2.0/mfrom`
+    pub fn set_v2_mfrom(&mut self) {
+        self.version = String::from("spf2.0/mfrom");
+    }
+    /// Set version to `spf2.0/pra,mfrom`
+    pub fn set_v2_pra_mfrom(&mut self) {
+        self.version = String::from("spf2.0/pra,mfrom");
+    }
+    /// Set version to `spf2.0/mfrom,pra`
+    pub fn set_v2_mfrom_pra(&mut self) {
+        self.version = String::from("spf2.0/mfrom,pra");
+    }
+    /// Check that version is v2
+    pub fn is_v2(&self) -> bool {
+        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
     }
 }
