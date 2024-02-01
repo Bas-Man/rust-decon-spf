@@ -1,3 +1,4 @@
+#[cfg(not(feature = "ptr"))]
 mod parse {
 
     use crate::spf::Spf;
