@@ -1,6 +1,5 @@
 #[cfg(test)]
 use crate::mechanism::Mechanism;
-use crate::mechanism::MechanismError;
 
 #[test]
 fn basic_ptr() {
