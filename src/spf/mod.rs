@@ -169,19 +169,11 @@ impl Spf {
     }
     /// Check that data stored in the Spf Struct is considered a valid Spf Record.
     pub fn is_valid(&self) -> bool {
-        if self.was_parsed || self.was_validated {
+        if self.was_validated {
             return self.is_valid;
         };
         false
     }
-    /// Check if there were any warnings when parsing the Spf String.
-    /// This can only be changed to `true` when `warn-dns` feature has been enabled. Other wise it
-    /// will always be `false`
-    //#[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
-    //#[cfg(feature = "warn-dns")]
-    //pub fn has_warnings(&self) -> bool {
-    //    self.warnings.is_some()
-    // }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
