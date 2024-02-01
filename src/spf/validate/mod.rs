@@ -112,6 +112,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
     if !spf.was_parsed {
         check_start_of_spf(spf.version())?;
     }
+    #[cfg(feature = "ptr")]
     check_ptr(spf)?;
     check_redirect_all(spf)?;
     // Basic check of lookup limit
