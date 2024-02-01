@@ -1,5 +1,6 @@
 #[cfg(test)]
 use crate::mechanism::Mechanism;
+#[cfg(feature = "strict-dns")]
 use crate::mechanism::MechanismError;
 
 #[test]

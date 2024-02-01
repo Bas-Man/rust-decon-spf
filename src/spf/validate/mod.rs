@@ -71,6 +71,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
     };
     Ok(())
 }
+#[cfg(feature = "ptr")]
 pub(crate) fn check_ptr(spf: &Spf) -> Result<(), SpfError> {
     if let Some(_) = &spf.ptr {
         Err(SpfError::DeprecatedPtrPresent)
