@@ -24,9 +24,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Spf {
-    source: String,
-    version: String,
-    from_src: bool,
+    source: String,  // Stores original Spf String that was parsed (s.parse())
+    version: String, // Version Usually v=spf1 but may be spf2.0/...
+    from_src: bool,  // Currently don't know if this is used or what it was used for if not used.
     redirect: Option<Mechanism<String>>,
     is_redirected: bool,
     a: Option<Vec<Mechanism<String>>>,
@@ -169,19 +169,11 @@ impl Spf {
     }
     /// Check that data stored in the Spf Struct is considered a valid Spf Record.
     pub fn is_valid(&self) -> bool {
-        if self.was_parsed || self.was_validated {
+        if self.was_validated {
             return self.is_valid;
         };
         false
     }
-    /// Check if there were any warnings when parsing the Spf String.
-    /// This can only be changed to `true` when `warn-dns` feature has been enabled. Other wise it
-    /// will always be `false`
-    //#[cfg_attr(docsrs, doc(cfg(feature = "warn-dns")))]
-    //#[cfg(feature = "warn-dns")]
-    //pub fn has_warnings(&self) -> bool {
-    //    self.warnings.is_some()
-    // }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) {
         self.version = String::from("v=spf1");
@@ -460,27 +452,27 @@ impl Spf {
     pub fn includes(&self) -> Option<&Vec<Mechanism<String>>> {
         self.include.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `A`
+    /// Returns a reference to a `Vec` of `Mechanism<String>` for `A`
     pub fn a(&self) -> Option<&Vec<Mechanism<String>>> {
         self.a.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `MX`
+    /// Returns a reference to a `Vec` of `Mechanism<String>` for `MX`
     pub fn mx(&self) -> Option<&Vec<Mechanism<String>>> {
         self.mx.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP4`
+    /// Returns a reference to a `Vec` of `Mechanism<IpNetwork>` for `IP4`
     pub fn ip4(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip4.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<IpNetwork>` for `IP6`
+    /// Returns a reference to a `Vec` of `Mechanism<IpNetwork>` for `IP6`
     pub fn ip6(&self) -> Option<&Vec<Mechanism<IpNetwork>>> {
         self.ip6.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Exists`
+    /// Returns a reference to a `Vec` of `Mechanism<String>` for `Exists`
     pub fn exists(&self) -> Option<&Vec<Mechanism<String>>> {
         self.exists.as_ref()
     }
-    /// Returns a reference to the a `Vec` of `Mechanism<String>` for `Ptr`
+    /// Returns a reference to a `Vec` of `Mechanism<String>` for `Ptr`
     pub fn ptr(&self) -> Option<&Mechanism<String>> {
         self.ptr.as_ref()
     }
