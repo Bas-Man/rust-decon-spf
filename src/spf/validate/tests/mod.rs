@@ -52,6 +52,7 @@ mod validate {
         assert_eq!(res2.to_string(), "Source string not valid.".to_string());
     }
     #[test]
+    #[cfg(feature = "ptr")]
     fn invalidate_with_ptr() {
         let input = "v=spf1 a ptr -all";
         let mut spf: Spf = input.parse().unwrap();

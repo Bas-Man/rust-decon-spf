@@ -57,10 +57,12 @@ trust-dns-resolver = "0.23.2"
 serde_json = { version = "1.0.108" }
 
 [features]
+default = ["ptr"]
 warn-dns = ["dep:addr"]
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
 spf2 = []
+ptr = []
 
 [package.metadata.docs.rs]
 all-features = true
