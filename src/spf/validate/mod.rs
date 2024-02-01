@@ -78,6 +78,14 @@ pub(crate) fn check_ptr(spf: &Spf) -> Result<(), SpfError> {
         Ok(())
     }
 }
+/// Redirect should be the only mechanism present. Any additional values are not permitted.
+/// This is wrong need to re-read rfc
+pub(crate) fn check_redirect_all(spf: &Spf) -> Result<(), SpfError> {
+    if spf.redirect().is_some() && spf.all().is_some() {
+        return Err(SpfError::RedirectWithAllMechanism);
+    }
+    Ok(())
+}
 pub(crate) fn check_lookup_count(spf: &Spf) -> usize {
     let mut lookup_count: usize = 0;
 
@@ -105,11 +113,7 @@ pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
         check_start_of_spf(spf.version())?;
     }
     check_ptr(spf)?;
-    // Redirect should be the only mechanism present. Any additional values are not permitted.
-    // This is wrong need to re-read rfc
-    if spf.redirect().is_some() && spf.all().is_some() {
-        return Err(SpfError::RedirectWithAllMechanism);
-    }
+    check_redirect_all(spf)?;
     // Basic check of lookup limit
     if check_lookup_count(spf) > 10 {
         return Err(SpfError::LookupLimitExceeded);
