@@ -60,4 +60,12 @@ mod validate {
         let res = spf.validate(SpfRfcStandard::Rfc4408).unwrap_err();
         assert_eq!(res, SpfError::DeprecatedPtrPresent);
     }
+    #[test]
+    fn invalidate_redirect_all() {
+        let input = "v=spf1 redirect=_spf.example.com -all";
+        let mut spf: Spf = input.parse().unwrap();
+
+        let res = spf.validate(SpfRfcStandard::Rfc4408).unwrap_err();
+        assert_eq!(res, SpfError::RedirectWithAllMechanism);
+    }
 }
