@@ -61,14 +61,10 @@ impl std::fmt::Display for Spf {
 /// assert_eq!(spf.to_string(), input);
 ///
 /// // Additional Space between `A` and `MX`
-/// let bad_input = "v=spf1 a   mx -all";
-/// let errs: SpfError = bad_input.parse::<Spf>().unwrap_err();
-/// assert_eq!(errs.to_string(), SpfError::WhiteSpaceSyntaxError.to_string());
+/// let invalid_input = "v=spf1 a   mx -all";
+/// let err: SpfError =invalid_input.parse::<Spf>().unwrap_err();
+/// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
-///
-/// // Example with warn-dns feature enabled.
-/// // Spf contains an invalid DNS host entry
-/// let bad_spf2: Spf = "v=spf1 a mx:example.m/24 -all".parse().unwrap();
 ///```
 ///
 impl FromStr for Spf {
@@ -224,16 +220,16 @@ impl Spf {
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
     /// use decon_spf::Spf;
-    /// let mut new_spf_record = Spf::new();
-    /// new_spf_record.set_v1();
-    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
-    /// new_spf_record.append_mechanism(Mechanism::a(Qualifier::Pass));
-    /// new_spf_record.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
+    /// let mut spf = Spf::new();
+    /// spf.set_v1();
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
+    /// spf.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                                  "203.32.160.0/23".parse().unwrap()));
-    /// assert_eq!(new_spf_record.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
+    /// assert_eq!(spf.to_string(), "v=spf1 a ip4:203.32.160.0/23 all".to_string());
     /// // Remove ip4 Mechanism
-    /// new_spf_record.clear_mechanism(Kind::IpV4);
-    /// assert_eq!(new_spf_record.to_string(), "v=spf1 a all".to_string());
+    /// spf.clear_mechanism(Kind::IpV4);
+    /// assert_eq!(spf.to_string(), "v=spf1 a all".to_string());
     ///```
     pub fn clear_mechanism(&mut self, kind: Kind) {
         match kind {
@@ -309,12 +305,12 @@ impl Spf {
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// use decon_spf::Spf;
-    /// let mut new_spf_record = Spf::new();
-    /// new_spf_record.set_v1();
-    /// new_spf_record.append_mechanism(Mechanism::redirect(Qualifier::Pass,
+    /// let mut spf = Spf::new();
+    /// spf.set_v1();
+    /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap());
-    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// assert_eq!(spf.to_string(), "v=spf1 redirect=_spf.example.com".to_string());
     /// ```
     ///
     /// # Note:
@@ -339,12 +335,12 @@ impl Spf {
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// use decon_spf::Spf;
-    /// let mut new_spf_record = Spf::new();
-    /// new_spf_record.set_v1();
-    /// new_spf_record.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
+    /// let mut spf = Spf::new();
+    /// spf.set_v1();
+    /// spf.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
-    /// new_spf_record.append_mechanism(Mechanism::all(Qualifier::Pass));
-    /// assert_eq!(new_spf_record.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// assert_eq!(spf.to_string(), "v=spf1 ip4:203.32.160.0/23 all".to_string());
     /// ```    
     pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) {
         match mechanism.kind() {
