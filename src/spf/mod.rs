@@ -431,6 +431,7 @@ impl Spf {
     }
 }
 
+#[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
 #[cfg(feature = "spf2")]
 impl Spf {
     /// Set version to `spf2.0/pra`
