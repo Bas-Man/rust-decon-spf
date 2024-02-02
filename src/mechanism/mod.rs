@@ -457,7 +457,6 @@ impl Mechanism<String> {
 }
 
 /// Provide to_string for `Mechanism<String>`
-
 impl std::fmt::Display for Mechanism<String> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())

@@ -124,7 +124,7 @@ pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
     partial_spf
 }
 
-#[cfg(any(feature = "warn-dns", feature = "strict-dns"))]
+#[cfg(feature = "strict-dns")]
 pub(crate) mod dns {
     use addr::parse_dns_name;
 
@@ -159,7 +159,7 @@ pub(crate) mod dns {
             }
         }
     }
-    #[cfg(feature = "warn-dns")]
+    #[cfg(feature = "strict-dns")]
     pub(crate) mod warn {
         use crate::core::dns::is_dns_suffix_valid;
 

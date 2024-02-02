@@ -12,9 +12,9 @@
 //! # Abilities:
 //! - Check and Set Spf record version. See: [`Spf Versions`](spf::Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
-//!     - [`Mechanism`]
-//!     - [`Mechanism Qualifier`](Mechanism::is_pass)
-//!     - [`Mechanism Kind`](Mechanism::kind)
+//!     - [`Mechanism`](mechanism)
+//!     - [`Mechanism Qualifier`](mechanism::Mechanism::is_pass)
+//!     - [`Mechanism Kind`](mechanism::Mechanism::kind)
 //!
 //! # Feature Flags:
 //! - `warn-dns` (Disabled by default.)
@@ -29,6 +29,5 @@ mod core;
 pub mod mechanism;
 mod spf;
 
-pub use crate::mechanism::Mechanism;
 pub use crate::spf::Spf;
 pub use crate::spf::SpfError;

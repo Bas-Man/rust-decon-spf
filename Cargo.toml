@@ -59,7 +59,6 @@ serde_json = { version = "1.0.113" }
 
 [features]
 default = ["ptr"]
-warn-dns = ["dep:addr"]
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
 spf2 = []
