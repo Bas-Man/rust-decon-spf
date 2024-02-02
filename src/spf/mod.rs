@@ -331,33 +331,6 @@ impl Spf {
             }
         }
     }
-    /// # Note: Experimental
-    /// *Do not use.*
-    /// Very rudimentary validation check.
-    /// - Will fail if the length of `source` is more than MAX_SPF_STRING_LENGTH characters See:
-    /// [`SourceLengthExceeded`](SpfError::SourceLengthExceeded)
-    /// - Will fail if there are more than 10 DNS lookups. Looks are required for each `A`, `MX`
-    /// , `Redirect`, and `Include` Mechanism. See: [`LookupLimitExceeded`](SpfError::LookupLimitExceeded)
-    /// (This will change given new information)
-    #[deprecated(note = "This is expected to be depreciated.")]
-    pub fn try_validate(&mut self) -> Result<(), SpfError> {
-        if self.from_src {
-            if self.source.len() > core::MAX_SPF_STRING_LENGTH {
-                return Err(SpfError::SourceLengthExceeded);
-            } else if !self.was_parsed {
-                return Err(SpfError::HasNotBeenParsed);
-            };
-        };
-        // Redirect should be the only mechanism present. Any additional values are not permitted.
-        if self.redirect().is_some() && self.all().is_some() {
-            return Err(SpfError::RedirectWithAllMechanism);
-        }
-        if validate::check_lookup_count(self) > 10 {
-            return Err(SpfError::LookupLimitExceeded);
-        }
-        self.is_valid = true;
-        Ok(())
-    }
     #[allow(dead_code)]
     fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
         return match rfc {
