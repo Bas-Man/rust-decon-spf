@@ -17,12 +17,15 @@
 //!     - [`Mechanism Kind`](mechanism::Mechanism::kind)
 //!
 //! # Feature Flags:
-//! - `warn-dns` (Disabled by default.)
-//!     - This feature only applies to the Spf Parser and only warns of possible problems.
+//! - `ptr` (Enabled by default.)  
+//!    This feature will impact a future validation feature.
 //! - `strict-dns` (Disabled by default.)  
 //!   This enables syntactical checking of Domain Names.
 //!     - When enabled it changes the behaviour of `FromStr` for `Mechanism<String>` and
-//! `ParsedMechanism`. By default `Mechanism<String>`'s `rrdata` is not checked.
+//! `ParsedMechanism`. By default, `Mechanism<String>`'s `rrdata` is not checked.
+//! - `spf2` (Disabled by default)  
+//!   This enables the ability to programmatically create Spf2 (SenderID) records. As this
+//!   has become defunct. There is no real need for it. But it remains as an option if desired.
 //! - `serde` (Disabled by default.)
 //!
 mod core;
