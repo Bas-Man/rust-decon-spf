@@ -129,52 +129,86 @@ mod mechanism {
 mod create {
     mod a {
 
-        use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
+        use crate::mechanism::{Kind, Mechanism, Qualifier};
+        mod not_strict {
+            use super::*;
+            #[test]
+            fn default() {
+                let a_mechanism = Mechanism::a(Qualifier::Fail);
+                assert_eq!(a_mechanism.is_fail(), true);
+                assert_eq!(a_mechanism.kind(), &Kind::A);
+                assert_eq!(a_mechanism.raw(), "a");
+                assert_eq!(a_mechanism.to_string(), "-a");
+            }
+            #[test]
+            #[cfg(not(feature = "strict-dns"))]
+            fn with_invalid_rrdata_not_strict() {
+                let string = String::from("example.xx");
+                let a_mechanism = Mechanism::a(Qualifier::Fail).with_rrdata(&string);
+                match a_mechanism {
+                    Ok(m) => {
+                        assert_eq!(m.is_fail(), true);
+                        assert_eq!(m.kind(), &Kind::A);
+                        assert_eq!(m.raw(), string);
+                        assert_eq!(m.to_string(), "-a:example.xx");
+                    }
+                    Err(_) => {
+                        panic!("strict-dns not set; invalid domain. Should not Err()")
+                    }
+                }
+            }
 
-        #[test]
-        fn a() {
-            let a_mechanism = Mechanism::a(Qualifier::Fail);
-            assert_eq!(a_mechanism.is_fail(), true);
-            assert_eq!(a_mechanism.kind(), &Kind::A);
-            assert_eq!(a_mechanism.raw(), "a");
-            assert_eq!(a_mechanism.to_string(), "-a");
-        }
-        #[test]
-        fn a_with_rrdata() {
-            let string = String::from("example.com");
-            let a_mechanism = Mechanism::a(Qualifier::Fail).with_rrdata(&string);
-            match a_mechanism {
-                Ok(m) => {
-                    assert_eq!(m.is_fail(), true);
-                    assert_eq!(m.kind(), &Kind::A);
-                    assert_eq!(m.raw(), string);
-                    assert_eq!(m.to_string(), "-a:example.com");
-                }
-                Err(_) => {}
-            }
-        }
-        #[test]
-        fn a_with_bad_rrdata() {
-            let a_mechanism = Mechanism::a(Qualifier::Fail).with_rrdata("example.xx");
-            match a_mechanism {
-                Ok(_) => {}
-                Err(e) => {
-                    assert_eq!(
-                        e,
-                        MechanismError::InvalidDomainHost("example.xx".to_string())
-                    );
+            #[test]
+            fn with_rrdata() {
+                let string = String::from("example.com");
+                let a_mechanism = Mechanism::a(Qualifier::Fail).with_rrdata(&string);
+                match a_mechanism {
+                    Ok(m) => {
+                        assert_eq!(m.is_fail(), true);
+                        assert_eq!(m.kind(), &Kind::A);
+                        assert_eq!(m.raw(), string);
+                        assert_eq!(m.to_string(), "-a:example.com");
+                    }
+                    Err(_) => {
+                        panic!("strict-dns not set. and valid domain. Should not Err()")
+                    }
                 }
             }
         }
-        #[test]
-        fn a_with_bad_rrdata_2() {
-            match Mechanism::a(Qualifier::Fail).with_rrdata("example.xx") {
-                Ok(_) => {}
-                Err(e) => {
-                    assert_eq!(
-                        e,
-                        MechanismError::InvalidDomainHost("example.xx".to_string())
-                    );
+        #[cfg(feature = "strict-dns")]
+        mod strict {
+
+            use super::*;
+            use crate::mechanism::MechanismError;
+
+            #[test]
+            fn with_rrdata_strict() {
+                let string = String::from("example.com");
+                let a_mechanism = Mechanism::a(Qualifier::Fail).with_rrdata(&string);
+                match a_mechanism {
+                    Ok(m) => {
+                        assert_eq!(m.is_fail(), true);
+                        assert_eq!(m.kind(), &Kind::A);
+                        assert_eq!(m.raw(), string);
+                        assert_eq!(m.to_string(), "-a:example.com");
+                    }
+                    Err(_) => {
+                        panic!("strict-dns enabled. Valid domain: Should not fail")
+                    }
+                }
+            }
+            #[test]
+            fn strict_with_rrdata() {
+                match Mechanism::a(Qualifier::Fail).with_rrdata("example.xx") {
+                    Ok(_) => {
+                        panic!("This should be and Err. rrdata is invalid and strict-dns feature enabled.")
+                    }
+                    Err(e) => {
+                        assert_eq!(
+                            e,
+                            MechanismError::InvalidDomainHost("example.xx".to_string())
+                        );
+                    }
                 }
             }
         }
@@ -182,75 +216,77 @@ mod create {
 
     mod mx {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::MechanismError;
-        use crate::mechanism::Qualifier;
-        #[test]
-        fn default() {
-            let mx = Mechanism::mx(Qualifier::Pass);
-            assert_eq!(mx.is_pass(), true);
-            assert_eq!(mx.raw(), "mx");
-            assert_eq!(mx.to_string(), "mx");
-        }
-        #[test]
-        fn with_rrdata() {
-            let mx = Mechanism::mx(Qualifier::Neutral)
-                .with_rrdata("example.com")
-                .unwrap();
-            assert_eq!(mx.is_neutral(), true);
-            assert_eq!(mx.raw(), "example.com");
-            assert_eq!(mx.to_string(), "?mx:example.com");
-        }
-        #[test]
-        fn with_rrdata_match() {
-            let mx = Mechanism::mx(Qualifier::Neutral).with_rrdata("example.com");
-            match mx {
-                Ok(mx) => {
-                    assert_eq!(mx.is_neutral(), true);
-                    assert_eq!(mx.raw(), "example.com");
-                    assert_eq!(mx.to_string(), "?mx:example.com");
-                }
-                Err(_) => {}
+        use crate::mechanism::{Mechanism, Qualifier};
+        mod not_strict {
+            use super::*;
+            #[test]
+            fn default() {
+                let mx = Mechanism::mx(Qualifier::Pass);
+                assert_eq!(mx.is_pass(), true);
+                assert_eq!(mx.raw(), "mx");
+                assert_eq!(mx.to_string(), "mx");
             }
-        }
-        #[test]
-        fn with_bad_rrdata_match() {
-            let mx = Mechanism::mx(Qualifier::Neutral).with_rrdata("example.xx");
-            match mx {
-                Ok(_) => {}
-                Err(e) => {
-                    assert_eq!(
-                        e,
-                        MechanismError::InvalidDomainHost("example.xx".to_string()),
-                    )
+
+            #[test]
+            fn with_rrdata() {
+                match Mechanism::mx(Qualifier::Neutral).with_rrdata("example.com") {
+                    Ok(m) => {
+                        assert_eq!(m.is_neutral(), true);
+                        assert_eq!(m.raw(), "example.com");
+                        assert_eq!(m.to_string(), "?mx:example.com");
+                    }
+                    Err(_) => {
+                        panic!("Should not Err; valid domain not strict-dns")
+                    }
+                }
+            }
+
+            #[test]
+            #[cfg(not(feature = "strict-dns"))]
+            fn with_invalid_rrdata_non_strict_dns() {
+                match Mechanism::mx(Qualifier::Neutral).with_rrdata("example.xx") {
+                    Ok(mx) => {
+                        assert_eq!(mx.is_neutral(), true);
+                        assert_eq!(mx.raw(), "example.xx");
+                        assert_eq!(mx.to_string(), "?mx:example.xx");
+                    }
+                    Err(_) => {
+                        panic!("Should not Err: Invalid domain strict-dns not enabled")
+                    }
                 }
             }
         }
-        #[test]
-        fn with_rrdata_match2() {
-            match Mechanism::mx(Qualifier::Neutral).with_rrdata("example.com") {
-                Ok(mx) => {
-                    assert_eq!(mx.is_neutral(), true);
-                    assert_eq!(mx.raw(), "example.com");
-                    assert_eq!(mx.to_string(), "?mx:example.com");
-                }
-                Err(e) => {
-                    assert_eq!(
-                        e,
-                        MechanismError::InvalidDomainHost("example.xx".to_string()),
-                    )
+        #[cfg(feature = "strict-dns")]
+        mod strict {
+            use super::*;
+            use crate::mechanism::MechanismError;
+            #[test]
+            fn with_invalid_rrdata() {
+                let mx = Mechanism::mx(Qualifier::Neutral).with_rrdata("example.xx");
+                match mx {
+                    Ok(_) => {
+                        panic!("Should not Ok(). strict-dns enabled, invalid domain")
+                    }
+                    Err(e) => {
+                        assert_eq!(
+                            e,
+                            MechanismError::InvalidDomainHost("example.xx".to_string()),
+                        )
+                    }
                 }
             }
-        }
-        #[test]
-        fn with_bad_rrdata_match2() {
-            match Mechanism::mx(Qualifier::Neutral).with_rrdata("example.xx") {
-                Ok(_) => {}
-                Err(e) => {
-                    assert_eq!(
-                        e,
-                        MechanismError::InvalidDomainHost("example.xx".to_string()),
-                    )
+
+            #[test]
+            fn with_valid_rrdata() {
+                match Mechanism::mx(Qualifier::Neutral).with_rrdata("example.com") {
+                    Ok(mx) => {
+                        assert_eq!(mx.is_neutral(), true);
+                        assert_eq!(mx.raw(), "example.com");
+                        assert_eq!(mx.to_string(), "?mx:example.com");
+                    }
+                    Err(_) => {
+                        panic!("Should not Err; valid domain with strict-dns enabled")
+                    }
                 }
             }
         }
@@ -258,46 +294,114 @@ mod create {
 
     mod exists {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::Qualifier;
-        #[test]
-        fn pass() {
-            let exists = Mechanism::exists(Qualifier::Neutral, "bogus.com").unwrap();
-            assert_eq!(exists.is_neutral(), true);
-            assert_eq!(exists.to_string(), "?exists:bogus.com");
+        use crate::mechanism::{Mechanism, Qualifier};
+        mod not_strict {
+            use super::*;
+            #[test]
+            fn pass_valid_domain() {
+                let exists = Mechanism::exists(Qualifier::Neutral, "bogus.com").unwrap();
+                assert_eq!(exists.is_neutral(), true);
+                assert_eq!(exists.to_string(), "?exists:bogus.com");
+            }
+            #[test]
+            #[cfg(not(feature = "strict-dns"))]
+            fn pass_invalid_domain() {
+                match Mechanism::exists(Qualifier::Neutral, "bogus.xx") {
+                    Ok(m) => {
+                        assert_eq!(m.is_neutral(), true);
+                        assert_eq!(m.to_string(), "?exists:bogus.xx");
+                    }
+                    Err(_) => panic!("Should not Err: strict-dns not enabled."),
+                }
+            }
+        }
+        #[cfg(feature = "strict-dns")]
+        mod strict {
+            use super::*;
+            use crate::mechanism::MechanismError;
+            #[test]
+            fn pass_valid_domain() {
+                match Mechanism::exists(Qualifier::Neutral, "bogus.com") {
+                    Ok(m) => {
+                        assert_eq!(m.is_neutral(), true);
+                        assert_eq!(m.to_string(), "?exists:bogus.com");
+                    }
+                    Err(_) => {
+                        panic!("Should not Err; valid domain with strict-dns")
+                    }
+                }
+            }
+            #[test]
+            fn pass_invalid_domain() {
+                match Mechanism::exists(Qualifier::Neutral, "bogus.xx") {
+                    Ok(_) => panic!("Should not be Ok; invalid domain and strict-dns"),
+                    Err(e) => {
+                        assert_eq!(e, MechanismError::InvalidDomainHost("bogus.xx".to_string()))
+                    }
+                }
+            }
         }
     }
 
     mod include {
 
-        use crate::mechanism::Kind;
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::Qualifier;
-        #[test]
-        fn pass() {
-            let include = Mechanism::include(Qualifier::Pass, "_spf.test.com").unwrap();
-            assert_eq!(include.is_pass(), true);
-            assert_eq!(include.kind(), &Kind::Include);
-            assert_eq!(include.raw(), "_spf.test.com");
-            assert_eq!(include.to_string(), "include:_spf.test.com");
+        use crate::mechanism::{Kind, Mechanism, Qualifier};
+        mod not_strict {
+            use super::*;
+            #[test]
+            fn pass() {
+                let include = Mechanism::include(Qualifier::Pass, "_spf.test.com").unwrap();
+                assert_eq!(include.is_pass(), true);
+                assert_eq!(include.kind(), &Kind::Include);
+                assert_eq!(include.raw(), "_spf.test.com");
+                assert_eq!(include.to_string(), "include:_spf.test.com");
+            }
+
+            #[test]
+            fn fail() {
+                let include = Mechanism::include(Qualifier::Fail, "_spf.test.com").unwrap();
+                assert_eq!(include.is_fail(), true);
+                assert_eq!(include.to_string(), "-include:_spf.test.com");
+            }
+
+            #[test]
+            fn softfail() {
+                let include = Mechanism::include(Qualifier::SoftFail, "_spf.test.com").unwrap();
+                assert_eq!(include.is_softfail(), true);
+                assert_eq!(include.to_string(), "~include:_spf.test.com");
+            }
+
+            #[test]
+            fn neutral() {
+                let include = Mechanism::include(Qualifier::Neutral, "_spf.test.com").unwrap();
+                assert_eq!(include.is_neutral(), true);
+                assert_eq!(include.to_string(), "?include:_spf.test.com");
+            }
+            #[test]
+            #[cfg(not(feature = "strict-dns"))]
+            fn invalid_not_strict() {
+                let include = Mechanism::include(Qualifier::Neutral, "_spf.test.xx").unwrap();
+                assert_eq!(include.is_neutral(), true);
+                assert_eq!(include.to_string(), "?include:_spf.test.xx");
+            }
         }
-        #[test]
-        fn fail() {
-            let include = Mechanism::include(Qualifier::Fail, "_spf.test.com").unwrap();
-            assert_eq!(include.is_fail(), true);
-            assert_eq!(include.to_string(), "-include:_spf.test.com");
-        }
-        #[test]
-        fn softfail() {
-            let include = Mechanism::include(Qualifier::SoftFail, "_spf.test.com").unwrap();
-            assert_eq!(include.is_softfail(), true);
-            assert_eq!(include.to_string(), "~include:_spf.test.com");
-        }
-        #[test]
-        fn neutral() {
-            let include = Mechanism::include(Qualifier::Neutral, "_spf.test.com").unwrap();
-            assert_eq!(include.is_neutral(), true);
-            assert_eq!(include.to_string(), "?include:_spf.test.com");
+        #[cfg(feature = "strict-dns")]
+        mod strict {
+            use super::*;
+            use crate::mechanism::MechanismError;
+
+            #[test]
+            fn invalid_not_strict() {
+                match Mechanism::include(Qualifier::Neutral, "_spf.test.xx") {
+                    Ok(_) => panic!("Should not Ok(), invalid domain with strict-dns"),
+                    Err(e) => {
+                        assert_eq!(
+                            e,
+                            MechanismError::InvalidDomainHost("_spf.test.xx".to_string())
+                        )
+                    }
+                }
+            }
         }
     }
     mod ptr {
