@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod a {
 
     use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};

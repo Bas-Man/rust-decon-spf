@@ -1,5 +1,3 @@
-#[cfg(test)]
-
 mod general {
 
     use crate::mechanism::{Mechanism, MechanismError};

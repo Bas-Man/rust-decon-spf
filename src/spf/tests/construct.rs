@@ -54,26 +54,6 @@ mod build {
     use crate::spf::Spf;
 
     #[test]
-    fn make_redirect() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        spf.append_mechanism_of_redirect(Mechanism::new_redirect(
-            Qualifier::Pass,
-            "_spf.example.com".to_string(),
-        ));
-        assert_eq!(
-            spf.to_string(),
-            "v=spf1 redirect=_spf.example.com".to_string()
-        );
-        assert_eq!(spf.is_redirect(), true);
-        spf.append_mechanism(Mechanism::all(Qualifier::Pass));
-        assert_eq!(spf.all().is_none(), true);
-        spf.clear_mechanism(Kind::Redirect);
-        assert_eq!(spf.is_redirect(), false);
-        assert_eq!(spf.redirect.is_none(), true);
-    }
-
-    #[test]
     fn make_a_all() {
         let mut spf = Spf::new();
         spf.set_v1();
@@ -84,89 +64,6 @@ mod build {
         assert_eq!(spf.to_string(), "v=spf1 a -all".to_string());
         spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
         assert_eq!(spf.to_string(), "v=spf1 a all".to_string());
-    }
-    #[test]
-    fn make_a_with_mx_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_a(Mechanism::new_a_without_mechanism(Qualifier::Pass));
-        spf.append_mechanism_of_mx(Mechanism::new_mx_without_mechanism(Qualifier::Pass));
-        spf.append_mechanism_of_all(Mechanism::new_all(Qualifier::Fail));
-        assert_eq!(spf.to_string(), "v=spf1 a mx -all".to_string());
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(spf.to_string(), "v=spf1 a mx all".to_string());
-    }
-    #[test]
-    fn make_a_with_mx_with_value_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_a(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism_of_mx(Mechanism::new_mx_with_mechanism(
-            Qualifier::Pass,
-            "test.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Fail));
-        assert_eq!(spf.to_string(), "v=spf1 a mx:test.com -all".to_string());
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(spf.to_string(), "v=spf1 a mx:test.com all".to_string());
-    }
-    #[test]
-    fn make_a_with_mx_with_value_x2_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_a(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism_of_mx(Mechanism::new_mx_with_mechanism(
-            Qualifier::Pass,
-            "test.com".to_string(),
-        ));
-        spf.append_mechanism_of_mx(Mechanism::new_mx_with_mechanism(
-            Qualifier::Pass,
-            "example.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(
-            spf.to_string(),
-            "v=spf1 a mx:test.com mx:example.com all".to_string()
-        );
-    }
-    #[test]
-    fn make_include_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_mx(Mechanism::new_include(
-            Qualifier::Pass,
-            "test.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(spf.to_string(), "v=spf1 include:test.com all".to_string());
-    }
-    #[test]
-    fn make_include_x2_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_mx(Mechanism::new_include(
-            Qualifier::Pass,
-            "test.com".to_string(),
-        ));
-        spf.append_mechanism_of_mx(Mechanism::new_include(
-            Qualifier::Pass,
-            "example.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(
-            spf.to_string(),
-            "v=spf1 include:test.com include:example.com all".to_string()
-        );
     }
     #[test]
     fn make_ip4_all() {
@@ -239,60 +136,6 @@ mod build {
             spf.to_string(),
             "v=spf1 ip6:2001:4860:4000::/36 ip6:2001:5160:4000::/36 all".to_string()
         );
-    }
-    #[test]
-    fn make_exists_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_exists(Mechanism::new_exists(
-            Qualifier::Pass,
-            "example.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(spf.to_string(), "v=spf1 exists:example.com all".to_string());
-    }
-    #[test]
-    fn make_exists_x2_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_exists(Mechanism::new_exists(
-            Qualifier::Pass,
-            "example.com".to_string(),
-        ));
-        spf.append_mechanism_of_exists(Mechanism::new_exists(
-            Qualifier::Neutral,
-            "test.com".to_string(),
-        ));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::Pass));
-        assert_eq!(
-            spf.to_string(),
-            "v=spf1 exists:example.com ?exists:test.com all".to_string()
-        );
-    }
-    #[test]
-    fn make_ptr_without_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_ptr(Mechanism::new_ptr_without_mechanism(Qualifier::Pass));
-        assert_eq!(spf.to_string(), "v=spf1 ptr".to_string());
-    }
-    #[test]
-    fn make_ptr_with_all() {
-        let mut spf = Spf::new();
-        spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
-        assert_eq!(spf.is_v1(), true);
-        spf.append_mechanism_of_ptr(Mechanism::new_ptr_with_mechanism(
-            Qualifier::Pass,
-            "test.com".to_string(),
-        ));
-        assert_eq!(spf.to_string(), "v=spf1 ptr:test.com".to_string());
     }
     #[test]
     fn make_ip4_by_append_ip_mechanism() {

@@ -274,29 +274,9 @@ impl<T> Mechanism<T> {
 
 impl Mechanism<String> {
     /// Create a new Mechanism struct of `Redirect`
-    #[deprecated(note = "This will be depreciated in 0.3.0. Please use `redirect()` instead")]
-    pub fn new_redirect(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::Redirect, qualifier, Some(mechanism))
-    }
-
-    /// Create a new Mechanism struct of `Redirect`
     pub fn redirect(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Redirect, qualifier).with_rrdata(rrdata)?)
     }
-    /// Create a new Mechanism struct of `A` with no string value.
-    #[deprecated(note = "This will be depreciated in 0.3.0. Please use `a()` instead")]
-    pub fn new_a_without_mechanism(qualifier: Qualifier) -> Self {
-        Mechanism::generic_inclusive(Kind::A, qualifier, None)
-    }
-
-    /// Create a new Mechanism struct of `A` with string value.
-    #[deprecated(
-        note = "This will be depreciated in 0.3.0. Please use `a().with_rrdata()` instead"
-    )]
-    pub fn new_a_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::A, qualifier, Some(mechanism))
-    }
-
     /// Create a new Mechanism struct of `A`
     ///
     /// # Example:
@@ -333,20 +313,6 @@ impl Mechanism<String> {
     pub fn a(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::A, qualifier)
     }
-    /// Create a new Mechanism struct of `MX` without string value.
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `mx()` instead")]
-    pub fn new_mx_without_mechanism(qualifier: Qualifier) -> Self {
-        Mechanism::generic_inclusive(Kind::MX, qualifier, None)
-    }
-
-    /// Create a new Mechanism struct of `MX`
-    #[deprecated(
-        note = "This will  be depreciated in 0.3.0. Please use `mx().with_rrdata()` instead"
-    )]
-    pub fn new_mx_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::MX, qualifier, Some(mechanism))
-    }
-
     /// Create a new Mechanism struct of `MX`
     ///
     /// # Example:
@@ -368,13 +334,6 @@ impl Mechanism<String> {
     pub fn mx(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::MX, qualifier)
     }
-
-    /// Create a new Mechanism struct of `Include`
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `include()` instead")]
-    pub fn new_include(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::Include, qualifier, Some(mechanism))
-    }
-
     /// Create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
@@ -392,20 +351,6 @@ impl Mechanism<String> {
     pub fn include(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Include, qualifier).with_rrdata(rrdata)?)
     }
-
-    /// Create a new Mechanism struct of `Ptr` with no value
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `ptr()` instead")]
-    pub fn new_ptr_without_mechanism(qualifier: Qualifier) -> Self {
-        Mechanism::generic_inclusive(Kind::Ptr, qualifier, None)
-    }
-
-    /// Create a new Mechanism struct of `Ptr`
-    #[deprecated(
-        note = "This will  be depreciated in 0.3.0. Please use `ptr().with_rrdata()` instead"
-    )]
-    pub fn new_ptr_with_mechanism(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::Ptr, qualifier, Some(mechanism))
-    }
     /// Create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
@@ -422,15 +367,6 @@ impl Mechanism<String> {
     pub fn ptr(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::Ptr, qualifier)
     }
-
-    /// Create a new Mechanism struct of `Exists`
-    #[deprecated(
-        note = "This will  be depreciated in 0.3.0. Please use `exists().with_rrdata()` instead"
-    )]
-    pub fn new_exists(qualifier: Qualifier, mechanism: String) -> Self {
-        Mechanism::generic_inclusive(Kind::Exists, qualifier, Some(mechanism))
-    }
-
     /// Create a new Mechanism struct of `Exists`
     pub fn exists(qualifier: Qualifier, rrdata: &str) -> Result<Self, MechanismError> {
         Ok(Mechanism::new(Kind::Exists, qualifier).with_rrdata(rrdata)?)
@@ -462,12 +398,6 @@ impl Mechanism<String> {
         }
         Ok(self)
     }
-    /// Create a new Mechanism struct of `All`
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `all()` instead")]
-    pub fn new_all(qualifier: Qualifier) -> Self {
-        Mechanism::new(Kind::All, qualifier)
-    }
-
     /// Create a new Mechanism struct of `All`
     pub fn all(qualifier: Qualifier) -> Self {
         Mechanism::new(Kind::All, qualifier)
@@ -541,11 +471,6 @@ impl From<IpNetworkError> for MechanismError {
 }
 
 impl Mechanism<IpNetwork> {
-    /// Create a new V4 or V6 `Mechanism<IpNetwork>`
-    #[deprecated(note = "This will be depreciated in 0.3.0. Please use `ip()` instead")]
-    pub fn new_ip(qualifier: Qualifier, mechanism: IpNetwork) -> Mechanism<IpNetwork> {
-        Mechanism::ip(qualifier, mechanism)
-    }
     /// Create a new V4 or V6 Mechanism from a string representation.
     ///```
     /// # use decon_spf::mechanism::{Mechanism, MechanismError};
@@ -596,25 +521,9 @@ impl Mechanism<IpNetwork> {
     }
 
     /// Create a new Mechanism<IpNetwork> of IP4
-    #[doc(hidden)]
-    #[allow(dead_code)]
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `ip4()` instead")]
-    fn new_ip4(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
-        Mechanism::generic_inclusive(Kind::IpV4, qualifier, Some(mechanism))
-    }
-
-    /// Create a new Mechanism<IpNetwork> of IP4
     fn ip4(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV4, qualifier, Some(rrdata))
     }
-    /// Create a new Mechanism<IpNetwork> of IP6
-    #[doc(hidden)]
-    #[allow(dead_code)]
-    #[deprecated(note = "This will  be depreciated in 0.3.0. Please use `ip6()` instead")]
-    fn new_ip6(qualifier: Qualifier, mechanism: IpNetwork) -> Self {
-        Mechanism::generic_inclusive(Kind::IpV6, qualifier, Some(mechanism))
-    }
-
     /// Create a new Mechanism<IpNetwork> of IP6
     fn ip6(qualifier: Qualifier, rrdata: IpNetwork) -> Self {
         Mechanism::generic_inclusive(Kind::IpV6, qualifier, Some(rrdata))
