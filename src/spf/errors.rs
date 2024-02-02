@@ -133,6 +133,7 @@ pub struct SpfErrors {
     source: String,
 }
 
+#[allow(dead_code)]
 impl SpfErrors {
     pub fn new() -> Self {
         Self {

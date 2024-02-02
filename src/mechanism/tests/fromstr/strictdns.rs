@@ -1,11 +1,8 @@
-#[cfg(feature = "strict-dns")]
-#[cfg(test)]
 mod a {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
-    #[cfg(feature = "strict-dns")]
-    fn basic_pass_a_rrdata_invalid_domain() {
+    fn basic_pass_rrdata_invalid_domain() {
         let input = "+a:example.xx";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
@@ -13,14 +10,11 @@ mod a {
         assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
-#[cfg(feature = "strict-dns")]
-#[cfg(test)]
 mod include {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
-    #[cfg(feature = "strict-dns")]
-    fn basic_pass_include_rrdata_invalid_domain() {
+    fn basic_pass_rrdata_invalid_domain() {
         let input = "+include:example.xx";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
@@ -28,14 +22,11 @@ mod include {
         assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
-#[cfg(feature = "strict-dns")]
-#[cfg(test)]
 mod mx {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
-    #[cfg(feature = "strict-dns")]
-    fn basic_pass_mx_rrdata_invalid_domain() {
+    fn basic_pass_rrdata_invalid_domain() {
         let input = "+mx:example.xx";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
@@ -43,14 +34,11 @@ mod mx {
         assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
-#[cfg(feature = "strict-dns")]
-#[cfg(test)]
 mod ptr {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
-    #[cfg(feature = "strict-dns")]
-    fn basic_pass_ptr_rrdata_invalid_domain() {
+    fn basic_pass_rrdata_invalid_domain() {
         let input = "+ptr:example.xx";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();
@@ -58,14 +46,11 @@ mod ptr {
         assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
     }
 }
-#[cfg(feature = "strict-dns")]
-#[cfg(test)]
 mod exists {
     use crate::mechanism::Mechanism;
     use crate::mechanism::MechanismError;
     #[test]
-    #[cfg(feature = "strict-dns")]
-    fn basic_pass_exists_rrdata_invalid_domain() {
+    fn basic_pass_rrdata_invalid_domain() {
         let input = "+exists:example.xx";
 
         let m: Result<Mechanism<String>, MechanismError> = input.parse();

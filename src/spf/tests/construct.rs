@@ -50,7 +50,7 @@ mod spf2 {
 #[allow(deprecated)]
 mod build {
 
-    use crate::mechanism::{Kind, Mechanism, Qualifier};
+    use crate::mechanism::{Mechanism, Qualifier};
     use crate::spf::Spf;
 
     #[test]

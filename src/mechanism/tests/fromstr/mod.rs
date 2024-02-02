@@ -7,4 +7,5 @@ mod ipnetwork;
 mod mx;
 mod ptr;
 mod redirect;
+#[cfg(feature = "strict-dns")]
 mod strictdns;

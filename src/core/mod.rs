@@ -163,6 +163,7 @@ pub(crate) mod dns {
     pub(crate) mod warn {
         use crate::core::dns::is_dns_suffix_valid;
 
+        #[allow(dead_code)]
         pub(crate) fn check_for_dns_warning(warning_vec: &mut Vec<String>, name: &str) {
             if !is_dns_suffix_valid(name) {
                 warning_vec.push(name.to_string());

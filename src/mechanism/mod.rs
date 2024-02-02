@@ -43,7 +43,7 @@ pub struct Mechanism<T> {
 
 #[cfg(test)]
 #[cfg(feature = "serde")]
-mod serde_test {
+mod serde_tests {
     use super::*;
     use serde_json;
 

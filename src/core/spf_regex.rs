@@ -124,6 +124,7 @@ mod a {
         assert_eq!(mechanism.raw(), "example.com/24");
         assert_eq!(mechanism.to_string(), "a:example.com/24");
     }
+    #[cfg(test)]
     mod invalid {
         use crate::mechanism::{Kind, MechanismError};
         use crate::spf::Mechanism;
