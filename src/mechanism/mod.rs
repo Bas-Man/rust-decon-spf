@@ -267,7 +267,13 @@ impl<T> Mechanism<T> {
     }
     /// Returns a reference to the Mechanism's Value.  
     /// This could return a `String`, `IpNetwork`, or `None`
+    #[deprecated(since = "0.3.5", note = "Please use `rr_data`")]
     pub fn mechanism(&self) -> &Option<T> {
+        &self.rrdata
+    }
+    /// Returns a reference to the Mechanism's Value.  
+    /// This could return a `String`, `IpNetwork`, or `None`
+    pub fn rr_data(&self) -> &Option<T> {
         &self.rrdata
     }
 }
