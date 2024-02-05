@@ -60,6 +60,7 @@ impl From<IpNetworkError> for SpfError {
 }
 
 impl From<MechanismError> for SpfError {
+    // TODO: This needs to be re-done with match statement to convert all MechanismErrors correctly.
     fn from(err: MechanismError) -> Self {
         SpfError::InvalidMechanism(err)
     }
