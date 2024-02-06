@@ -477,6 +477,8 @@ impl From<IpNetworkError> for MechanismError {
 
 impl Mechanism<IpNetwork> {
     /// Create a new V4 or V6 Mechanism from a string representation.
+    /// This is really just a convenience function around the `FromStr` trait that
+    /// creates a `Mechanism<IpNetwork>`
     ///```
     /// # use decon_spf::mechanism::{Mechanism, MechanismError};
     /// let string = "+ip4:203.32.160.0/24";
