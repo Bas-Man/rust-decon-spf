@@ -73,7 +73,7 @@ impl MechanismError {
     pub fn is_not_ip6_network(&self) -> bool {
         matches!(self, Self::NotIP6Network(_))
     }
-    /// Return `true` if it the string can not be parsed to an IpNetwork
+    /// Return `true` if the string can not be parsed to an IpNetwork
     /// # Example:
     /// "ip4:203.32.160.0/33" would give this error. This applies to IP6 networks.
     pub fn is_invalid_ip(&self) -> bool {
