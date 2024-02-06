@@ -1,3 +1,4 @@
+#[cfg(test)]
 mod tests;
 #[cfg(feature = "warn-dns")]
 mod warn;
@@ -7,6 +8,7 @@ use crate::spf::{Spf, SpfError};
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
+    // Add Rfc7208. I think this should be changed to a struct and then make traits
 }
 
 #[derive(Debug)]
