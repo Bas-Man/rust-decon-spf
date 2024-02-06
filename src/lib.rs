@@ -10,7 +10,7 @@
 //! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
 //!
 //! # Abilities:
-//! - Check and Set Spf record version. See: [`Spf Versions`](spf::Spf::set_v1)
+//! - Check and Set Spf record version. See: [`Spf Versions`](Spf::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
 //!     - [`Mechanism`](mechanism)
 //!     - [`Mechanism Qualifier`](mechanism::Mechanism::is_pass)
