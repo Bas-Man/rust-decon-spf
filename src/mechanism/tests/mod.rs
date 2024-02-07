@@ -1,130 +1,4 @@
 mod fromstr;
-mod mechanism {
-    mod build {
-        mod a {
-
-            use crate::mechanism::{Kind, Mechanism, Qualifier};
-
-            #[test]
-            fn new_a_without_mechanism() {
-                let a_mechanism = Mechanism::a(Qualifier::Fail);
-                assert_eq!(a_mechanism.is_fail(), true);
-                assert_eq!(a_mechanism.kind(), &Kind::A);
-                assert_eq!(a_mechanism.raw(), "a");
-                assert_eq!(a_mechanism.to_string(), "-a");
-            }
-        }
-
-        mod mx {
-
-            use crate::mechanism::Mechanism;
-            use crate::mechanism::Qualifier;
-            #[test]
-            fn without_mechanism() {
-                let mx = Mechanism::mx(Qualifier::Pass);
-                assert_eq!(mx.is_pass(), true);
-                assert_eq!(mx.raw(), "mx");
-                assert_eq!(mx.to_string(), "mx");
-            }
-            #[test]
-            fn without_mechanism_softfail() {
-                let mx = Mechanism::mx(Qualifier::SoftFail);
-                assert_eq!(mx.is_softfail(), true);
-                assert_eq!(mx.raw(), "mx");
-                assert_eq!(mx.to_string(), "~mx");
-            }
-        }
-
-        mod ptr {
-
-            use crate::mechanism::Mechanism;
-            use crate::mechanism::Qualifier;
-
-            #[test]
-            fn without_mechanism() {
-                let ptr = Mechanism::ptr(Qualifier::Pass);
-                assert_eq!(ptr.is_pass(), true);
-                assert_eq!(ptr.raw(), "ptr");
-                assert_eq!(ptr.to_string(), "ptr");
-            }
-        }
-        mod ip4 {
-
-            use crate::mechanism::Mechanism;
-            use crate::mechanism::MechanismError;
-            mod valid {
-                use super::*;
-                #[test]
-                fn from_string() {
-                    let string = String::from("ip4:203.32.160.10/32");
-                    let ip4 = Mechanism::ip_from_string(&string);
-                    let unwrapped = ip4.unwrap();
-                    assert_eq!(unwrapped.is_pass(), true);
-                    assert_eq!(unwrapped.to_string(), "ip4:203.32.160.10/32");
-                }
-            }
-            mod invalid {
-                use super::*;
-                #[test]
-                fn from_string() {
-                    let string = String::from("ip:203.32.160.10/32");
-                    let ip4 = Mechanism::ip_from_string(&string);
-                    let unwrapped = ip4.unwrap_err();
-                    assert_eq!(
-                        unwrapped,
-                        MechanismError::InvalidMechanismFormat(String::from("ip:203.32.160.10/32"))
-                    );
-                }
-            }
-        }
-
-        mod ip6 {
-
-            use crate::mechanism::Mechanism;
-            use crate::mechanism::MechanismError;
-
-            mod valid {
-                use super::*;
-                #[test]
-                fn from_string() {
-                    let string = String::from("ip6:2001:4860:4000::/36");
-                    let ip6 = Mechanism::ip_from_string(&string);
-                    let unwrapped = ip6.unwrap();
-                    assert_eq!(unwrapped.is_pass(), true);
-                    assert_eq!(unwrapped.to_string(), "ip6:2001:4860:4000::/36");
-                }
-            }
-            mod invalid {
-                use super::*;
-                #[test]
-                fn from_string() {
-                    let string = String::from("ip:2001:4860:4000::/36");
-                    let ip6 = Mechanism::ip_from_string(&string);
-                    let unwrapped = ip6.unwrap_err();
-                    assert_eq!(
-                        unwrapped,
-                        MechanismError::InvalidMechanismFormat(String::from(
-                            "ip:2001:4860:4000::/36"
-                        ))
-                    );
-                }
-            }
-        }
-        mod all {
-
-            use crate::mechanism::Mechanism;
-            use crate::mechanism::Qualifier;
-
-            #[test]
-            fn new_all() {
-                let a_mechanism = Mechanism::all(Qualifier::Fail);
-                assert_eq!(a_mechanism.is_fail(), true);
-                assert_eq!(a_mechanism.raw(), "all");
-                assert_eq!(a_mechanism.to_string(), "-all");
-            }
-        }
-    }
-}
 
 mod create {
     mod a {
@@ -404,6 +278,7 @@ mod create {
             }
         }
     }
+
     mod ptr {
 
         use crate::mechanism::Mechanism;
@@ -441,11 +316,65 @@ mod create {
         }
         #[test]
         fn invalid_rrdata() {
-            if let Err(redirect) = Mechanism::redirect(Qualifier::Pass, "_spf.example.") {
+            if let Err(redirect) = Mechanism::redirect(Qualifier::Pass, "_spf.example.xx") {
                 assert_eq!(
                     redirect,
-                    MechanismError::InvalidDomainHost("redirect=_spf.example.com".to_string())
+                    MechanismError::InvalidDomainHost("redirect=_spf.example.xx".to_string())
                 );
+            }
+        }
+    }
+    mod ip4 {
+
+        use crate::mechanism::Mechanism;
+        use crate::mechanism::MechanismError;
+        mod valid {
+            use super::*;
+            #[test]
+            fn from_string() {
+                let string = String::from("ip4:203.32.160.10/32");
+                let ip4 = Mechanism::ip_from_string(&string);
+                let unwrapped = ip4.unwrap();
+                assert_eq!(unwrapped.is_pass(), true);
+                assert_eq!(unwrapped.to_string(), string);
+            }
+        }
+        mod invalid {
+            use super::*;
+            #[test]
+            fn from_string() {
+                let string = String::from("ip:203.32.160.10/32");
+                let ip4 = Mechanism::ip_from_string(&string);
+                let unwrapped = ip4.unwrap_err();
+                assert_eq!(unwrapped, MechanismError::InvalidMechanismFormat(string));
+            }
+        }
+    }
+
+    mod ip6 {
+
+        use crate::mechanism::Mechanism;
+        use crate::mechanism::MechanismError;
+
+        mod valid {
+            use super::*;
+            #[test]
+            fn from_string() {
+                let string = String::from("ip6:2001:4860:4000::/36");
+                let ip6 = Mechanism::ip_from_string(&string);
+                let unwrapped = ip6.unwrap();
+                assert_eq!(unwrapped.is_pass(), true);
+                assert_eq!(unwrapped.to_string(), string);
+            }
+        }
+        mod invalid {
+            use super::*;
+            #[test]
+            fn from_string() {
+                let string = String::from("ip:2001:4860:4000::/36");
+                let ip6 = Mechanism::ip_from_string(&string);
+                let unwrapped = ip6.unwrap_err();
+                assert_eq!(unwrapped, MechanismError::InvalidMechanismFormat(string));
             }
         }
     }
@@ -455,21 +384,21 @@ mod create {
         use crate::mechanism::Qualifier;
 
         #[test]
-        fn fault() {
-            let a_mechanism = Mechanism::all(Qualifier::Fail);
-            assert_eq!(a_mechanism.is_fail(), true);
-            assert_eq!(a_mechanism.raw(), "all");
-            assert_eq!(a_mechanism.to_string(), "-all");
+        fn default() {
+            let m = Mechanism::all(Qualifier::Fail);
+            assert_eq!(m.is_fail(), true);
+            assert_eq!(m.raw(), "all");
+            assert_eq!(m.to_string(), "-all");
         }
         #[test]
         fn with_rrdata_is_none() {
-            let a_mechanism = Mechanism::all(Qualifier::Fail)
+            let m = Mechanism::all(Qualifier::Fail)
                 .with_rrdata("example.com")
                 .unwrap();
-            assert_eq!(a_mechanism.is_fail(), true);
-            assert_eq!(a_mechanism.raw(), "all");
-            assert_eq!(a_mechanism.to_string(), "-all");
-            assert_eq!(a_mechanism.rrdata, None);
+            assert_eq!(m.is_fail(), true);
+            assert_eq!(m.raw(), "all");
+            assert_eq!(m.to_string(), "-all");
+            assert_eq!(m.rrdata, None);
         }
     }
 }
