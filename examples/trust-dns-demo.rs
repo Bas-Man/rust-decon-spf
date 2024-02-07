@@ -1,4 +1,4 @@
-use decon_spf::Spf;
+use decon_spf::SpfBuilder;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::TxtLookup};
@@ -67,8 +67,8 @@ fn main() {
     println!("Spf: {}", spf_record);
 }
 
-fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
-    let mut spf_record = Spf::default();
+fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> SpfBuilder {
+    let mut spf_record = SpfBuilder::default();
     match txt_response {
         Err(_) => println!("No TXT Records."),
         Ok(txt_response) => {

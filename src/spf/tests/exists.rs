@@ -1,13 +1,13 @@
 mod parse {
     use crate::mechanism::MechanismError;
-    use crate::spf::Spf;
+    use crate::spf::SpfBuilder;
     use crate::SpfError;
 
     #[test]
     fn test_exist() {
         let input = "v=spf1 exists:example.com ~all";
 
-        let spf: Spf = input.parse().unwrap();
+        let spf: SpfBuilder = input.parse().unwrap();
         assert!(spf.exists().is_some());
         assert_eq!(spf.exists().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.exists().unwrap()[0].raw(), "example.com");
@@ -20,7 +20,7 @@ mod parse {
             let input = "v=spf1 exists:example.com/ ~all";
             let invalid_str = "exists:example.com/";
 
-            let err: SpfError = input.parse::<Spf>().unwrap_err();
+            let err: SpfError = input.parse::<SpfBuilder>().unwrap_err();
             assert_eq!(
                 err,
                 SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(

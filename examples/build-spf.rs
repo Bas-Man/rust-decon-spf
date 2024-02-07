@@ -1,8 +1,8 @@
 use decon_spf::mechanism::{Kind, Mechanism, ParsedMechanism, Qualifier};
-use decon_spf::Spf;
+use decon_spf::SpfBuilder;
 
 fn main() {
-    let mut spf1 = Spf::new();
+    let mut spf1 = SpfBuilder::new();
     spf1.set_v1();
     let ip_m_1 = ParsedMechanism::new("ip4:203.32.160.0/24");
     let ip_m_2 = ParsedMechanism::new("+ip4:203.32.166.0/24");
@@ -23,7 +23,7 @@ fn main() {
         "v=spf1 a:test.com mx ip4:203.32.160.0/24 ip4:203.32.166.0/24"
     );
 
-    let mut spf2 = Spf::new();
+    let mut spf2 = SpfBuilder::new();
     spf2.set_v1();
     let ip = "203.32.166.0/24".parse().unwrap();
     let m = Mechanism::ip(Qualifier::Pass, ip);
@@ -37,7 +37,7 @@ fn main() {
     spf2.clear_mechanism(Kind::MX);
     println!("Altered spf 2: >{}<", spf2);
 
-    let mut spf3 = Spf::new();
+    let mut spf3 = SpfBuilder::new();
     spf3.set_v2_pra();
     spf3.append_mechanism(Mechanism::a(Qualifier::Pass));
     spf3.append_mechanism(Mechanism::all(Qualifier::Neutral));

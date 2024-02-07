@@ -1,10 +1,10 @@
-use crate::spf::Spf;
+use crate::spf::SpfBuilder;
 
 #[test]
 fn mechanism() {
     let input = "v=spf1 a ~all";
 
-    let spf: Spf = input.parse().unwrap();
+    let spf: SpfBuilder = input.parse().unwrap();
     assert_eq!(spf.is_valid(), false);
     assert_eq!(spf.version(), "v=spf1");
     assert!(spf.a().is_some());
@@ -17,7 +17,7 @@ fn mechanism() {
 fn mechanism_slash_cidr() {
     let input = "v=spf1 -a/24 ~all";
 
-    let spf: Spf = input.parse().unwrap();
+    let spf: SpfBuilder = input.parse().unwrap();
     assert!(spf.a().is_some());
     assert_eq!(spf.a().unwrap()[0].qualifier().is_fail(), true);
     assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
@@ -26,7 +26,7 @@ fn mechanism_slash_cidr() {
 fn mechanism_colon_domain() {
     let input = "v=spf1 ?a:example.com ~all";
 
-    let spf: Spf = input.parse().unwrap();
+    let spf: SpfBuilder = input.parse().unwrap();
     assert!(spf.a().is_some());
     assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
     assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");
@@ -35,21 +35,21 @@ fn mechanism_colon_domain() {
 fn mechanism_domain_cidr() {
     let input = "v=spf1 ~a:example.com/24 ~all";
 
-    let spf: Spf = input.parse().unwrap();
+    let spf: SpfBuilder = input.parse().unwrap();
     assert!(spf.a().is_some());
     assert_eq!(spf.a().unwrap()[0].qualifier().is_softfail(), true);
     assert_eq!(spf.a().unwrap()[0].to_string(), "~a:example.com/24");
 }
 mod invalid {
     use crate::mechanism::MechanismError;
-    use crate::spf::{Spf, SpfError};
+    use crate::spf::{SpfBuilder, SpfError};
 
     #[test]
     fn invalid_with_colon_only() {
         let input = "v=spf1 a: -all";
         let err_mechanism = "a:";
 
-        let err = input.parse::<Spf>().unwrap_err();
+        let err = input.parse::<SpfBuilder>().unwrap_err();
         assert_eq!(
             err,
             SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
@@ -62,7 +62,7 @@ mod invalid {
         let input = "v=spf1 a/ -all";
         let err_mechanism = "a/";
 
-        let err = input.parse::<Spf>().unwrap_err();
+        let err = input.parse::<SpfBuilder>().unwrap_err();
         assert_eq!(
             err,
             SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(

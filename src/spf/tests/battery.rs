@@ -1,4 +1,4 @@
-use crate::spf::Spf;
+use crate::spf::SpfBuilder;
 mod spf_v1 {
     use super::*;
     mod valid {
@@ -9,7 +9,7 @@ mod spf_v1 {
             let list = vec!["v=spf1 a -all"];
 
             for item in list.into_iter() {
-                let valid_spf: Spf = item.parse().unwrap();
+                let valid_spf: SpfBuilder = item.parse().unwrap();
                 assert_eq!(valid_spf.is_valid(), false);
             }
         }
@@ -24,7 +24,7 @@ mod spf_v1 {
             let list = vec!["v=spf a -all"];
 
             for item in list.into_iter() {
-                let invalid_spf: SpfError = item.parse::<Spf>().unwrap_err();
+                let invalid_spf: SpfError = item.parse::<SpfBuilder>().unwrap_err();
                 assert_eq!(invalid_spf, SpfError::InvalidSource)
             }
         }
@@ -46,7 +46,7 @@ mod spf_v2 {
             ];
 
             for item in list.into_iter() {
-                let valid_spf: Spf = item.parse().unwrap();
+                let valid_spf: SpfBuilder = item.parse().unwrap();
                 assert_eq!(valid_spf.is_v2(), true);
             }
         }
@@ -61,7 +61,7 @@ mod spf_v2 {
             let list = vec!["spf2.0/ a -all", "spf2.0 a -all"];
 
             for item in list.into_iter() {
-                let invalid_spf: SpfError = item.parse::<Spf>().unwrap_err();
+                let invalid_spf: SpfError = item.parse::<SpfBuilder>().unwrap_err();
                 assert_eq!(invalid_spf, SpfError::InvalidSource)
             }
         }

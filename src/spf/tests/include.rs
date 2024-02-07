@@ -1,12 +1,12 @@
 mod parse {
 
-    use crate::spf::Spf;
+    use crate::spf::SpfBuilder;
 
     #[test]
     fn test_include() {
         let input = "v=spf1 include:_spf.example.com ~all";
 
-        let spf: Spf = input.parse().unwrap();
+        let spf: SpfBuilder = input.parse().unwrap();
         assert!(spf.includes().is_some());
         assert_eq!(spf.includes().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.includes().unwrap()[0].raw(), "_spf.example.com");

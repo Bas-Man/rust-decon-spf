@@ -1,8 +1,6 @@
 //! Document me When you can.
 //! Warning checks
 
-use crate::Spf;
+use crate::SpfBuilder;
 
-impl Spf {
-
-}
+impl SpfBuilder {}

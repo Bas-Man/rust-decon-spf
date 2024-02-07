@@ -1,10 +1,10 @@
 mod spf1 {
 
-    use crate::spf::Spf;
+    use crate::spf::SpfBuilder;
 
     #[test]
     fn make_v1() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.version(), "v=spf1");
@@ -14,11 +14,11 @@ mod spf1 {
 #[cfg(feature = "spf2")]
 mod spf2 {
 
-    use crate::spf::Spf;
+    use crate::spf::SpfBuilder;
 
     #[test]
     fn make_v2_pra() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v2_pra();
         assert_eq!(spf.version, "spf2.0/pra");
         assert_eq!(spf.is_v2(), true);
@@ -26,21 +26,21 @@ mod spf2 {
     }
     #[test]
     fn make_v2_mfrom() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v2_mfrom();
         assert_eq!(spf.version, "spf2.0/mfrom");
         assert_eq!(spf.is_v2(), true);
     }
     #[test]
     fn make_v2_mfrom_pra() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v2_mfrom_pra();
         assert_eq!(spf.version, "spf2.0/mfrom,pra");
         assert_eq!(spf.is_v2(), true);
     }
     #[test]
     fn make_v2_pra_mfrom() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v2_pra_mfrom();
         assert_eq!(spf.version, "spf2.0/pra,mfrom");
         assert_eq!(spf.is_v2(), true);
@@ -51,11 +51,11 @@ mod spf2 {
 mod build {
 
     use crate::mechanism::{Mechanism, Qualifier};
-    use crate::spf::Spf;
+    use crate::spf::SpfBuilder;
 
     #[test]
     fn make_a_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -67,7 +67,7 @@ mod build {
     }
     #[test]
     fn make_ip4_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -83,7 +83,7 @@ mod build {
     }
     #[test]
     fn make_ip4_x2_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -103,7 +103,7 @@ mod build {
     }
     #[test]
     fn make_ip6_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -119,7 +119,7 @@ mod build {
     }
     #[test]
     fn make_ip6_x2_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -139,7 +139,7 @@ mod build {
     }
     #[test]
     fn make_ip4_by_append_ip_mechanism() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -151,7 +151,7 @@ mod build {
     }
     #[test]
     fn make_ip4_x2_by_append_ip_mechanism() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -170,7 +170,7 @@ mod build {
     }
     #[test]
     fn make_ip6_by_append_ip_mechanism() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         assert_eq!(spf.version, "v=spf1");
         assert_eq!(spf.is_v1(), true);
@@ -185,7 +185,7 @@ mod build {
     }
     #[test]
     fn make_v1_a_mx_all() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         spf.append_mechanism(Mechanism::a(Qualifier::Pass));
         spf.append_mechanism(Mechanism::mx(Qualifier::Pass));
@@ -194,7 +194,7 @@ mod build {
     }
     #[test]
     fn make_v1_ip4_ip6() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         spf.append_ip_mechanism(Mechanism::ip(
             Qualifier::Pass,

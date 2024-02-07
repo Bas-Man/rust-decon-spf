@@ -4,7 +4,7 @@ mod tests;
 mod warn;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::{Spf, SpfError};
+use crate::spf::{SpfBuilder, SpfError};
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
@@ -13,7 +13,7 @@ pub enum SpfRfcStandard {
 
 #[derive(Debug)]
 pub enum SpfValidationResult<'a> {
-    Valid(&'a Spf),
+    Valid(&'a SpfBuilder),
     InValid(SpfError),
 }
 
@@ -74,7 +74,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
     Ok(())
 }
 #[cfg(feature = "ptr")]
-pub(crate) fn check_ptr(spf: &Spf) -> Result<(), SpfError> {
+pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     if let Some(_) = &spf.ptr {
         Err(SpfError::DeprecatedPtrPresent)
     } else {
@@ -83,13 +83,13 @@ pub(crate) fn check_ptr(spf: &Spf) -> Result<(), SpfError> {
 }
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
-pub(crate) fn check_redirect_all(spf: &Spf) -> Result<(), SpfError> {
+pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
     if spf.redirect().is_some() && spf.all().is_some() {
         return Err(SpfError::RedirectWithAllMechanism);
     }
     Ok(())
 }
-pub(crate) fn check_lookup_count(spf: &Spf) -> usize {
+pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     let mut lookup_count: usize = 0;
 
     if spf.redirect().is_some() {
@@ -108,7 +108,7 @@ pub(crate) fn check_lookup_count(spf: &Spf) -> usize {
 }
 
 #[allow(dead_code)]
-pub(crate) fn validate_rfc4408(spf: &mut Spf) -> Result<&Spf, SpfError> {
+pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfError> {
     if spf.is_valid {
         return Ok(spf);
     };

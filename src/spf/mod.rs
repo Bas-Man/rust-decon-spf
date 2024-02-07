@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spf {
+pub struct SpfBuilder {
     source: String,  // Stores original Spf String that was parsed (s.parse())
     version: String, // Version Usually v=spf1 but may be spf2.0/...
     from_src: bool,  // Currently don't know if this is used or what it was used for if not used.
@@ -42,7 +42,7 @@ pub struct Spf {
     is_valid: bool,
 }
 
-impl std::fmt::Display for Spf {
+impl std::fmt::Display for SpfBuilder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_spf_string())
     }
@@ -53,21 +53,21 @@ impl std::fmt::Display for Spf {
 /// # Examples:
 ///
 ///```rust
-/// use decon_spf::Spf;
+/// use decon_spf::SpfBuilder;
 /// use decon_spf::SpfError;
 /// // Successful
 /// let input = "v=spf1 a mx -all";
-/// let spf: Spf = input.parse().unwrap();
+/// let spf: SpfBuilder = input.parse().unwrap();
 /// assert_eq!(spf.to_string(), input);
 ///
 /// // Additional Space between `A` and `MX`
 /// let invalid_input = "v=spf1 a   mx -all";
-/// let err: SpfError =invalid_input.parse::<Spf>().unwrap_err();
+/// let err: SpfError =invalid_input.parse::<SpfBuilder>().unwrap_err();
 /// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///```
 ///
-impl FromStr for Spf {
+impl FromStr for SpfBuilder {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
@@ -76,7 +76,7 @@ impl FromStr for Spf {
         let source = String::from(s);
 
         // Basic Checks are ok.
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         // Setup Vectors
         let records = source.split_whitespace();
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
@@ -151,17 +151,17 @@ impl FromStr for Spf {
     }
 }
 
-impl TryFrom<&str> for Spf {
+impl TryFrom<&str> for SpfBuilder {
     type Error = SpfError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
-        Spf::from_str(s)
+        SpfBuilder::from_str(s)
     }
 }
-impl Spf {
+impl SpfBuilder {
     /// Create a new empty Spf struct.
     pub fn new() -> Self {
-        Spf::default()
+        SpfBuilder::default()
     }
     /// Check that data stored in the Spf Struct is considered a valid Spf Record.
     pub fn is_valid(&self) -> bool {
@@ -199,8 +199,8 @@ impl Spf {
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
-    /// use decon_spf::Spf;
-    /// let mut spf = Spf::new();
+    /// use decon_spf::SpfBuilder;
+    /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
@@ -284,8 +284,8 @@ impl Spf {
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::Spf;
-    /// let mut spf = Spf::new();
+    /// use decon_spf::SpfBuilder;
+    /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap());
@@ -314,8 +314,8 @@ impl Spf {
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::Spf;
-    /// let mut spf = Spf::new();
+    /// use decon_spf::SpfBuilder;
+    /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
@@ -433,7 +433,7 @@ impl Spf {
 
 #[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
 #[cfg(feature = "spf2")]
-impl Spf {
+impl SpfBuilder {
     /// Set version to `spf2.0/pra`
     pub fn set_v2_pra(&mut self) {
         self.version = String::from("spf2.0/pra");

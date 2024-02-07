@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod validate {
     use crate::mechanism::{Mechanism, Qualifier};
-    use crate::spf::{Spf, SpfRfcStandard};
+    use crate::spf::{SpfBuilder, SpfRfcStandard};
     use crate::SpfError;
 
     #[test]
     fn validate() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         spf.set_v1();
         spf.append_ip_mechanism(Mechanism::ip(
             Qualifier::Pass,
@@ -32,7 +32,7 @@ mod validate {
     }
     #[test]
     fn invalidate() {
-        let mut spf = Spf::new();
+        let mut spf = SpfBuilder::new();
         //spf.set_v1();
         spf.append_ip_mechanism(Mechanism::ip(
             Qualifier::Pass,
@@ -55,7 +55,7 @@ mod validate {
     #[cfg(feature = "ptr")]
     fn invalidate_with_ptr() {
         let input = "v=spf1 a ptr -all";
-        let mut spf: Spf = input.parse().unwrap();
+        let mut spf: SpfBuilder = input.parse().unwrap();
 
         let res = spf.validate(SpfRfcStandard::Rfc4408).unwrap_err();
         assert_eq!(res, SpfError::DeprecatedPtrPresent);
@@ -63,7 +63,7 @@ mod validate {
     #[test]
     fn invalidate_redirect_all() {
         let input = "v=spf1 redirect=_spf.example.com -all";
-        let mut spf: Spf = input.parse().unwrap();
+        let mut spf: SpfBuilder = input.parse().unwrap();
 
         let res = spf.validate(SpfRfcStandard::Rfc4408).unwrap_err();
         assert_eq!(res, SpfError::RedirectWithAllMechanism);
