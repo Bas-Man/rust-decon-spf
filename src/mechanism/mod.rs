@@ -286,7 +286,7 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `A`
     ///
     /// # Example:
-    /// ```
+    /// ``` rust
     /// use decon_spf::mechanism::Qualifier;
     /// use decon_spf::mechanism::Mechanism;
     /// # #[cfg(feature = "strict-dns")]
@@ -295,7 +295,7 @@ impl Mechanism<String> {
     /// let m = Mechanism::a(Qualifier::Pass);
     /// assert_eq!(m.kind().is_a(), true);
     /// assert_eq!(m.raw(), "a".to_string());
-    /// assert_eq!(m.mechanism().is_none(), true);
+    /// assert_eq!(m.rr_data().is_none(), true);
     /// // Create `A` with rrdata
     /// if let Ok(m_with_rrdata) = Mechanism::a(Qualifier::Pass)
     ///                                                .with_rrdata("example.com") {
