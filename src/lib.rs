@@ -5,16 +5,16 @@
 //! Provides methods for building spf records programmatically.  
 //!
 //!
-//! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)  
+//! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`]  
 //!
 //! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
 //!
 //! # Abilities:
 //! - Check and Set Spf record version. See: [`Spf Versions`](SpfBuilder::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
-//!     - [`Mechanism`](mechanism)
-//!     - [`Mechanism Qualifier`](mechanism::Mechanism::is_pass)
-//!     - [`Mechanism Kind`](mechanism::Mechanism::kind)
+//!     - [`Mechanism`]
+//!     - [`Mechanism Qualifier`](Mechanism::is_pass)
+//!     - [`Mechanism Kind`](Mechanism::kind)
 //!
 //! # Feature Flags:
 //! - `ptr` (Enabled by default.)  
@@ -29,8 +29,8 @@
 //! - `serde` (Disabled by default.)
 //!
 mod core;
-pub mod mechanism;
+mod mechanism;
 mod spf;
 
-pub use crate::spf::SpfBuilder;
-pub use crate::spf::SpfError;
+pub use crate::mechanism::{Kind, Mechanism, MechanismError, ParsedMechanism, Qualifier};
+pub use crate::spf::{SpfBuilder, SpfError};

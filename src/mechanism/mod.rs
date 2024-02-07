@@ -76,7 +76,7 @@ mod serde_tests {
 ///
 /// # Examples:
 ///```rust
-/// # use decon_spf::mechanism::Mechanism;
+/// # use decon_spf::Mechanism;
 /// let a: Mechanism<String> = "a".parse().unwrap();
 /// assert_eq!(a.kind().is_a(), true);
 ///
@@ -157,7 +157,7 @@ impl TryFrom<&str> for Mechanism<String> {
 ///
 /// # Examples:
 ///```rust
-/// # use decon_spf::mechanism::{Mechanism, MechanismError};
+/// # use decon_spf::{Mechanism, MechanismError};
 /// # use ipnetwork::IpNetwork;
 /// let ip4: Mechanism<IpNetwork> = "ip4:203.32.160.0/24".parse().unwrap();
 /// assert_eq!(ip4.kind().is_ip_v4(), true);
@@ -287,10 +287,10 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ``` rust
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// # #[cfg(feature = "strict-dns")]
-    /// # use decon_spf::mechanism::MechanismError;
+    /// # use decon_spf::MechanismError;
     /// // New `A` without rrdata.
     /// let m = Mechanism::a(Qualifier::Pass);
     /// assert_eq!(m.kind().is_a(), true);
@@ -323,8 +323,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```rust
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// // without rrdata
     /// let mx = Mechanism::mx(Qualifier::Pass);
     /// assert_eq!(mx.kind().is_mx(), true);
@@ -343,8 +343,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// let include = Mechanism::include(Qualifier::Pass,
     ///                                         "example.com").unwrap();
     /// assert_eq!(include.qualifier().as_str(), "");
@@ -360,8 +360,8 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// // without rrdata
     /// let ptr = Mechanism::ptr(Qualifier::Fail);
     /// assert_eq!(ptr.to_string(), "-ptr");
@@ -413,8 +413,8 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// let mechanism_a = Mechanism::a(Qualifier::Neutral);
     /// assert_eq!(mechanism_a.raw(), "a");
     /// let mechanism_a_string = Mechanism::a(Qualifier::Neutral)
@@ -480,7 +480,7 @@ impl Mechanism<IpNetwork> {
     /// This is really just a convenience function around the `FromStr` trait that
     /// creates a `Mechanism<IpNetwork>`
     ///```
-    /// # use decon_spf::mechanism::{Mechanism, MechanismError};
+    /// # use decon_spf::{Mechanism, MechanismError};
     /// let string = "+ip4:203.32.160.0/24";
     /// if let Ok(m) = Mechanism::ip_from_string(&string) {
     ///   assert_eq!(m.raw(), "203.32.160.0/24");
@@ -497,7 +497,7 @@ impl Mechanism<IpNetwork> {
     /// # Examples:
     /// ```
     /// # use ipnetwork::IpNetwork;
-    /// use decon_spf::mechanism::{Mechanism, Qualifier};
+    /// use decon_spf::{Mechanism, Qualifier};
     ///
     /// // Requires: use ipnetwork::IpNetwork;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
@@ -540,8 +540,8 @@ impl Mechanism<IpNetwork> {
     ///
     ///```
     /// use ipnetwork::IpNetwork;
-    /// use decon_spf::mechanism::Qualifier;
-    /// use decon_spf::mechanism::Mechanism;
+    /// use decon_spf::Qualifier;
+    /// use decon_spf::Mechanism;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::ip(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");

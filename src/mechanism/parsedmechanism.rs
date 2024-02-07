@@ -27,7 +27,7 @@ impl std::fmt::Display for ParsedMechanism {
 /// # Examples:
 ///```rust
 /// use ipnetwork::IpNetworkError::InvalidAddr;
-/// use decon_spf::mechanism::{ParsedMechanism, MechanismError};
+/// use decon_spf::{ParsedMechanism, MechanismError};
 /// let mechanism_a: ParsedMechanism = "a:test.com/24".parse().unwrap();
 /// let mechanism_mx = "mx:example.com".parse::<ParsedMechanism>().unwrap();
 /// let mechanism_ip4 = "ip4:203.32.160.10/24".parse::<ParsedMechanism>().unwrap();
@@ -64,7 +64,7 @@ impl ParsedMechanism {
     /// Provides another way to parse `Spf Mechanisms`
     /// # Example:
     ///```rust
-    /// use decon_spf::mechanism::{ParsedMechanism,MechanismError};
+    /// use decon_spf::{ParsedMechanism, MechanismError};
     /// let parsed_mechanism = ParsedMechanism::new("ptr").unwrap();
     /// // This is clearly not and `IpNetwork` so use `.txt()`
     /// let mechanism = parsed_mechanism.txt();
@@ -80,7 +80,7 @@ impl ParsedMechanism {
     /// Returns a new `Mechanism<String>`
     /// # Example:
     ///```rust
-    /// use decon_spf::mechanism::{ParsedMechanism,Mechanism};
+    /// use decon_spf::{ParsedMechanism,Mechanism};
     /// let parsed_mechanism = ParsedMechanism::new("mx").unwrap();
     /// let mechanism = parsed_mechanism.txt();
     /// assert_eq!(mechanism.kind().is_mx(), true);
@@ -100,7 +100,7 @@ impl ParsedMechanism {
     /// Returns a new `Mechanism<IpNetwork>`
     /// # Example:
     ///```rust
-    /// use decon_spf::mechanism::{ParsedMechanism, Mechanism};
+    /// use decon_spf::{ParsedMechanism, Mechanism};
     /// let parsed_mechanism = ParsedMechanism::new("ip4:203.32.160.0/24").unwrap();
     /// let mechanism = parsed_mechanism.network();
     /// assert_eq!(mechanism.kind().is_ip_v4(), true);

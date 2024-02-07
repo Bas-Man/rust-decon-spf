@@ -198,7 +198,7 @@ impl SpfBuilder {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
+    /// use decon_spf::{Qualifier, Kind, Mechanism};
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
@@ -283,7 +283,7 @@ impl SpfBuilder {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::mechanism::{Qualifier, Mechanism};
+    /// use decon_spf::{Qualifier, Mechanism};
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
@@ -313,7 +313,7 @@ impl SpfBuilder {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::mechanism::{Qualifier, Mechanism};
+    /// use decon_spf::{Qualifier, Mechanism};
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();

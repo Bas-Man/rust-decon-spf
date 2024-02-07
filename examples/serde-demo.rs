@@ -1,5 +1,5 @@
-use decon_spf::mechanism::{Mechanism, ParsedMechanism, Qualifier};
 use decon_spf::SpfBuilder;
+use decon_spf::{Mechanism, ParsedMechanism, Qualifier};
 use serde_json;
 
 fn main() {

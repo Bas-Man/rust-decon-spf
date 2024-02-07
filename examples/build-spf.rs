@@ -1,5 +1,5 @@
-use decon_spf::mechanism::{Kind, Mechanism, ParsedMechanism, Qualifier};
 use decon_spf::SpfBuilder;
+use decon_spf::{Kind, Mechanism, ParsedMechanism, Qualifier};
 
 fn main() {
     let mut spf1 = SpfBuilder::new();

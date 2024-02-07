@@ -5,7 +5,7 @@
 //!
 //!
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Defines the possible mechanisms.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
@@ -77,7 +77,7 @@ impl Kind {
     /// # Examples:
     ///
     /// ```
-    /// # use decon_spf::mechanism::Kind;
+    /// # use decon_spf::Kind;
     /// let ip4 = Kind::IpV4;
     /// let ip6 = Kind::IpV6;
     /// assert_eq!(ip4.is_ip_v4(), true);
@@ -115,7 +115,7 @@ impl Kind {
     /// # Examples:
     ///
     /// ```rust
-    /// # use decon_spf::mechanism::Kind;
+    /// # use decon_spf::Kind;
     /// let a = Kind::A;
     /// let mx = Kind::MX;
     /// assert_eq!(a.as_str(), "a");
@@ -212,7 +212,7 @@ mod serde_tests {
         let a = Kind::default();
         let json = serde_json::to_string(&a).unwrap();
         assert_eq!(json, "\"A\"");
-        let deserialized:Kind = serde_json::from_str(&json).unwrap();
+        let deserialized: Kind = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, a);
     }
 
