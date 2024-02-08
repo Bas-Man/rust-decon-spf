@@ -14,11 +14,30 @@ pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
+use std::fmt::{Debug, Display, Formatter};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+#[derive(Default, Debug, PartialEq)]
+pub struct Spf<T> {
+    source: String,
+    mechanisms: Vec<Mechanism<T>>,
+}
+
+impl<T> Spf<T>
+where
+    T: Default,
+    T: Debug,
+    T: Display,
+{
+    fn new() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+}
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
