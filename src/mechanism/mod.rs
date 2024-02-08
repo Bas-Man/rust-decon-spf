@@ -569,6 +569,15 @@ impl Mechanism<IpNetwork> {
     }
 }
 
+impl From<Mechanism<IpNetwork>> for Mechanism<String> {
+    fn from(value: Mechanism<IpNetwork>) -> Self {
+        Mechanism::generic_inclusive(
+            *value.kind(),
+            value.qualifier,
+            Some(value.rr_data().expect("Not IpNetwork").to_string()),
+        )
+    }
+}
 /// Provide to_string for `Mechanism<IpNetwork`>
 impl std::fmt::Display for Mechanism<IpNetwork> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
