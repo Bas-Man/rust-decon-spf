@@ -38,6 +38,12 @@ where
         }
     }
 }
+
+impl<T> Display for Spf<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.source)
+    }
+}
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
