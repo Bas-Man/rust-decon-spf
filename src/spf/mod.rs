@@ -84,7 +84,7 @@ impl FromStr for Spf<String> {
             }
             idx = idx + 1;
         }
-        if all_idx > redirect_idx {
+        if (redirect_idx != 0) && (all_idx > redirect_idx) {
             return Err(SpfError::RedirectWithAllMechanism);
         }
         if redirect_idx != idx {
