@@ -44,6 +44,58 @@ impl<T> Display for Spf<T> {
         write!(f, "{}", self.source)
     }
 }
+impl FromStr for Spf<String> {
+    type Err = SpfError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        validate::check_start_of_spf(s)?;
+        validate::check_spf_length(s)?;
+        validate::check_whitespaces(s)?;
+
+        let mut redirect_idx = 0;
+        let mut all_idx = 0;
+        let mut idx = 0;
+        let mut spf = Spf::default();
+        let mechanisms = s.split_whitespace();
+        for m in mechanisms {
+            if m.contains("v=spf1") || m.starts_with("spf2.0") {
+            } else if m.contains("redirect=") {
+                spf.mechanisms.push(m.parse()?);
+                redirect_idx = idx;
+            } else if m.contains("include:") {
+                spf.mechanisms.push(m.parse()?);
+            } else if m.ends_with("all") && (m.len() == 3 || m.len() == 4) {
+                spf.mechanisms
+                    .push(Mechanism::all(core::return_and_remove_qualifier(m, 'a').0));
+                all_idx = idx;
+            } else if m.contains("ip4:") || m.contains("ip6:") {
+                let m_ip: Mechanism<IpNetwork> = m.parse()?;
+                let m_str: Mechanism<String> = m_ip.into();
+                spf.mechanisms.push(m_str);
+            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::A) {
+                spf.mechanisms.push(m);
+            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::MX) {
+                spf.mechanisms.push(m);
+            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::Ptr) {
+                spf.mechanisms.push(m);
+            } else {
+                return Err(SpfError::InvalidMechanism(
+                    MechanismError::InvalidMechanismFormat(m.to_string()),
+                ));
+            }
+            idx = idx + 1;
+        }
+        if all_idx > redirect_idx {
+            return Err(SpfError::RedirectWithAllMechanism);
+        }
+        if redirect_idx != idx {
+            // Todo: Redirect should be the last item in the Spf Record
+            todo!()
+        }
+        spf.source = s.to_string();
+        Ok(spf)
+    }
+}
+
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
