@@ -3,7 +3,17 @@ mod ip4 {
     use ipnetwork::IpNetwork;
 
     #[test]
-    fn basic_str() {
+    fn ip_without_cidr() {
+        let input = "ip4:203.32.160.0";
+
+        let m: Mechanism<IpNetwork> = input.parse().unwrap();
+        assert_eq!(m.kind().is_ip_v4(), true);
+        assert_eq!(m.rr_data().unwrap().to_string(), "203.32.160.0/32");
+        assert_eq!(m.to_string(), "ip4:203.32.160.0");
+        assert_eq!(m.raw(), "203.32.160.0");
+    }
+    #[test]
+    fn ip_with_cidr() {
         let input = "ip4:203.32.160.0/24";
 
         let m: Mechanism<IpNetwork> = input.parse().unwrap();
@@ -81,8 +91,17 @@ mod ip6 {
     use ipnetwork::IpNetwork;
 
     #[test]
-    fn basic_ip_str() {
+    fn with_cidr() {
         let input = "ip6:2001:4860:4000::/36";
+
+        let m: Mechanism<IpNetwork> = input.parse().unwrap();
+        assert_eq!(m.kind().is_ip_v6(), true);
+        assert_eq!(m.qualifier().is_pass(), true);
+        assert_eq!(m.to_string(), input);
+    }
+    #[test]
+    fn without_cidr() {
+        let input = "ip6:2001:4860:4000::";
 
         let m: Mechanism<IpNetwork> = input.parse().unwrap();
         assert_eq!(m.kind().is_ip_v6(), true);

@@ -549,8 +549,7 @@ impl Mechanism<IpNetwork> {
     ///```
     ///
     pub fn raw(&self) -> String {
-        // Consider striping ':' and "/" if they are the first characters.
-        self.rrdata.unwrap().to_string()
+        Self::sanitize_ip_addr(self.rrdata.as_ref().expect("Missing IpNetwork"))
     }
 
     fn build_string(&self) -> String {
@@ -559,13 +558,32 @@ impl Mechanism<IpNetwork> {
             ip_mechanism_str.push_str(self.qualifier.as_str());
         };
         ip_mechanism_str.push_str(self.kind().as_str());
-        ip_mechanism_str.push_str(self.rrdata.unwrap().to_string().as_str());
+        let ip = self.rrdata.as_ref().unwrap();
+        let ip_str = Self::sanitize_ip_addr(ip);
+        ip_mechanism_str.push_str(ip_str.as_str());
         ip_mechanism_str
+    }
+
+    // IpNetwork contains a prefix of /32 or /128 for Ip4 and I6 respectively.
+    // This happens when the ip address provided does not contain a prefix.
+    // This means we need to strip this out before returning the string representation
+    fn sanitize_ip_addr(ip: &IpNetwork) -> String {
+        let ip_binding = ip.to_string();
+        match ip.is_ipv4() {
+            true => match ip.prefix() {
+                32 => ip.network().to_string(),
+                _ => ip_binding,
+            },
+            false => match ip.prefix() {
+                128 => ip.network().to_string(),
+                _ => ip_binding,
+            },
+        }
     }
 
     /// Returns a reference to the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
-        self.rrdata.as_ref().unwrap()
+        self.rrdata.as_ref().expect("Missing IpNetwork")
     }
 }
 
@@ -574,7 +592,9 @@ impl From<Mechanism<IpNetwork>> for Mechanism<String> {
         Mechanism::generic_inclusive(
             *value.kind(),
             value.qualifier,
-            Some(value.rr_data().expect("Not IpNetwork").to_string()),
+            Some(Mechanism::sanitize_ip_addr(
+                value.rr_data().as_ref().expect("Not IpNetwork"),
+            )),
         )
     }
 }
