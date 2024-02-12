@@ -20,9 +20,13 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Spf<T> {
-    source: String,
+    source: T,
+    version: T,
+    redirect_idx: u8,
+    all_idx: u8,
     mechanisms: Vec<Mechanism<T>>,
 }
 
@@ -32,18 +36,14 @@ where
     T: Debug,
     T: Display,
 {
-    fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
-    }
 }
 
-impl<T> Display for Spf<T> {
+impl Display for Spf<String> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.source)
     }
 }
+
 impl FromStr for Spf<String> {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -52,47 +52,76 @@ impl FromStr for Spf<String> {
         validate::check_whitespaces(s)?;
 
         let mut redirect_idx = 0;
+        let mut redirect = false;
         let mut all_idx = 0;
         let mut idx = 0;
         let mut spf = Spf::default();
         let mechanisms = s.split_whitespace();
         for m in mechanisms {
-            if m.contains("v=spf1") || m.starts_with("spf2.0") {
-            } else if m.contains("redirect=") {
-                spf.mechanisms.push(m.parse()?);
-                redirect_idx = idx;
-            } else if m.contains("include:") {
-                spf.mechanisms.push(m.parse()?);
-            } else if m.ends_with("all") && (m.len() == 3 || m.len() == 4) {
-                spf.mechanisms
-                    .push(Mechanism::all(core::return_and_remove_qualifier(m, 'a').0));
-                all_idx = idx;
+            if m.contains("v=spf1") {
+                spf.version = m.to_string();
             } else if m.contains("ip4:") || m.contains("ip6:") {
-                let m_ip: Mechanism<IpNetwork> = m.parse()?;
-                let m_str: Mechanism<String> = m_ip.into();
-                spf.mechanisms.push(m_str);
-            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::A) {
-                spf.mechanisms.push(m);
-            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::MX) {
-                spf.mechanisms.push(m);
-            } else if let Ok(m) = core::spf_regex::capture_matches(m, Kind::Ptr) {
-                spf.mechanisms.push(m);
+                let m_ip = m.parse::<Mechanism<IpNetwork>>()?;
+                spf.mechanisms.push(m_ip.into());
             } else {
-                return Err(SpfError::InvalidMechanism(
-                    MechanismError::InvalidMechanismFormat(m.to_string()),
-                ));
+                let m_str = m.parse::<Mechanism<String>>()?;
+                match *m_str.kind() {
+                    Kind::Redirect => {
+                        if !redirect {
+                            redirect = true;
+                            redirect_idx = idx;
+                        } else {
+                            return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
+                        }
+                    }
+                    Kind::All => all_idx = idx,
+                    _ => {}
+                }
+                spf.mechanisms.push(m_str);
+                idx = idx + 1;
             }
-            idx = idx + 1;
         }
-        if (redirect_idx != 0) && (all_idx > redirect_idx) {
-            return Err(SpfError::RedirectWithAllMechanism);
-        }
-        if redirect_idx != idx {
-            // Todo: Redirect should be the last item in the Spf Record
-            todo!()
+        if redirect {
+            if all_idx > redirect_idx {
+                return Err(SpfError::RedirectWithAllMechanism);
+            }
+            if redirect_idx != idx - 1 {
+                return Err(SpfError::RedirectNotFinalMechanism(redirect_idx));
+            }
         }
         spf.source = s.to_string();
+        spf.redirect_idx = redirect_idx;
+        spf.all_idx = all_idx;
         Ok(spf)
+    }
+}
+
+impl TryFrom<&str> for Spf<String> {
+    type Error = SpfError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Spf::from_str(s)
+    }
+}
+impl Spf<String> {
+    /// Creates a Spf<String> from the passed str reference.
+    /// This is basically a rapper around FromStr which has been implemented for Spf<String>
+    #[allow(dead_code)]
+    pub fn new(s: &str) -> Result<Self, SpfError> {
+        s.parse::<Spf<String>>()
+    }
+
+    /// Access the version of the Spf String
+    pub fn version(&self) -> &str {
+        self.version.as_ref()
+    }
+    /// Check that version is v1
+    pub fn is_v1(&self) -> bool {
+        self.version.contains("v=spf1")
+    }
+    #[allow(dead_code)]
+    fn validate(&self) {
+        todo!()
     }
 }
 
@@ -119,8 +148,8 @@ pub struct SpfBuilder {
     is_valid: bool,
 }
 
-impl std::fmt::Display for SpfBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for SpfBuilder {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_spf_string())
     }
 }
