@@ -336,7 +336,7 @@ mod create {
                 let ip4 = Mechanism::ip_from_string(&string);
                 let unwrapped = ip4.unwrap();
                 assert_eq!(unwrapped.is_pass(), true);
-                assert_eq!(unwrapped.to_string(), string);
+                assert_eq!(unwrapped.to_string(), "ip4:203.32.160.10");
             }
         }
         mod invalid {
