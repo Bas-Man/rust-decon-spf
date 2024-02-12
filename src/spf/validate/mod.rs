@@ -1,7 +1,5 @@
 #[cfg(test)]
 mod tests;
-#[cfg(feature = "warn-dns")]
-mod warn;
 
 use crate::core::{self, spf_check_whitespace};
 use crate::spf::{SpfBuilder, SpfError};
