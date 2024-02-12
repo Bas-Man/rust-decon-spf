@@ -1,4 +1,5 @@
 use crate::mechanism::MechanismError;
+use crate::Kind;
 use ipnetwork::IpNetworkError;
 
 /// A list of expected and possible errors for SPF records.
@@ -18,6 +19,10 @@ pub enum SpfError {
     InvalidSPF,
     /// Redirect with `All` Mechanism
     RedirectWithAllMechanism,
+    /// Redirect Not Final Mechanism
+    RedirectNotFinalMechanism(u8),
+    /// Modifiers May only occur once in any Spf Record
+    ModifierMayOccurOnlyOnce(Kind),
     /// Network Address is not valid
     InvalidIPAddr(IpNetworkError),
     /// SpfError for an invalid Mechanism
@@ -43,6 +48,8 @@ impl std::fmt::Display for SpfError {
             SpfError::RedirectWithAllMechanism => {
                 write!(f, "Redirect with unexpected 'All' Mechanism")
             }
+            SpfError::RedirectNotFinalMechanism(err) => write!(f, "Redirect not last mechanism. Found at idx: {}", err),
+            SpfError::ModifierMayOccurOnlyOnce(kind) => write!(f, "Mechanism: {} occurred more than once.", kind),
             SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
             SpfError::InvalidMechanism(err) => write!(f, "{}", err),
             SpfError::DeprecatedPtrPresent => write!(
