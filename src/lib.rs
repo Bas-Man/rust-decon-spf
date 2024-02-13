@@ -33,4 +33,4 @@ mod mechanism;
 mod spf;
 
 pub use crate::mechanism::{Kind, Mechanism, MechanismError, ParsedMechanism, Qualifier};
-pub use crate::spf::{SpfBuilder, SpfError};
+pub use crate::spf::{Spf, SpfBuilder, SpfError};

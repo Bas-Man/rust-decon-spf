@@ -30,16 +30,17 @@ path = "src/lib.rs"
 [[example]]
 name = "trust-dns-demo"
 path = "examples/trust-dns-demo.rs"
+required-features = ["builder"]
 
 [[example]]
 name = "build-spf"
 path = "examples/build-spf.rs"
-required-features = ["spf2"]
+required-features = ["builder", "spf2"]
 
 [[example]]
 name = "build-spf-strict"
 path = "examples/build-spf-strict.rs"
-required-features = ["strict-dns", "spf2"]
+required-features = ["builder", "strict-dns", "spf2"]
 
 [[example]]
 name = "serde-demo"
@@ -59,6 +60,7 @@ serde_json = { version = "1.0.113" }
 
 [features]
 default = ["ptr"]
+builder = []
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
 spf2 = []

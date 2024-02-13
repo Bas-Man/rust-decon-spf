@@ -1,5 +1,8 @@
 use crate::spf::Spf;
 
+#[cfg(feature = "serde")]
+mod serde;
+
 mod default_checks {
     use super::*;
     use crate::SpfError;
