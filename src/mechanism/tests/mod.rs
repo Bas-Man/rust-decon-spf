@@ -330,6 +330,7 @@ mod create {
         use crate::mechanism::MechanismError;
         mod valid {
             use super::*;
+            use std::convert::TryInto;
             #[test]
             fn from_string() {
                 let string = String::from("ip4:203.32.160.10/32");
@@ -337,6 +338,16 @@ mod create {
                 let unwrapped = ip4.unwrap();
                 assert_eq!(unwrapped.is_pass(), true);
                 assert_eq!(unwrapped.to_string(), "ip4:203.32.160.10");
+            }
+            #[test]
+            fn string_into_ip() {
+                let string = String::from("ip4:203.32.160.10/32");
+                let ip4 = Mechanism::ip_from_string(&string).unwrap();
+                let ip_str: Mechanism<String> = ip4.into();
+                let ip_from = ip_str.try_into().unwrap();
+                assert_eq!(ip4, ip_from);
+                assert_eq!(ip4.is_pass(), true);
+                assert_eq!(ip4.to_string(), "ip4:203.32.160.10");
             }
         }
         mod invalid {

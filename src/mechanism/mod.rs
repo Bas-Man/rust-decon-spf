@@ -34,6 +34,7 @@ use serde::{Deserialize, Serialize};
 
 /// Stores its [`Kind`], [`Qualifier`], and its `Value`
 #[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
     kind: Kind,
