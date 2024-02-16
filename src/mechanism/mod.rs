@@ -153,6 +153,19 @@ impl TryFrom<&str> for Mechanism<String> {
     }
 }
 
+impl TryFrom<Mechanism<String>> for Mechanism<IpNetwork> {
+    type Error = MechanismError;
+    fn try_from(value: Mechanism<String>) -> Result<Self, Self::Error> {
+        match value.kind {
+            Kind::IpV4 | Kind::IpV6 => Ok(Mechanism::ip(
+                value.qualifier,
+                value.rrdata.expect("Missing RRData").parse::<IpNetwork>()?,
+            )),
+            _ => Err(MechanismError::InvalidMechanismFormat(value.to_string())),
+        }
+    }
+}
+
 /// Create a `Mechanism<IpNetwork>` from the provided string.
 ///
 /// # Examples:
