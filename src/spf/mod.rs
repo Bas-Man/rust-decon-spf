@@ -8,6 +8,7 @@ mod tests;
 mod validate;
 
 use crate::core;
+use crate::mechanism::Kind;
 pub use crate::mechanism::Mechanism;
 use crate::mechanism::{Kind, MechanismError};
 pub use crate::spf::errors::SpfError;
@@ -106,6 +107,8 @@ impl TryFrom<&str> for Spf<String> {
 impl Spf<String> {
     /// Creates a Spf<String> from the passed str reference.
     /// This is basically a rapper around FromStr which has been implemented for Spf<String>
+    /// Creates a `Spf<String>` from the passed str reference.
+    /// This is basically a rapper around FromStr which has been implemented for `Spf<String>`
     #[allow(dead_code)]
     pub fn new(s: &str) -> Result<Self, SpfError> {
         s.parse::<Spf<String>>()
@@ -118,6 +121,36 @@ impl Spf<String> {
     /// Check that version is v1
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
+    }
+    pub fn redirect(&self) -> Option<&Mechanism<String>> {
+        if self.redirect_idx == 0 {
+            return match self
+                .mechanisms
+                .first()
+                .expect("There should be a Mechanism<>")
+                .kind()
+            {
+                Kind::Redirect => return self.mechanisms.first(),
+                _ => None,
+            };
+        } else {
+            Some(&self.mechanisms[self.redirect_idx as usize])
+        }
+    }
+    pub fn all(&self) -> Option<&Mechanism<String>> {
+        if self.all_idx == 0 {
+            return match self
+                .mechanisms
+                .first()
+                .expect("There should be a Mechanism<>")
+                .kind()
+            {
+                Kind::All => return self.mechanisms.first(),
+                _ => None,
+            };
+        } else {
+            Some(&self.mechanisms[self.all_idx as usize])
+        }
     }
     #[allow(dead_code)]
     fn validate(&self) {
