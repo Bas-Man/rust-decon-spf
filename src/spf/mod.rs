@@ -181,6 +181,16 @@ pub struct SpfBuilder {
     is_valid: bool,
 }
 
+impl From<Spf<String>> for SpfBuilder {
+    fn from(source: Spf<String>) -> Self {
+        let mut new_spf = SpfBuilder::new();
+        new_spf.version = source.version;
+        for m in source.mechanisms.into_iter() {
+            new_spf.append_mechanism(m);
+        }
+        new_spf
+    }
+}
 impl Display for SpfBuilder {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_spf_string())

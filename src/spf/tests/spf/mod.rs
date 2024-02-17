@@ -182,3 +182,22 @@ mod redirect {
         }
     }
 }
+
+#[cfg(feature = "builder")]
+mod spf_to_spf_builder {
+    use crate::{Mechanism, Qualifier, Spf, SpfBuilder};
+
+    #[test]
+    fn basic() {
+        let input = "v=spf1 a -all";
+        let spf: Spf<String> = input.parse().unwrap();
+        let builder_from: SpfBuilder = spf.into();
+
+        let mut builder_hand = SpfBuilder::new();
+        builder_hand.set_v1(); // Needed for testing
+        builder_hand.append_mechanism(Mechanism::a(Qualifier::Pass));
+        builder_hand.append_mechanism(Mechanism::all(Qualifier::Fail));
+
+        assert_eq!(builder_hand, builder_from);
+    }
+}
