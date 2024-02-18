@@ -26,8 +26,8 @@ use serde::{Deserialize, Serialize};
 pub struct Spf<T> {
     source: T,
     version: T,
-    redirect_idx: u8,
-    all_idx: u8,
+    redirect_idx: usize,
+    all_idx: usize,
     mechanisms: Vec<Mechanism<T>>,
 }
 
@@ -52,7 +52,7 @@ impl FromStr for Spf<String> {
         validate::check_spf_length(s)?;
         validate::check_whitespaces(s)?;
 
-        let mut redirect_idx = 0;
+        let mut redirect_idx: usize = 0;
         let mut redirect = false;
         let mut all_idx = 0;
         let mut idx = 0;
@@ -87,7 +87,7 @@ impl FromStr for Spf<String> {
                 return Err(SpfError::RedirectWithAllMechanism);
             }
             if redirect_idx != idx - 1 {
-                return Err(SpfError::RedirectNotFinalMechanism(redirect_idx));
+                return Err(SpfError::RedirectNotFinalMechanism(redirect_idx as u8));
             }
         }
         spf.source = s.to_string();
@@ -134,7 +134,7 @@ impl Spf<String> {
                 _ => None,
             };
         } else {
-            Some(&self.mechanisms[self.redirect_idx as usize])
+            Some(&self.mechanisms[self.redirect_idx])
         }
     }
     pub fn all(&self) -> Option<&Mechanism<String>> {
@@ -149,7 +149,7 @@ impl Spf<String> {
                 _ => None,
             };
         } else {
-            Some(&self.mechanisms[self.all_idx as usize])
+            Some(&self.mechanisms[self.all_idx])
         }
     }
     #[allow(dead_code)]
