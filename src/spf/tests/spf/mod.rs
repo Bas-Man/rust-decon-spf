@@ -201,3 +201,20 @@ mod spf_to_spf_builder {
         assert_eq!(builder_hand, builder_from);
     }
 }
+
+mod iter {
+    use super::*;
+
+    #[test]
+    fn basic() {
+        let input = "v=spf1 a mx -all";
+        let spf: Spf<String> = input.parse().unwrap();
+        let m_list = vec!["a", "mx", "-all"];
+        assert_eq!(spf.version(), "v=spf1");
+        let mut idx: usize = 0;
+        for m in spf.iter() {
+            assert_eq!(m.to_string(), m_list[idx]);
+            idx = idx + 1;
+        }
+    }
+}
