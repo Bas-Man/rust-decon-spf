@@ -33,7 +33,6 @@ use std::{convert::TryFrom, str::FromStr};
 use serde::{Deserialize, Serialize};
 
 /// Stores its [`Kind`], [`Qualifier`], and its `Value`
-#[derive(Default, Debug, Clone, PartialEq)]
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
@@ -439,7 +438,10 @@ impl Mechanism<String> {
         if self.rrdata.is_none() {
             self.kind().to_string()
         } else {
-            self.rrdata.as_ref().unwrap().to_string()
+            self.rrdata
+                .as_ref()
+                .expect("This should not be None.")
+                .to_string()
         }
     }
 
