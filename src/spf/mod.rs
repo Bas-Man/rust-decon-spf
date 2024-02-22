@@ -7,11 +7,10 @@ mod errors;
 mod tests;
 mod validate;
 
-use crate::core;
 use crate::mechanism::Kind;
 pub use crate::mechanism::Mechanism;
-use crate::mechanism::{Kind, MechanismError};
 pub use crate::spf::errors::SpfError;
+use crate::{core, MechanismError};
 use ipnetwork::IpNetwork;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
