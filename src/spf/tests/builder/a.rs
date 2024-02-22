@@ -3,6 +3,7 @@ use crate::{Mechanism, Qualifier};
 
 mod valid {
     use super::*;
+
     #[test]
     fn default() {
         let mut spf: SpfBuilder = SpfBuilder::new();
@@ -51,8 +52,8 @@ mod valid {
         assert_eq!(new_spf.mechanisms[0].to_string(), "?a:example.com");
         assert_eq!(new_spf.mechanisms[1].to_string(), "~all");
         assert_eq!(new_spf.mechanisms.len(), 2);
-        dbg!(&new_spf);
     }
+
     #[test]
     fn mechanism_domain_cidr() {
         let mut spf: SpfBuilder = SpfBuilder::new();
