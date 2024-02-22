@@ -43,10 +43,10 @@ impl<'a, T> Iterator for SpfIterator<'a, T> {
 }
 
 impl<T> Spf<T>
-where
-    T: Default,
-    T: Debug,
-    T: Display,
+    where
+        T: Default,
+        T: Debug,
+        T: Display,
 {
     pub fn version(&self) -> &T {
         &self.version
@@ -70,7 +70,16 @@ impl<T> IntoIterator for Spf<T> {
 
 impl Display for Spf<String> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.source)
+        if !&self.source.is_empty() {
+            write!(f, "{}", self.source)
+        } else {
+            let mut spf_string = String::new();
+            spf_string.push_str(self.version.as_str());
+            for m in self.iter() {
+                spf_string.push_str(format!(" {}", m.to_string()).as_str());
+            }
+            write!(f, "{}", spf_string)
+        }
     }
 }
 
