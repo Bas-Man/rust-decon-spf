@@ -29,9 +29,11 @@ pub struct Spf<T> {
     all_idx: usize,
     mechanisms: Vec<Mechanism<T>>,
 }
+
 pub struct SpfIterator<'a, T> {
     mechanism_iter: std::slice::Iter<'a, Mechanism<T>>,
 }
+
 impl<'a, T> Iterator for SpfIterator<'a, T> {
     type Item = &'a Mechanism<T>; // Change the Item type to Mechanism<T>
 
@@ -131,6 +133,7 @@ impl TryFrom<&str> for Spf<String> {
         Spf::from_str(s)
     }
 }
+
 impl Spf<String> {
     /// Creates a Spf<String> from the passed str reference.
     /// This is basically a rapper around FromStr which has been implemented for Spf<String>
