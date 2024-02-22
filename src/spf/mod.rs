@@ -225,6 +225,107 @@ impl Display for SpfBuilder {
     }
 }
 
+/// Creates an `Spf Struct` by parsing a string representation of Spf.
+///
+/// # Examples:
+///
+///```rust
+/// use decon_spf::SpfBuilder;
+/// use decon_spf::SpfError;
+/// // Successful
+/// let input = "v=spf1 a mx -all";
+/// let spf: SpfBuilder = input.parse().unwrap();
+/// assert_eq!(spf.to_string(), input);
+///
+/// // Additional Space between `A` and `MX`
+/// let invalid_input = "v=spf1 a   mx -all";
+/// let err: SpfError =invalid_input.parse::<SpfBuilder>().unwrap_err();
+/// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
+/// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
+///```
+///
+impl FromStr for SpfBuilder {
+    type Err = SpfError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        validate::check_start_of_spf(s)?;
+        validate::check_spf_length(s)?;
+        validate::check_whitespaces(s)?;
+        let source = String::from(s);
+
+        // Basic Checks are ok.
+        let mut spf = SpfBuilder::new();
+        // Setup Vectors
+        let records = source.split_whitespace();
+        let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
+        let mut vec_of_ip6: Vec<Mechanism<IpNetwork>> = Vec::new();
+        let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
+        let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+
+        for record in records {
+            // Consider ensuring we do this once at least and then skip
+            if record.contains("v=spf1") || record.starts_with("spf2.0") {
+                spf.version = record.to_string();
+            } else if record.contains("redirect=") {
+                let m: Mechanism<String> = record.parse()?;
+                spf.redirect = Some(m);
+                spf.is_redirected = true;
+            } else if record.contains("include:") {
+                let m: Mechanism<String> = record.parse()?;
+                vec_of_includes.push(m);
+            } else if record.contains("ip4:") || record.contains("ip6:") {
+                let m = record.parse::<Mechanism<IpNetwork>>()?;
+                match m.kind() {
+                    Kind::IpV4 => vec_of_ip4.push(m),
+                    Kind::IpV6 => vec_of_ip6.push(m),
+                    _ => unreachable!(),
+                }
+            } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
+                spf.all = Some(Mechanism::all(
+                    core::return_and_remove_qualifier(record, 'a').0,
+                ));
+                // Handle A, MX, Exists and PTR types.
+            } else if let Ok(a_mechanism) = core::spf_regex::capture_matches(record, Kind::A) {
+                vec_of_a.push(a_mechanism);
+            } else if let Ok(mx_mechanism) = core::spf_regex::capture_matches(record, Kind::MX) {
+                vec_of_mx.push(mx_mechanism);
+            } else if let Ok(ptr_mechanism) = core::spf_regex::capture_matches(record, Kind::Ptr) {
+                spf.ptr = Some(ptr_mechanism);
+            } else if let Ok(exists_mechanism) =
+                core::spf_regex::capture_matches(record, Kind::Exists)
+            {
+                vec_of_exists.push(exists_mechanism);
+            } else {
+                return Err(SpfError::InvalidMechanism(
+                    MechanismError::InvalidMechanismFormat(record.to_string()),
+                ));
+            }
+        }
+        // Move vec_of_* into the SPF struct
+        if !vec_of_includes.is_empty() {
+            spf.include = Some(vec_of_includes);
+        };
+        if !vec_of_ip4.is_empty() {
+            spf.ip4 = Some(vec_of_ip4);
+        };
+        if !vec_of_ip6.is_empty() {
+            spf.ip6 = Some(vec_of_ip6);
+        };
+        if !vec_of_a.is_empty() {
+            spf.a = Some(vec_of_a);
+        }
+        if !vec_of_mx.is_empty() {
+            spf.mx = Some(vec_of_mx);
+        }
+        if !vec_of_exists.is_empty() {
+            spf.exists = Some(vec_of_exists);
+        }
+
+        Ok(spf)
+    }
+}
+
 impl SpfBuilder {
     /// Create a new empty Spf struct.
     pub fn new() -> Self {
