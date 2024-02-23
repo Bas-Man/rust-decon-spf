@@ -76,7 +76,7 @@ impl Display for Spf<String> {
             let mut spf_string = String::new();
             spf_string.push_str(self.version.as_str());
             for m in self.iter() {
-                spf_string.push_str(format!(" {}", m.to_string()).as_str());
+                spf_string.push_str(format!(" {}", m).as_str());
             }
             write!(f, "{}", spf_string)
         }
@@ -117,7 +117,7 @@ impl FromStr for Spf<String> {
                     _ => {}
                 }
                 spf.mechanisms.push(m_str);
-                idx = idx + 1;
+                idx += 1;
             }
         }
         if redirect {
@@ -652,22 +652,22 @@ impl SpfBuilder {
         let mut count: usize = 0;
         {
             if let Some(a) = &self.a {
-                count = count + a.len();
+                count += a.len();
             }
             if let Some(mx) = &self.mx {
-                count = count + mx.len();
+                count += mx.len();
             }
-            if let Some(_) = &self.redirect {
-                count = count + 1;
+            if self.redirect.is_some() {
+                count += 1;
             }
             if let Some(exists) = &self.exists {
-                count = count + exists.len();
+                count += exists.len();
             }
-            if let Some(_) = &self.ptr {
-                count = count + 1;
+            if self.ptr.is_some() {
+                count += 1;
             }
             if let Some(include) = &self.include {
-                count = count + include.len();
+                count += include.len();
             }
         }
         count

@@ -45,7 +45,7 @@ pub(crate) fn capture_matches(
     let mut mechanism_string: String;
     let mechanism;
     match caps {
-        None => return Err(MechanismError::InvalidMechanismFormat(string.to_string())),
+        None => Err(MechanismError::InvalidMechanismFormat(string.to_string())),
         Some(caps) => {
             // There was a match
             if let Some(qualifier) = caps.name("qualifier") {
@@ -64,7 +64,7 @@ pub(crate) fn capture_matches(
                     match num {
                         Ok(_) => new_mechanism.push_str(&format!("/{}", mechanism_string.as_str())),
                         Err(_) => {
-                            return Err(MechanismError::InvalidMechanismFormat(string.to_string()))
+                            return Err(MechanismError::InvalidMechanismFormat(string.to_string()));
                         }
                     }
                 }
@@ -80,7 +80,7 @@ pub(crate) fn capture_matches(
                 mechanism = Mechanism::generic_inclusive(kind, qualifier_result, None);
             }
             if mechanism.kind().is_exists() && mechanism.raw().contains('/') {
-                return Err(MechanismError::InvalidMechanismFormat(string.to_string()));
+                Err(MechanismError::InvalidMechanismFormat(string.to_string()))
             } else {
                 Ok(mechanism)
             }
@@ -100,6 +100,7 @@ mod a {
         assert_eq!(mechanism.raw(), "a");
         assert_eq!(mechanism.to_string(), "a");
     }
+
     #[test]
     fn test_match_on_a_colon() {
         let string = "-a:example.com";
@@ -108,6 +109,7 @@ mod a {
         assert_eq!(mechanism.raw(), "example.com");
         assert_eq!(mechanism.to_string(), "-a:example.com");
     }
+
     #[test]
     fn test_match_on_a_slash() {
         let string = "~a/24";
@@ -116,6 +118,7 @@ mod a {
         assert_eq!(mechanism.raw(), "/24");
         assert_eq!(mechanism.to_string(), "~a/24");
     }
+
     #[test]
     fn test_match_on_a_colon_slash() {
         let string = "+a:example.com/24";
@@ -124,6 +127,7 @@ mod a {
         assert_eq!(mechanism.raw(), "example.com/24");
         assert_eq!(mechanism.to_string(), "a:example.com/24");
     }
+
     #[cfg(test)]
     mod invalid {
         use crate::mechanism::{Kind, MechanismError};
@@ -135,18 +139,21 @@ mod a {
             let m = crate::core::spf_regex::capture_matches(&input, Kind::A).unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn a_slash_only() {
             let input = "a/";
             let m = crate::core::spf_regex::capture_matches(&input, Kind::A).unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn a_slash_colon() {
             let input = "a/:";
             let m = input.parse::<Mechanism<String>>().unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn a_colon_slash_() {
             let input = "a:/";
@@ -155,6 +162,7 @@ mod a {
         }
     }
 }
+
 #[cfg(test)]
 mod exists {
     use crate::mechanism::{Kind, MechanismError};
@@ -167,8 +175,10 @@ mod exists {
         assert_eq!(mechanism.raw(), "a.example.com");
         assert_eq!(mechanism.to_string(), "exists:a.example.com");
     }
+
     mod invalid {
         use super::*;
+
         #[test]
         fn basic_with_slash_error() {
             let string = "exists:a.example.com/";
@@ -192,6 +202,7 @@ mod exists {
         }
     }
 }
+
 #[cfg(test)]
 mod mx {
     use crate::mechanism::Kind;
@@ -204,6 +215,7 @@ mod mx {
         assert_eq!(mechanism.raw(), "mx");
         assert_eq!(mechanism.to_string(), "mx");
     }
+
     #[test]
     fn match_on_mx_colon() {
         let string = "-mx:example.com";
@@ -212,6 +224,7 @@ mod mx {
         assert_eq!(mechanism.raw(), "example.com");
         assert_eq!(mechanism.to_string(), "-mx:example.com");
     }
+
     #[test]
     fn match_on_mx_slash() {
         let string = "~mx/24";
@@ -220,6 +233,7 @@ mod mx {
         assert_eq!(mechanism.raw(), "/24");
         assert_eq!(mechanism.to_string(), "~mx/24");
     }
+
     #[test]
     fn match_on_mx_colon_slash() {
         let string = "+mx:example.com/24";
@@ -228,6 +242,7 @@ mod mx {
         assert_eq!(mechanism.raw(), "example.com/24");
         assert_eq!(mechanism.to_string(), "mx:example.com/24");
     }
+
     mod invalid {
         use crate::mechanism::{Kind, Mechanism, MechanismError};
 
@@ -237,18 +252,21 @@ mod mx {
             let m = crate::core::spf_regex::capture_matches(&input, Kind::A).unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn mx_slash_only() {
             let input = "mx/";
             let m = crate::core::spf_regex::capture_matches(&input, Kind::A).unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn mx_slash_colon() {
             let input = "mx/:";
             let m = input.parse::<Mechanism<String>>().unwrap_err();
             assert_eq!(m, MechanismError::InvalidMechanismFormat(input.to_string()));
         }
+
         #[test]
         fn mx_colon_slash_() {
             let input = "mx:/";
@@ -257,9 +275,9 @@ mod mx {
         }
     }
 }
+
 #[cfg(test)]
 mod ptr {
-
     use crate::mechanism::{Kind, MechanismError};
 
     #[test]
@@ -270,6 +288,7 @@ mod ptr {
         assert_eq!(mechanism.raw(), "ptr");
         assert_eq!(mechanism.to_string(), "ptr");
     }
+
     #[test]
     fn match_on_ptr_colon() {
         let string = "ptr:example.com";
@@ -278,8 +297,10 @@ mod ptr {
         assert_eq!(mechanism.is_pass(), true);
         assert_eq!(mechanism.raw(), "example.com");
     }
+
     mod invalid {
         use super::*;
+
         #[test]
         fn match_on_ptr_colon_with_slash_error() {
             let string = "ptr:example.com/";

@@ -53,6 +53,7 @@ impl FromStr for ParsedMechanism {
         }
     }
 }
+
 impl TryFrom<&str> for ParsedMechanism {
     type Error = MechanismError;
 
@@ -60,6 +61,7 @@ impl TryFrom<&str> for ParsedMechanism {
         ParsedMechanism::from_str(s)
     }
 }
+
 impl ParsedMechanism {
     /// Provides another way to parse `Spf Mechanisms`
     /// # Example:
@@ -107,7 +109,7 @@ impl ParsedMechanism {
     ///```
     pub fn network(&self) -> Mechanism<IpNetwork> {
         match *self {
-            ParsedMechanism::IP(ref m) => m.clone(),
+            ParsedMechanism::IP(ref m) => *m,
             // This needs to be changed to return an Err when called on txt
             ParsedMechanism::TXT(_) => unreachable!(),
         }

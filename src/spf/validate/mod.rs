@@ -4,6 +4,7 @@ mod tests;
 
 use crate::core::{self, spf_check_whitespace};
 use crate::spf::{SpfBuilder, SpfError};
+
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
@@ -40,6 +41,7 @@ pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
         Err(SpfError::InvalidSource)
     }
 }
+
 #[test]
 fn valid_versions() {
     let input = vec![
@@ -63,6 +65,7 @@ pub(crate) fn check_whitespaces(spf_string: &str) -> Result<(), SpfError> {
     };
     Ok(())
 }
+
 /// Checks that the string length does not exceed SPF Max Length.
 ///
 /// Returns [`SourceLengthExceeded`](SpfError::SourceLengthExceeded) on Error.
@@ -72,14 +75,16 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
     };
     Ok(())
 }
+
 #[cfg(feature = "ptr")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
-    if let Some(_) = &spf.ptr {
+    if spf.ptr.is_some() {
         Err(SpfError::DeprecatedPtrPresent)
     } else {
         Ok(())
     }
 }
+
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
 pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
@@ -88,6 +93,7 @@ pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
     }
     Ok(())
 }
+
 pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     let mut lookup_count: usize = 0;
 
