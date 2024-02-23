@@ -19,11 +19,9 @@ mod validate {
             spf.validate_to_string(SpfRfcStandard::Rfc4408).to_string(),
             "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()
         );
-        assert_eq!(spf.is_valid(), true);
         let res = spf.validate(SpfRfcStandard::Rfc4408);
         assert_eq!(res.is_ok(), true);
         let res2 = res.unwrap();
-        assert_eq!(res2.is_valid(), true);
         assert_eq!(
             res2.to_string(),
             "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()

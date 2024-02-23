@@ -178,9 +178,9 @@ mod build {
     fn make_v1_a_mx_all() {
         let mut spf = SpfBuilder::new();
         spf.set_v1();
-        spf.append_mechanism(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism(Mechanism::mx(Qualifier::Pass));
-        spf.append_mechanism(Mechanism::all(Qualifier::Fail));
+        spf.append_string_mechanism(Mechanism::a(Qualifier::Pass));
+        spf.append_string_mechanism(Mechanism::mx(Qualifier::Pass));
+        spf.append_string_mechanism(Mechanism::all(Qualifier::Fail));
         assert_eq!(spf.to_string(), "v=spf1 a mx -all".to_string());
     }
 

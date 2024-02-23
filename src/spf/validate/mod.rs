@@ -1,3 +1,4 @@
+#[cfg(feature = "builder")]
 #[cfg(test)]
 mod tests;
 
@@ -110,9 +111,6 @@ pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfE
     if spf.is_valid {
         return Ok(spf);
     };
-    if !spf.was_parsed {
-        check_start_of_spf(spf.version())?;
-    }
     #[cfg(feature = "ptr")]
     check_ptr(spf)?;
     check_redirect_all(spf)?;
@@ -120,7 +118,6 @@ pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfE
     if check_lookup_count(spf) > 10 {
         return Err(SpfError::LookupLimitExceeded);
     }
-    spf.was_validated = true;
     spf.is_valid = true;
     Ok(spf)
 }

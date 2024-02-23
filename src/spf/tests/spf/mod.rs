@@ -13,14 +13,17 @@ mod default_checks {
         let err = "v=spf1 a  -all".parse::<Spf<String>>().unwrap_err();
         assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
     }
+
     #[test]
     fn space_at_end() {
         let err = "v=spf1 a -all ".parse::<Spf<String>>().unwrap_err();
         assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
     }
 }
+
 mod a {
     use super::*;
+
     mod not_strict {
         use super::*;
 
@@ -52,29 +55,32 @@ mod a {
             assert_eq!(spf.mechanisms[0].raw(), "example.xx".to_string());
             assert_eq!(spf.mechanisms.len(), 2);
         }
-    }
 
-    #[cfg(feature = "strict-dns")]
-    mod strict {
-        use super::*;
-        use crate::{MechanismError, SpfError};
-
-        mod invalid {
+        #[cfg(feature = "strict-dns")]
+        mod strict {
             use super::*;
-            #[test]
-            fn checked_domain() {
-                let input = "v=spf1 a:example.xx -all";
-                let spf = input.parse::<Spf<String>>().unwrap_err();
-                assert_eq!(
-                    spf,
-                    SpfError::InvalidMechanism(MechanismError::InvalidDomainHost(
-                        "example.xx".to_string()
-                    ))
-                );
+            use crate::{MechanismError, SpfError};
+
+            mod invalid {
+                use super::*;
+
+                #[test]
+                fn checked_domain() {
+                    let input = "v=spf1 a:example.xx -all";
+                    let spf = input.parse::<Spf<String>>().unwrap_err();
+                    assert_eq!(
+                        spf,
+                        SpfError::InvalidMechanism(MechanismError::InvalidDomainHost(
+                            "example.xx".to_string()
+                        ))
+                    );
+                }
             }
         }
+
         mod valid {
             use super::*;
+
             #[test]
             fn valid_domain() {
                 let input = "v=spf1 a:example.com -all";
@@ -86,17 +92,57 @@ mod a {
             }
         }
     }
+
+    mod invalid {
+        use super::*;
+        use crate::MechanismError;
+        use crate::SpfError;
+
+        #[test]
+        fn invalid_with_colon_only() {
+            let input = "v=spf1 a: -all";
+            let err_mechanism = "a:";
+
+            let err = input.parse::<Spf<String>>().unwrap_err();
+            assert_eq!(
+                err,
+                SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
+                    err_mechanism.to_string()
+                ))
+            )
+        }
+
+        #[test]
+        fn invalid_with_slash_only() {
+            let input = "v=spf1 a/ -all";
+            let err_mechanism = "a/";
+
+            let err = input.parse::<Spf<String>>().unwrap_err();
+            assert_eq!(
+                err,
+                SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
+                    err_mechanism.to_string()
+                ))
+            )
+        }
+    }
 }
+
 mod mx {
     mod not_strict {}
+
     mod strict {}
 }
+
 mod ip {
     use super::*;
+
     mod ip4 {
         use super::*;
+
         mod valid {
             use super::*;
+
             #[test]
             fn basic() {
                 let input = "v=spf1 ip4:203.32.160.10 -all";
@@ -105,6 +151,7 @@ mod ip {
                 dbg!(&spf);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
+
             #[test]
             fn basic_strip_prefix_32() {
                 let input = "v=spf1 ip4:203.32.160.10/32 -all";
@@ -113,6 +160,7 @@ mod ip {
                 dbg!(&spf);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
+
             #[test]
             fn with_prefix() {
                 let input = "v=spf1 ip4:203.32.160.10/27 -all";
@@ -122,11 +170,13 @@ mod ip {
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10/27");
             }
         }
+
         mod invalid {
             use super::*;
             use crate::MechanismError::InvalidIPNetwork;
             use crate::SpfError;
             use ipnetwork::IpNetwork;
+
             #[test]
             fn basic() {
                 let input = "v=spf1 ip4:203.32.160.10/34 -all";
@@ -140,14 +190,17 @@ mod ip {
             }
         }
     }
+
     mod ip6 {}
 }
+
 mod redirect {
     use super::*;
 
     mod valid {
         use super::*;
         use crate::Kind;
+
         #[test]
         fn redirect_final() {
             let input = "v=spf1 mx redirect=_spf.example.com";
@@ -157,6 +210,7 @@ mod redirect {
             assert_eq!(spf.redirect_idx, 1);
             assert_eq!(spf.mechanisms.len(), 2);
         }
+
         #[test]
         fn redirect_final_2() {
             let input = "v=spf1 a mx redirect=_spf.example.com";
@@ -164,6 +218,7 @@ mod redirect {
             assert_eq!(spf.mechanisms[2].kind(), &Kind::Redirect);
         }
     }
+
     mod invalid {
         use super::*;
         use crate::{Kind, SpfError};
@@ -174,6 +229,7 @@ mod redirect {
             let spf: SpfError = input.parse::<Spf<String>>().unwrap_err();
             assert_eq!(spf, SpfError::RedirectNotFinalMechanism(0));
         }
+
         #[test]
         fn redirect_x2() {
             let input = "v=spf1 redirect=example.com redirect=test.com";
@@ -195,8 +251,8 @@ mod spf_to_spf_builder {
 
         let mut builder_hand = SpfBuilder::new();
         builder_hand.set_v1(); // Needed for testing
-        builder_hand.append_mechanism(Mechanism::a(Qualifier::Pass));
-        builder_hand.append_mechanism(Mechanism::all(Qualifier::Fail));
+        builder_hand.append_string_mechanism(Mechanism::a(Qualifier::Pass));
+        builder_hand.append_string_mechanism(Mechanism::all(Qualifier::Fail));
 
         assert_eq!(builder_hand, builder_from);
     }

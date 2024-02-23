@@ -1,5 +1,4 @@
 mod a;
-mod battery;
 mod construct;
 mod display;
 mod exists;

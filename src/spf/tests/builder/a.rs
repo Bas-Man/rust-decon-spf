@@ -27,7 +27,7 @@ mod valid {
     fn mechanism_slash_cidr() {
         let mut spf: SpfBuilder = SpfBuilder::new();
         spf.set_v1();
-        spf.append_mechanism(Mechanism::a(Qualifier::Fail).with_rrdata("/24").unwrap());
+        spf.append_string_mechanism(Mechanism::a(Qualifier::Fail).with_rrdata("/24").unwrap());
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_fail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
@@ -57,7 +57,7 @@ mod valid {
     #[test]
     fn mechanism_domain_cidr() {
         let mut spf: SpfBuilder = SpfBuilder::new();
-        spf.set_v1().append_mechanism(
+        spf.set_v1().append_string_mechanism(
             Mechanism::a(Qualifier::SoftFail)
                 .with_rrdata("example.com/24")
                 .unwrap(),

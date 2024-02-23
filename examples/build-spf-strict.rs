@@ -14,13 +14,13 @@ fn main() {
     }
 
     if let Ok(mx) = ParsedMechanism::new("mx") {
-        spf1.append_mechanism(mx.txt());
+        spf1.append_string_mechanism(mx.txt());
     }
 
     // example.xx is not a valid domain. There is no TLD of xx
     if let Ok(m) = "a:test.xx".parse() {
         // Append does not occur
-        spf1.append_mechanism(m);
+        spf1.append_string_mechanism(m);
     }
 
     println!("New spf 1: >{}<", spf1);
@@ -38,14 +38,14 @@ fn main() {
     println!("Attempt to create invalid mx to spf2");
     match Mechanism::mx(Qualifier::Pass).with_rrdata("example.xx") {
         Ok(m) => {
-            spf2.append_mechanism(m);
+            spf2.append_string_mechanism(m);
         }
         Err(e) => {
             println!("Error creating Mechanism: \"{}\"", e.to_string());
         }
     };
     println!("Add mx to spf2");
-    spf2.append_mechanism(Mechanism::mx(Qualifier::Pass));
+    spf2.append_string_mechanism(Mechanism::mx(Qualifier::Pass));
     println!("Altered spf 2: >{}<", spf2);
     println!("Clear mx from spf2");
     spf2.clear_mechanism(Kind::MX);
@@ -53,11 +53,11 @@ fn main() {
 
     let mut spf3 = SpfBuilder::new();
     spf3.set_v2_pra();
-    spf3.append_mechanism(Mechanism::a(Qualifier::Pass));
-    spf3.append_mechanism(Mechanism::all(Qualifier::Neutral));
+    spf3.append_string_mechanism(Mechanism::a(Qualifier::Pass));
+    spf3.append_string_mechanism(Mechanism::all(Qualifier::Neutral));
 
     println!("\nNew spf 3: >{}<", spf3);
     println!("Change spf3 all to Fail");
-    spf3.append_mechanism(Mechanism::all(Qualifier::Fail));
+    spf3.append_string_mechanism(Mechanism::all(Qualifier::Fail));
     println!("Altered spf 3: >{}<", spf3);
 }
