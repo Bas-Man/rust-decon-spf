@@ -365,9 +365,9 @@ impl SpfBuilder {
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
-    /// spf.append_string_mechanism(Mechanism::all(Qualifier::Pass));
-    /// spf.append_string_mechanism(Mechanism::a(Qualifier::Pass));
-    /// spf.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                                  "203.32.160.0/23".parse().unwrap()));
     /// // Remove ip4 Mechanism
     /// spf.clear_mechanism(Kind::IpV4);
@@ -456,16 +456,16 @@ impl SpfBuilder {
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
-    /// spf.append_string_mechanism(Mechanism::redirect(Qualifier::Pass,
+    /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap());
-    /// spf.append_string_mechanism(Mechanism::all(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
     /// ```
     ///
     /// # Note:
     /// If the Spf is already set as `Redirect` trying to append an `All`
     /// Mechanism will have no affect.
     // Consider make this a Result
-    pub fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         match mechanism.kind() {
             Kind::Redirect => return self.append_mechanism_of_redirect(mechanism),
             Kind::A => return self.append_mechanism_of_a(mechanism),
@@ -487,11 +487,11 @@ impl SpfBuilder {
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
-    /// spf.append_ip_mechanism(Mechanism::ip(Qualifier::Pass,
+    /// spf.append_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                 "203.32.160.0/23".parse().unwrap()));
-    /// spf.append_string_mechanism(Mechanism::all(Qualifier::Pass));
-    /// ```    
-    pub fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// ```
+    fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         match mechanism.kind() {
             Kind::IpV4 => return self.append_mechanism_of_ip4(mechanism),
             Kind::IpV6 => return self.append_mechanism_of_ip6(mechanism),
@@ -499,6 +499,13 @@ impl SpfBuilder {
                 unreachable!()
             }
         }
+    }
+    pub fn append_mechanism<T>(&mut self, mechanism: Mechanism<T>) -> &mut Self
+        where
+            Self: Append<T>,
+    {
+        self.append(mechanism);
+        self
     }
     #[allow(dead_code)]
     fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
@@ -700,5 +707,21 @@ impl SpfBuilder {
     /// Check that version is v2
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
+    }
+}
+
+pub trait Append<T> {
+    fn append(&mut self, mechanism: Mechanism<T>);
+}
+
+impl Append<String> for SpfBuilder {
+    fn append(&mut self, mechanism: Mechanism<String>) {
+        self.append_string_mechanism(mechanism);
+    }
+}
+
+impl Append<IpNetwork> for SpfBuilder {
+    fn append(&mut self, mechanism: Mechanism<IpNetwork>) {
+        self.append_ip_mechanism(mechanism);
     }
 }

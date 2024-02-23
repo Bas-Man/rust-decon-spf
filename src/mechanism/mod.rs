@@ -59,6 +59,7 @@ mod serde_tests {
         let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, a);
     }
+
     #[test]
     fn mx() {
         let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
@@ -72,6 +73,7 @@ mod serde_tests {
         assert_eq!(deserialized, mx);
     }
 }
+
 /// Create a `Mechanism<String>` from the provided string.
 ///
 /// # Examples:
@@ -614,6 +616,7 @@ impl From<Mechanism<IpNetwork>> for Mechanism<String> {
         )
     }
 }
+
 /// Provide to_string for `Mechanism<IpNetwork`>
 impl std::fmt::Display for Mechanism<IpNetwork> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
