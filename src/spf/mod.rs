@@ -20,6 +20,7 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// Base struct for an Spf of any type.
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Spf<T> {
@@ -48,6 +49,7 @@ where
     T: Debug,
     T: Display,
 {
+    /// Access the version attribute associated with the Spf record.
     pub fn version(&self) -> &T {
         &self.version
     }
@@ -155,6 +157,7 @@ impl Spf<String> {
     pub fn is_v1(&self) -> bool {
         self.version.contains("v=spf1")
     }
+    /// Give access to the redirect modifier if present
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         if self.redirect_idx == 0 {
             return match self
@@ -170,6 +173,7 @@ impl Spf<String> {
             Some(&self.mechanisms[self.redirect_idx])
         }
     }
+    /// Give access to the `all` mechanism if it is present.
     pub fn all(&self) -> Option<&Mechanism<String>> {
         if self.all_idx == 0 {
             return match self
@@ -191,7 +195,7 @@ impl Spf<String> {
     }
 }
 
-/// The definition of the Spf struct which contains all information related a single
+/// The definition of the SpfBuilder struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -330,7 +334,7 @@ impl FromStr for SpfBuilder {
 }
 
 impl SpfBuilder {
-    /// Create a new empty Spf struct.
+    /// Create a new empty SpfBuilder struct.
     pub fn new() -> Self {
         SpfBuilder::default()
     }
@@ -447,24 +451,6 @@ impl SpfBuilder {
         }
         self
     }
-    /// Appends the passed `Mechanism<String>` to the SPF struct.
-    /// This only works for Mechanism which are *NOT* `ip4:` or `ip6:`
-    ///
-    /// # Example:
-    /// ```
-    /// use decon_spf::{Qualifier, Mechanism};
-    /// use decon_spf::SpfBuilder;
-    /// let mut spf = SpfBuilder::new();
-    /// spf.set_v1();
-    /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
-    ///                                 "_spf.example.com").unwrap());
-    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
-    /// ```
-    ///
-    /// # Note:
-    /// If the Spf is already set as `Redirect` trying to append an `All`
-    /// Mechanism will have no affect.
-    // Consider make this a Result
     fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         match mechanism.kind() {
             Kind::Redirect => return self.append_mechanism_of_redirect(mechanism),
@@ -479,18 +465,6 @@ impl SpfBuilder {
             }
         };
     }
-    /// Appends the passed `Mechanism<IpNetwork>` to the SPF struct.
-    ///
-    /// # Example:
-    /// ```
-    /// use decon_spf::{Qualifier, Mechanism};
-    /// use decon_spf::SpfBuilder;
-    /// let mut spf = SpfBuilder::new();
-    /// spf.set_v1();
-    /// spf.append_mechanism(Mechanism::ip(Qualifier::Pass,
-    ///                                 "203.32.160.0/23".parse().unwrap()));
-    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
-    /// ```
     fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         match mechanism.kind() {
             Kind::IpV4 => return self.append_mechanism_of_ip4(mechanism),
@@ -500,6 +474,19 @@ impl SpfBuilder {
             }
         }
     }
+    /// ```
+    /// use decon_spf::{Qualifier, Mechanism};
+    /// use decon_spf::SpfBuilder;
+    /// let mut spf = SpfBuilder::new();
+    /// spf.set_v1();
+    /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
+    ///                                 "_spf.example.com").unwrap());
+    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// assert!(spf.all().is_none());
+    /// ```
+    /// # Note
+    /// When Redirect is present, All will be set to None.
+    ///
     pub fn append_mechanism<T>(&mut self, mechanism: Mechanism<T>) -> &mut Self
     where
         Self: Append<T>,
