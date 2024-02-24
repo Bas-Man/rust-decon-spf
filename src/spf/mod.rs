@@ -43,10 +43,10 @@ impl<'a, T> Iterator for SpfIterator<'a, T> {
 }
 
 impl<T> Spf<T>
-    where
-        T: Default,
-        T: Debug,
-        T: Display,
+where
+    T: Default,
+    T: Debug,
+    T: Display,
 {
     pub fn version(&self) -> &T {
         &self.version
@@ -501,8 +501,8 @@ impl SpfBuilder {
         }
     }
     pub fn append_mechanism<T>(&mut self, mechanism: Mechanism<T>) -> &mut Self
-        where
-            Self: Append<T>,
+    where
+        Self: Append<T>,
     {
         self.append(mechanism);
         self

@@ -27,7 +27,7 @@ mod parse {
         fn exists_with_slash() {
             let input = "v=spf1 ptr:host.example.com/23 -all";
 
-            let err = input.parse::<Spf>().unwrap_err();
+            let err = input.parse::<SpfBuilder>().unwrap_err();
             assert_eq!(
                 err,
                 SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
