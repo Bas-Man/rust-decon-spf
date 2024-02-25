@@ -592,6 +592,8 @@ impl SpfBuilder {
     pub fn all(&self) -> Option<&Mechanism<String>> {
         self.all.as_ref()
     }
+    /// Creates a `Spf<String>` from `SpfBuilder`
+    // #todo This should probably require that a validation has been completed first.
     pub fn build(mut self) -> Result<Spf<String>, SpfError> {
         if self.version.is_empty() {
             self.set_v1();
