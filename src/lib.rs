@@ -13,8 +13,8 @@
 //! - Check and Set Spf record version. See: [`Spf Versions`](SpfBuilder::set_v1)
 //! - Check and Create Spf Mechanism/Modifiers:
 //!     - [`Mechanism`]
-//!     - [`Mechanism Qualifier`](Mechanism::is_pass)
-//!     - [`Mechanism Kind`](Mechanism::kind)
+//!     - [`Mechanism::Qualifier`](Mechanism::is_pass)
+//!     - [`Mechanism::ind`](Mechanism::kind)
 //!
 //! # Feature Flags:
 //! - `ptr` (Enabled by default.)  

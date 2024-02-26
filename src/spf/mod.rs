@@ -77,7 +77,7 @@ impl Display for Spf<String> {
             write!(f, "{}", self.source)
         } else {
             let mut spf_string = String::new();
-            spf_string.push_str(self.version.as_str());
+            spf_string.push_str(self.version().as_str());
             for m in self.iter() {
                 spf_string.push_str(format!(" {}", m).as_str());
             }
