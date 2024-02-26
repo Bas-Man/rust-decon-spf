@@ -628,13 +628,19 @@ impl Display for Mechanism<IpNetwork> {
 #[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct All;
-impl Mechanism<All> {
-    pub fn new_all() -> Self {
+
+impl Default for Mechanism<All> {
+    fn default() -> Self {
         Self {
             kind: Kind::All,
             qualifier: Qualifier::Fail,
             rrdata: None,
         }
+    }
+}
+impl Mechanism<All> {
+    pub fn new_all_default() -> Self {
+        Self::default()
     }
     pub fn new_all_with_qualifier(qualifier: Qualifier) -> Self {
         Self {
@@ -674,7 +680,7 @@ mod test_all {
     use serde_json;
     #[test]
     fn mech_all_to_all_string() {
-        let m = Mechanism::new_all();
+        let m = Mechanism::new_all_default();
         assert_eq!(m.qualifier, Qualifier::Fail);
         assert_eq!(m.rrdata, None);
         assert_eq!(m.to_string(), "-all");
