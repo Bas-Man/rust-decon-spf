@@ -482,8 +482,8 @@ impl Mechanism<String> {
 }
 
 /// Provide to_string for `Mechanism<String>`
-impl std::fmt::Display for Mechanism<String> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for Mechanism<String> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())
     }
 }
@@ -619,8 +619,8 @@ impl From<Mechanism<IpNetwork>> for Mechanism<String> {
 }
 
 /// Provide to_string for `Mechanism<IpNetwork`>
-impl std::fmt::Display for Mechanism<IpNetwork> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for Mechanism<IpNetwork> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())
     }
 }
