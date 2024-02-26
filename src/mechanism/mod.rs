@@ -670,24 +670,27 @@ impl Display for Mechanism<All> {
 #[cfg(test)]
 mod test_all {
     use super::*;
+    #[cfg(feature = "serde")]
     use serde_json;
     #[test]
-    #[cfg(feature = "serde")]
     fn mech_all_to_all_string() {
         let m = Mechanism::new_all();
         assert_eq!(m.qualifier, Qualifier::Fail);
         assert_eq!(m.rrdata, None);
         assert_eq!(m.to_string(), "-all");
-        let json = serde_json::to_string(&m).unwrap();
-        assert_eq!(
-            json,
-            "{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}"
-        );
-        let m_str: Mechanism<String> = m.into();
+        let m_str: Mechanism<String> = m.clone().into();
         assert_eq!(m_str.kind, Kind::All);
         assert_eq!(m_str.rrdata, None);
         assert_eq!(m_str.to_string(), "-all");
-        let s_json = serde_json::to_string(&m_str).unwrap();
-        assert_eq!(json, s_json);
+        #[cfg(feature = "serde")]
+        {
+            let json = serde_json::to_string(&m).unwrap();
+            assert_eq!(
+                json,
+                "{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}"
+            );
+            let s_json = serde_json::to_string(&m_str).unwrap();
+            assert_eq!(json, s_json);
+        }
     }
 }
