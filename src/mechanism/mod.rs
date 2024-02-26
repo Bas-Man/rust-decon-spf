@@ -42,39 +42,6 @@ pub struct Mechanism<T> {
     rrdata: Option<T>,
 }
 
-#[cfg(test)]
-#[cfg(feature = "serde")]
-mod serde_tests {
-    use super::*;
-    use serde_json;
-
-    #[test]
-    fn a() {
-        let a: Mechanism<String> = "a".parse().unwrap();
-        let json = serde_json::to_string(&a).unwrap();
-
-        assert_eq!(
-            json,
-            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
-        );
-        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, a);
-    }
-
-    #[test]
-    fn mx() {
-        let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
-        let json = serde_json::to_string(&mx).unwrap();
-
-        assert_eq!(
-            json,
-            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
-        );
-        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, mx);
-    }
-}
-
 /// Create a `Mechanism<String>` from the provided string.
 ///
 /// # Examples:
@@ -698,5 +665,38 @@ mod test_all {
             let s_json = serde_json::to_string(&m_str).unwrap();
             assert_eq!(json, s_json);
         }
+    }
+}
+
+#[cfg(test)]
+#[cfg(feature = "serde")]
+mod serde_tests {
+    use super::*;
+    use serde_json;
+
+    #[test]
+    fn a() {
+        let a: Mechanism<String> = "a".parse().unwrap();
+        let json = serde_json::to_string(&a).unwrap();
+
+        assert_eq!(
+            json,
+            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
+        );
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, a);
+    }
+
+    #[test]
+    fn mx() {
+        let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
+        let json = serde_json::to_string(&mx).unwrap();
+
+        assert_eq!(
+            json,
+            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
+        );
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, mx);
     }
 }
