@@ -8,14 +8,14 @@ fn main() {
     let ip_m_2 = ParsedMechanism::new("+ip4:203.32.166.0/24");
     let mx = ParsedMechanism::new("mx").unwrap();
     if let Ok(ip1) = ip_m_1 {
-        spf1.append_ip_mechanism(ip1.network());
+        spf1.append_mechanism(ip1.network());
     }
     if let Ok(ip2) = ip_m_2 {
-        spf1.append_ip_mechanism(ip2.network());
+        spf1.append_mechanism(ip2.network());
     }
-    spf1.append_string_mechanism(mx.txt());
+    spf1.append_mechanism(mx.txt());
 
-    spf1.append_string_mechanism("a:test.com".parse().unwrap());
+    spf1.append_mechanism("a:test.com".parse::<Mechanism<String>>().unwrap());
 
     println!("New spf 1: >{}<", spf1);
     assert_eq!(
@@ -27,11 +27,11 @@ fn main() {
     spf2.set_v1();
     let ip = "203.32.166.0/24".parse().unwrap();
     let m = Mechanism::ip(Qualifier::Pass, ip);
-    spf2.append_ip_mechanism(m);
+    spf2.append_mechanism(m);
 
     println!("\nNew spf 2: >{}<", spf2);
     println!("Add mx to spf2");
-    spf2.append_string_mechanism(Mechanism::mx(Qualifier::Pass));
+    spf2.append_mechanism(Mechanism::mx(Qualifier::Pass));
     println!("Altered spf 2: >{}<", spf2);
     println!("Clear mx from spf2");
     spf2.clear_mechanism(Kind::MX);
@@ -39,11 +39,11 @@ fn main() {
 
     let mut spf3 = SpfBuilder::new();
     spf3.set_v2_pra();
-    spf3.append_string_mechanism(Mechanism::a(Qualifier::Pass));
-    spf3.append_string_mechanism(Mechanism::all(Qualifier::Neutral));
+    spf3.append_mechanism(Mechanism::a(Qualifier::Pass));
+    spf3.append_mechanism(Mechanism::all(Qualifier::Neutral));
 
     println!("\nNew spf 3: >{}<", spf3);
     println!("Change spf3 all to Fail");
-    spf3.append_string_mechanism(Mechanism::all(Qualifier::Fail));
+    spf3.append_mechanism(Mechanism::all(Qualifier::Fail));
     println!("Altered spf 3: >{}<", spf3);
 }

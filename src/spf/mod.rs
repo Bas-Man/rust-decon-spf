@@ -7,13 +7,14 @@ mod errors;
 mod tests;
 mod validate;
 
-use crate::mechanism::Kind;
 pub use crate::mechanism::Mechanism;
+use crate::mechanism::{All, Kind};
 pub use crate::spf::errors::SpfError;
 use crate::{core, MechanismError};
 use ipnetwork::IpNetwork;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
+use std::convert::TryInto;
 use std::fmt::{Debug, Display, Formatter};
 use std::{convert::TryFrom, str::FromStr};
 
@@ -211,7 +212,7 @@ pub struct SpfBuilder {
     ip6: Option<Vec<Mechanism<IpNetwork>>>,
     ptr: Option<Mechanism<String>>,
     exists: Option<Vec<Mechanism<String>>>,
-    all: Option<Mechanism<String>>,
+    all: Option<Mechanism<All>>,
     is_valid: bool,
 }
 
@@ -289,7 +290,7 @@ impl FromStr for SpfBuilder {
                     _ => unreachable!(),
                 }
             } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
-                spf.all = Some(Mechanism::all(
+                spf.all = Some(Mechanism::new_all_with_qualifier(
                     core::return_and_remove_qualifier(record, 'a').0,
                 ));
                 // Handle A, MX, Exists and PTR types.
@@ -369,7 +370,7 @@ impl SpfBuilder {
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
-    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                                  "203.32.160.0/23".parse().unwrap()));
@@ -445,7 +446,7 @@ impl SpfBuilder {
         self.ptr = Some(mechanism);
         self
     }
-    fn append_mechanism_of_all(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_mechanism_of_all(&mut self, mechanism: Mechanism<All>) -> &mut Self {
         if self.redirect.is_none() {
             self.all = Some(mechanism);
         }
@@ -459,7 +460,10 @@ impl SpfBuilder {
             Kind::Include => return self.append_mechanism_of_include(mechanism),
             Kind::Exists => return self.append_mechanism_of_exists(mechanism),
             Kind::Ptr => return self.append_mechanism_of_ptr(mechanism),
-            Kind::All => return self.append_mechanism_of_all(mechanism),
+            Kind::All => {
+                return self
+                    .append_mechanism_of_all(mechanism.try_into().expect("Not a Mechanism<All>"))
+            }
             _ => {
                 panic!("What the heck? Unmatched case?")
             }
@@ -481,7 +485,7 @@ impl SpfBuilder {
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap());
-    /// spf.append_mechanism(Mechanism::all(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::Pass));
     /// assert!(spf.all().is_none());
     /// ```
     /// # Note
@@ -589,7 +593,7 @@ impl SpfBuilder {
         self.ptr.as_ref()
     }
     /// Returns a reference to `Mechanism<String>` for `All`
-    pub fn all(&self) -> Option<&Mechanism<String>> {
+    pub fn all(&self) -> Option<&Mechanism<All>> {
         self.all.as_ref()
     }
     /// Creates a `Spf<String>` from `SpfBuilder`
@@ -628,7 +632,7 @@ impl SpfBuilder {
             mechanisms.append(list);
         }
         if let Some(all) = self.all {
-            mechanisms.push(all);
+            mechanisms.push(all.into());
             all_idx = mechanisms.len() - 1;
         }
         if let Some(redirect) = self.redirect {
@@ -712,5 +716,11 @@ impl Append<String> for SpfBuilder {
 impl Append<IpNetwork> for SpfBuilder {
     fn append(&mut self, mechanism: Mechanism<IpNetwork>) {
         self.append_ip_mechanism(mechanism);
+    }
+}
+
+impl Append<All> for SpfBuilder {
+    fn append(&mut self, mechanism: Mechanism<All>) {
+        self.append_mechanism_of_all(mechanism);
     }
 }

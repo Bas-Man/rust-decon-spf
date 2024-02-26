@@ -9,7 +9,7 @@ mod valid {
         let mut spf: SpfBuilder = SpfBuilder::new();
         spf.set_v1();
         spf.append_mechanism_of_a(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::SoftFail));
+        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "a");
@@ -44,7 +44,7 @@ mod valid {
                 .with_rrdata("example.com")
                 .unwrap(),
         );
-        spf.append_mechanism_of_all(Mechanism::all(Qualifier::SoftFail));
+        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");

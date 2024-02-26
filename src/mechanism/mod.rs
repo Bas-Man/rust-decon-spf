@@ -27,6 +27,7 @@ pub use crate::mechanism::qualifier::Qualifier;
 use crate::core;
 
 use ipnetwork::{IpNetwork, IpNetworkError};
+use std::fmt::{Display, Formatter};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
@@ -621,5 +622,72 @@ impl From<Mechanism<IpNetwork>> for Mechanism<String> {
 impl std::fmt::Display for Mechanism<IpNetwork> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_string())
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct All;
+impl Mechanism<All> {
+    pub fn new_all() -> Self {
+        Self {
+            kind: Kind::All,
+            qualifier: Qualifier::Fail,
+            rrdata: None,
+        }
+    }
+    pub fn new_all_with_qualifier(qualifier: Qualifier) -> Self {
+        Self {
+            kind: Kind::All,
+            qualifier,
+            rrdata: None,
+        }
+    }
+}
+
+impl From<Mechanism<All>> for Mechanism<String> {
+    fn from(m: Mechanism<All>) -> Self {
+        Mechanism::all(m.qualifier)
+    }
+}
+
+impl TryFrom<Mechanism<String>> for Mechanism<All> {
+    type Error = MechanismError;
+
+    fn try_from(m: Mechanism<String>) -> Result<Self, Self::Error> {
+        match m.kind {
+            Kind::All => Ok(Mechanism::new_all_with_qualifier(m.qualifier)),
+            _ => Err(MechanismError::InvalidMechanismFormat(m.to_string())),
+        }
+    }
+}
+
+impl Display for Mechanism<All> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", format!("{}all", self.qualifier))
+    }
+}
+#[cfg(test)]
+mod test_all {
+    use super::*;
+    use serde_json;
+    #[test]
+    #[cfg(feature = "serde")]
+    fn mech_all_to_all_string() {
+        let m = Mechanism::new_all();
+        assert_eq!(m.qualifier, Qualifier::Fail);
+        assert_eq!(m.rrdata, None);
+        assert_eq!(m.to_string(), "-all");
+        let json = serde_json::to_string(&m).unwrap();
+        assert_eq!(
+            json,
+            "{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}"
+        );
+        let m_str: Mechanism<String> = m.into();
+        assert_eq!(m_str.kind, Kind::All);
+        assert_eq!(m_str.rrdata, None);
+        assert_eq!(m_str.to_string(), "-all");
+        let s_json = serde_json::to_string(&m_str).unwrap();
+        assert_eq!(json, s_json);
     }
 }
