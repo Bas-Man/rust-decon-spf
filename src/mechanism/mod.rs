@@ -33,7 +33,7 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Stores its [`Kind`], [`Qualifier`], and its `Value`
+/// Stores its [`Kind`], [`Qualifier`], and its `[rrdata]`
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
@@ -596,7 +596,7 @@ impl Display for Mechanism<IpNetwork> {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct All;
 
-/// The Default Mechanism<All> is set to to have a `Qualifier` of `Fail`
+/// The Default Mechanism<All> is set to have a `Qualifier` of `Fail`
 impl Default for Mechanism<All> {
     fn default() -> Self {
         Self {
