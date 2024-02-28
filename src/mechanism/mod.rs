@@ -596,6 +596,7 @@ impl Display for Mechanism<IpNetwork> {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct All;
 
+/// The Default Mechanism<All> is set to to have a `Qualifier` of `Fail`
 impl Default for Mechanism<All> {
     fn default() -> Self {
         Self {
