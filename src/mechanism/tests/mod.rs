@@ -411,6 +411,13 @@ mod create {
             assert_eq!(m.to_string(), "-all");
             assert_eq!(m.rrdata, None);
         }
+        #[test]
+        fn mechanism_all() {
+            use crate::mechanism::{All, Kind};
+            let m: Mechanism<All> = Mechanism::default();
+            assert_eq!(m.kind(), &Kind::All);
+            assert_eq!(m.qualifier(), &Qualifier::Fail);
+        }
     }
 }
 mod parsedmechanism {
