@@ -607,9 +607,11 @@ impl Default for Mechanism<All> {
     }
 }
 impl Mechanism<All> {
+    /// Create a `Mechanism<All>` with default `Qualifier` of `Fail`
     pub fn new_all_default() -> Self {
         Self::default()
     }
+    /// Create a `Mechanism<All>` with a custom`Qualifier`
     pub fn new_all_with_qualifier(qualifier: Qualifier) -> Self {
         Self {
             kind: Kind::All,
@@ -649,6 +651,8 @@ mod test_all {
     #[test]
     fn mech_all_to_all_string() {
         let m = Mechanism::new_all_default();
+        let m_pass = Mechanism::new_all_with_qualifier(Qualifier::Pass);
+        assert_eq!(m_pass.to_string(), "all");
         assert_eq!(m.qualifier, Qualifier::Fail);
         assert_eq!(m.rrdata, None);
         assert_eq!(m.to_string(), "-all");
