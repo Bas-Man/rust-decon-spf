@@ -396,14 +396,14 @@ mod create {
 
         #[test]
         fn default() {
-            let m = Mechanism::new_all_default();
+            let m = Mechanism::all_default();
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");
         }
         #[test]
         fn with_rrdata_is_none() {
-            let m: Mechanism<String> = Mechanism::new_all_default().into();
+            let m: Mechanism<String> = Mechanism::all_default().into();
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");

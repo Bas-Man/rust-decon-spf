@@ -290,7 +290,7 @@ impl FromStr for SpfBuilder {
                     _ => unreachable!(),
                 }
             } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
-                spf.all = Some(Mechanism::new_all_with_qualifier(
+                spf.all = Some(Mechanism::all_with_qualifier(
                     core::return_and_remove_qualifier(record, 'a').0,
                 ));
                 // Handle A, MX, Exists and PTR types.
@@ -370,7 +370,7 @@ impl SpfBuilder {
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
-    /// spf.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::ip(Qualifier::Pass,
     ///                                                  "203.32.160.0/23".parse().unwrap()));
@@ -485,7 +485,7 @@ impl SpfBuilder {
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap());
-    /// spf.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+    /// spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
     /// assert!(spf.all().is_none());
     /// ```
     /// # Note

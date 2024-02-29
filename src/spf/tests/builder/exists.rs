@@ -8,7 +8,7 @@ mod parse {
         let mut spf: SpfBuilder = SpfBuilder::new();
         spf.set_v1()
             .append_string_mechanism(Mechanism::exists(Qualifier::Pass, "example.com").unwrap())
-            .append_string_mechanism(Mechanism::new_all_with_qualifier(Qualifier::SoftFail).into());
+            .append_string_mechanism(Mechanism::all_with_qualifier(Qualifier::SoftFail).into());
         assert!(spf.exists().is_some());
         assert_eq!(spf.exists().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.exists().unwrap()[0].raw(), "example.com");

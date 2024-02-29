@@ -92,8 +92,7 @@ impl FromStr for Mechanism<String> {
             }
         } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
             m = Some(
-                Mechanism::new_all_with_qualifier(core::return_and_remove_qualifier(s, 'a').0)
-                    .into(),
+                Mechanism::all_with_qualifier(core::return_and_remove_qualifier(s, 'a').0).into(),
             );
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(mechanism);
@@ -602,17 +601,19 @@ impl Default for Mechanism<All> {
 }
 impl Mechanism<All> {
     /// Create a `Mechanism<All>` with default `Qualifier` of `Fail`
-    pub fn new_all_default() -> Self {
+    pub fn all_default() -> Self {
         Self::default()
     }
     /// Create a `Mechanism<All>` with a custom`Qualifier`
-    pub fn new_all_with_qualifier(qualifier: Qualifier) -> Self {
+    pub fn all_with_qualifier(qualifier: Qualifier) -> Self {
         Self {
             kind: Kind::All,
             qualifier,
             rrdata: None,
         }
     }
+    /// Return the mechanism stored. In this case it will be `all` as there is no rr_data
+    ///  for this form of mechanism
     pub fn raw(&self) -> String {
         self.kind().to_string()
     }
@@ -629,7 +630,7 @@ impl TryFrom<Mechanism<String>> for Mechanism<All> {
 
     fn try_from(m: Mechanism<String>) -> Result<Self, Self::Error> {
         match m.kind {
-            Kind::All => Ok(Mechanism::new_all_with_qualifier(m.qualifier)),
+            Kind::All => Ok(Mechanism::all_with_qualifier(m.qualifier)),
             _ => Err(MechanismError::InvalidMechanismFormat(m.to_string())),
         }
     }
@@ -647,8 +648,8 @@ mod test_all {
     use serde_json;
     #[test]
     fn mech_all_to_all_string() {
-        let m = Mechanism::new_all_default();
-        let m_pass = Mechanism::new_all_with_qualifier(Qualifier::Pass);
+        let m = Mechanism::all_default();
+        let m_pass = Mechanism::all_with_qualifier(Qualifier::Pass);
         assert_eq!(m_pass.to_string(), "all");
         assert_eq!(m.qualifier, Qualifier::Fail);
         assert_eq!(m.rrdata, None);

@@ -57,9 +57,9 @@ mod build {
         let mut spf = SpfBuilder::new();
         spf.set_v1();
         spf.append_mechanism_of_a(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Fail));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Fail));
         assert_eq!(spf.to_string(), "v=spf1 a -all".to_string());
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Pass));
         assert_eq!(spf.to_string(), "v=spf1 a all".to_string());
     }
 
@@ -71,7 +71,7 @@ mod build {
             Qualifier::Pass,
             "203.32.160.0/24".parse().unwrap(),
         ));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Pass));
         assert_eq!(
             spf.to_string(),
             "v=spf1 ip4:203.32.160.0/24 all".to_string()
@@ -90,7 +90,7 @@ mod build {
             Qualifier::Pass,
             "203.32.160.0/24".parse().unwrap(),
         ));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Pass));
         assert_eq!(
             spf.to_string(),
             "v=spf1 ip4:10.0.0.0/23 ip4:203.32.160.0/24 all".to_string()
@@ -105,7 +105,7 @@ mod build {
             Qualifier::Pass,
             "2001:4860:4000::/36".parse().unwrap(),
         ));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Pass));
         assert_eq!(
             spf.to_string(),
             "v=spf1 ip6:2001:4860:4000::/36 all".to_string()
@@ -124,7 +124,7 @@ mod build {
             Qualifier::Pass,
             "2001:5160:4000::/36".parse().unwrap(),
         ));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::Pass));
+        spf.append_mechanism_of_all(Mechanism::all_with_qualifier(Qualifier::Pass));
         assert_eq!(
             spf.to_string(),
             "v=spf1 ip6:2001:4860:4000::/36 ip6:2001:5160:4000::/36 all".to_string()
@@ -180,7 +180,7 @@ mod build {
         spf.set_v1();
         spf.append_string_mechanism(Mechanism::a(Qualifier::Pass));
         spf.append_string_mechanism(Mechanism::mx(Qualifier::Pass));
-        spf.append_string_mechanism(Mechanism::new_all_default().into());
+        spf.append_string_mechanism(Mechanism::all_default().into());
         assert_eq!(spf.to_string(), "v=spf1 a mx -all".to_string());
     }
 
