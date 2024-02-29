@@ -40,10 +40,10 @@ fn main() {
     let mut spf3 = SpfBuilder::new();
     spf3.set_v2_pra();
     spf3.append_mechanism(Mechanism::a(Qualifier::Pass));
-    spf3.append_mechanism(Mechanism::all(Qualifier::Neutral));
+    spf3.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::Neutral));
 
     println!("\nNew spf 3: >{}<", spf3);
     println!("Change spf3 all to Fail");
-    spf3.append_mechanism(Mechanism::all(Qualifier::Fail));
+    spf3.append_mechanism(Mechanism::new_all_default());
     println!("Altered spf 3: >{}<", spf3);
 }

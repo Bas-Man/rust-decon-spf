@@ -62,7 +62,7 @@ mod valid {
                 .with_rrdata("example.com")
                 .unwrap(),
         );
-        spf.append_mechanism(Mechanism::all(Qualifier::SoftFail));
+        spf.append_mechanism(Mechanism::new_all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");

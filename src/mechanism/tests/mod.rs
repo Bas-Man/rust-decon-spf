@@ -396,16 +396,14 @@ mod create {
 
         #[test]
         fn default() {
-            let m = Mechanism::all(Qualifier::Fail);
+            let m = Mechanism::new_all_default();
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");
         }
         #[test]
         fn with_rrdata_is_none() {
-            let m = Mechanism::all(Qualifier::Fail)
-                .with_rrdata("example.com")
-                .unwrap();
+            let m: Mechanism<String> = Mechanism::new_all_default().into();
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");

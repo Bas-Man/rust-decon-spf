@@ -180,7 +180,7 @@ mod build {
         spf.set_v1();
         spf.append_string_mechanism(Mechanism::a(Qualifier::Pass));
         spf.append_string_mechanism(Mechanism::mx(Qualifier::Pass));
-        spf.append_string_mechanism(Mechanism::all(Qualifier::Fail));
+        spf.append_string_mechanism(Mechanism::new_all_default().into());
         assert_eq!(spf.to_string(), "v=spf1 a mx -all".to_string());
     }
 

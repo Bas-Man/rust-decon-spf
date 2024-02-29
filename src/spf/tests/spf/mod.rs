@@ -252,7 +252,7 @@ mod spf_to_spf_builder {
         let mut builder_hand = SpfBuilder::new();
         builder_hand.set_v1(); // Needed for testing
         builder_hand.append_string_mechanism(Mechanism::a(Qualifier::Pass));
-        builder_hand.append_string_mechanism(Mechanism::all(Qualifier::Fail));
+        builder_hand.append_string_mechanism(Mechanism::new_all_default().into());
 
         assert_eq!(builder_hand, builder_from);
     }

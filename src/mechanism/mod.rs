@@ -91,7 +91,10 @@ impl FromStr for Mechanism<String> {
                 ));
             }
         } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
-            m = Some(Mechanism::all(core::return_and_remove_qualifier(s, 'a').0));
+            m = Some(
+                Mechanism::new_all_with_qualifier(core::return_and_remove_qualifier(s, 'a').0)
+                    .into(),
+            );
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(mechanism);
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
@@ -380,18 +383,9 @@ impl Mechanism<String> {
                 _ => {}
             };
         }
-        match self.kind() {
-            // Ensure that `All` is always None even if with_rrdata() is called
-            Kind::All => self.rrdata = None,
-            _ => self.rrdata = Some(rrdata_string),
-        }
+        self.rrdata = Some(rrdata_string);
         Ok(self)
     }
-    /// Create a new Mechanism struct of `All`
-    pub fn all(qualifier: Qualifier) -> Self {
-        Mechanism::new(Kind::All, qualifier)
-    }
-
     /// Return the mechanism string stored in the `Mechanism`
     ///
     /// # Example:
@@ -619,11 +613,14 @@ impl Mechanism<All> {
             rrdata: None,
         }
     }
+    pub fn raw(&self) -> String {
+        self.kind().to_string()
+    }
 }
 
 impl From<Mechanism<All>> for Mechanism<String> {
     fn from(m: Mechanism<All>) -> Self {
-        Mechanism::all(m.qualifier)
+        Mechanism::new(*m.kind(), *m.qualifier())
     }
 }
 
