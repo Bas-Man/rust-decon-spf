@@ -21,6 +21,19 @@ mod default_checks {
     }
 }
 
+mod minus_all {
+    use super::*;
+    use crate::Mechanism;
+
+    #[test]
+    fn minimum_spf() {
+        let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+        assert_eq!(spf.version(), "v=spf1");
+        let m: Mechanism<String> = Mechanism::all_default().into();
+        assert_eq!(*spf.all().unwrap(), m);
+    }
+}
+
 mod a {
     use super::*;
 
@@ -199,13 +212,23 @@ mod redirect {
 
     mod valid {
         use super::*;
-        use crate::Kind;
+        use crate::{Kind, Mechanism, Qualifier};
 
+        #[test]
+        fn redirect_at_start() {
+            let spf: Spf<String> = "v=spf1 redirect=example.com".parse().unwrap();
+            let m: Mechanism<String> = Mechanism::redirect(Qualifier::Pass, "example.com").unwrap();
+            assert_eq!(spf.redirect().unwrap(), &m);
+        }
         #[test]
         fn redirect_final() {
             let input = "v=spf1 mx redirect=_spf.example.com";
             let spf: Spf<String> = input.parse().unwrap();
             assert_eq!(spf.version, "v=spf1");
+            assert_eq!(
+                spf.redirect().unwrap().rr_data().as_ref().unwrap(),
+                "_spf.example.com"
+            );
             assert_eq!(spf.mechanisms[1].kind(), &Kind::Redirect);
             assert_eq!(spf.redirect_idx, 1);
             assert_eq!(spf.mechanisms.len(), 2);

@@ -33,7 +33,7 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Stores its [`Kind`], [`Qualifier`], and its `[rrdata]`
+/// Stores its [`Kind`], [`Qualifier`], and its [`rrdata`]
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
