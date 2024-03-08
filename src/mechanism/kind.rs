@@ -44,10 +44,10 @@ pub enum Kind {
     /// Represents a Mechanism of type *ptr*
     /// # Note:
     /// This is rarely use.
-    /// ///```text
+    /// ```text
     /// ptr
     /// ptr:<domain>
-    ///```
+    /// ```
     Ptr,
     /// Represents a Mechanism of type *exists*  
     Exists,
