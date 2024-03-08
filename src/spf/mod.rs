@@ -635,7 +635,7 @@ impl SpfBuilder {
     pub fn ptr(&self) -> Option<&Mechanism<String>> {
         self.ptr.as_ref()
     }
-    /// Returns a reference to `Mechanism<String>` for `All`
+    /// Returns a reference to `Mechanism<All>` for `All`
     pub fn all(&self) -> Option<&Mechanism<All>> {
         self.all.as_ref()
     }
