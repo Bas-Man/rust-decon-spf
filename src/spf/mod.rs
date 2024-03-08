@@ -527,8 +527,8 @@ impl SpfBuilder {
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
-    ///                                 "_spf.example.com").unwrap());
-    /// spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
+    ///                                 "_spf.example.com").unwrap())
+    ///    .append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
     /// assert!(spf.all().is_none());
     /// ```
     /// # Note
