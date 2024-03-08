@@ -216,6 +216,18 @@ pub struct SpfBuilder {
     is_valid: bool,
 }
 
+pub struct SpfBuilderIterator {
+    m_iter: std::vec::IntoIter<Mechanism<String>>,
+}
+
+impl Iterator for SpfBuilderIterator {
+    type Item = Mechanism<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.m_iter.next()
+    }
+}
+
 impl From<Spf<String>> for SpfBuilder {
     fn from(source: Spf<String>) -> Self {
         let mut new_spf = SpfBuilder::new();
@@ -344,6 +356,7 @@ impl SpfBuilder {
         self.version = String::from("v=spf1");
         self
     }
+}
     /// Access the version attribute
     pub fn version(&self) -> &String {
         &self.version
@@ -700,9 +713,55 @@ impl SpfBuilder {
     /// Check that version is v2
     pub fn is_v2(&self) -> bool {
         self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
+    pub fn iter(&self) -> SpfBuilderIterator {
+        let mut m: Vec<Mechanism<String>> = vec![];
+
+        if let Some(r) = &self.redirect {
+            m.push(r.clone());
+        }
+
+        if let Some(m_a) = &self.a {
+            m.extend(m_a.iter().cloned())
+        }
+        if let Some(m_mx) = &self.mx {
+            m.extend(m_mx.iter().cloned())
+        }
+        if let Some(include) = &self.include {
+            m.extend(include.iter().cloned())
+        }
+        if let Some(ip4) = &self.ip4 {
+            m.extend(ip4.iter().map(|v| (*v).into()))
+        }
+        if let Some(ip6) = &self.ip6 {
+            m.extend(ip6.iter().map(|v| (*v).into()))
+        }
+        if let Some(exists) = &self.exists {
+            m.extend(exists.iter().cloned())
+        }
+        if let Some(ptr) = &self.ptr {
+            m.push(ptr.clone())
+        }
+        if let Some(all) = &self.all {
+            m.push((*all).clone().into())
+        }
+
+        SpfBuilderIterator {
+            m_iter: m.into_iter(),
+        }
     }
 }
 
+#[test]
+fn spf_builder_iter() {
+    let mut spf_b = SpfBuilder::new();
+    spf_b
+        //.append(Mechanism::redirect(Qualifier::Pass, "example.com").unwrap())
+        .append(Mechanism::a(Qualifier::Pass))
+        .append(Mechanism::ip_from_string("ip4:203.160.10.10").unwrap())
+        .append(Mechanism::ip_from_string("ip6:2001:4860:4000::").unwrap())
+        .append(Mechanism::include(Qualifier::Pass, "test.com").unwrap())
+        .append(Mechanism::all_default());
+}
 pub trait Append<T> {
     fn append(&mut self, mechanism: Mechanism<T>) -> &mut Self;
 }
