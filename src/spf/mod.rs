@@ -357,6 +357,36 @@ impl SpfBuilder {
         self
     }
 }
+#[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
+#[cfg(feature = "spf2")]
+impl SpfBuilder {
+    /// Set version to `spf2.0/pra`
+    pub fn set_v2_pra(&mut self) -> &mut Self {
+        self.version = String::from("spf2.0/pra");
+        self
+    }
+    /// Set version to `spf2.0/mfrom`
+    pub fn set_v2_mfrom(&mut self) -> &mut Self {
+        self.version = String::from("spf2.0/mfrom");
+        self
+    }
+    /// Set version to `spf2.0/pra,mfrom`
+    pub fn set_v2_pra_mfrom(&mut self) -> &mut Self {
+        self.version = String::from("spf2.0/pra,mfrom");
+        self
+    }
+    /// Set version to `spf2.0/mfrom,pra`
+    pub fn set_v2_mfrom_pra(&mut self) -> &mut Self {
+        self.version = String::from("spf2.0/mfrom,pra");
+        self
+    }
+    /// Check that version is v2
+    pub fn is_v2(&self) -> bool {
+        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
+    }
+}
+
+impl SpfBuilder {
     /// Access the version attribute
     pub fn version(&self) -> &String {
         &self.version
@@ -687,32 +717,7 @@ impl SpfBuilder {
     }
 }
 
-#[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
-#[cfg(feature = "spf2")]
 impl SpfBuilder {
-    /// Set version to `spf2.0/pra`
-    pub fn set_v2_pra(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/pra");
-        self
-    }
-    /// Set version to `spf2.0/mfrom`
-    pub fn set_v2_mfrom(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/mfrom");
-        self
-    }
-    /// Set version to `spf2.0/pra,mfrom`
-    pub fn set_v2_pra_mfrom(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/pra,mfrom");
-        self
-    }
-    /// Set version to `spf2.0/mfrom,pra`
-    pub fn set_v2_mfrom_pra(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/mfrom,pra");
-        self
-    }
-    /// Check that version is v2
-    pub fn is_v2(&self) -> bool {
-        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
     pub fn iter(&self) -> SpfBuilderIterator {
         let mut m: Vec<Mechanism<String>> = vec![];
 
