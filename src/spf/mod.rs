@@ -10,7 +10,7 @@ mod validate;
 pub use crate::mechanism::Mechanism;
 use crate::mechanism::{All, Kind};
 pub use crate::spf::errors::SpfError;
-use crate::{core, MechanismError};
+use crate::{core, MechanismError, Qualifier};
 use ipnetwork::IpNetwork;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
@@ -704,23 +704,23 @@ impl SpfBuilder {
 }
 
 pub trait Append<T> {
-    fn append(&mut self, mechanism: Mechanism<T>);
+    fn append(&mut self, mechanism: Mechanism<T>) -> &mut Self;
 }
 
 impl Append<String> for SpfBuilder {
-    fn append(&mut self, mechanism: Mechanism<String>) {
-        self.append_string_mechanism(mechanism);
+    fn append(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+        self.append_string_mechanism(mechanism)
     }
 }
 
 impl Append<IpNetwork> for SpfBuilder {
-    fn append(&mut self, mechanism: Mechanism<IpNetwork>) {
-        self.append_ip_mechanism(mechanism);
+    fn append(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+        self.append_ip_mechanism(mechanism)
     }
 }
 
 impl Append<All> for SpfBuilder {
-    fn append(&mut self, mechanism: Mechanism<All>) {
-        self.append_mechanism_of_all(mechanism);
+    fn append(&mut self, mechanism: Mechanism<All>) -> &mut Self {
+        self.append_mechanism_of_all(mechanism)
     }
 }
