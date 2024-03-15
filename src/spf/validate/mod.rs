@@ -30,11 +30,11 @@ impl<'a> std::fmt::Display for SpfValidationResult<'a> {
 /// "spf2.0"
 /// Returns Ok() or and [`InvalidSource`](SpfError::InvalidSource)
 pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
-    if spf_string.starts_with("v=spf1")
-        || spf_string.starts_with("spf2.0/pra")
-        || spf_string.starts_with("spf2.0/mfrom")
-        || spf_string.starts_with("spf2.0/pra,mfrom")
-        || spf_string.starts_with("spf2.0/mfrom,pra")
+    if spf_string.starts_with(core::VSPF1)
+        || spf_string.starts_with(core::SPF2_PRA)
+        || spf_string.starts_with(core::SPF2_MFROM)
+        || spf_string.starts_with(core::SPF2_PRA_MFROM)
+        || spf_string.starts_with(core::SPF2_MFROM_PRA)
     {
         Ok(())
     } else {

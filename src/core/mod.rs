@@ -7,6 +7,20 @@ pub(crate) mod spf_regex;
 /// This is the maximum number of characters that an Spf Record can store.
 pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
 
+/// Spf Versions
+pub(crate) const VSPF1: &str = "v=spf1";
+pub(crate) const SPF2_PRA: &str = "spf2.0/pra";
+pub(crate) const SPF2_MFROM: &str = "spf2.0/mfrom";
+pub(crate) const SPF2_PRA_MFROM: &str = "spf2.0/pra,mfrom";
+pub(crate) const SPF2_MFROM_PRA: &str = "spf2.0/mfrom,pra";
+
+/// Mechanism Const Slices
+pub(crate) const REDIRECT: &str = "redirect=";
+pub(crate) const INCLUDE: &str = "include:";
+pub(crate) const ALL: &str = "all";
+pub(crate) const IP4: &str = "ip4:";
+pub(crate) const IP6: &str = "ip6:";
+
 /// Check for white space in spf record.
 ///
 /// Return true if there is a space at the end of the string or

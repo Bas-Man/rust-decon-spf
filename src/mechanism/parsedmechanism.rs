@@ -1,3 +1,4 @@
+use crate::core;
 use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
 use ipnetwork::IpNetwork;
 
@@ -46,7 +47,7 @@ impl FromStr for ParsedMechanism {
     type Err = MechanismError;
 
     fn from_str(s: &str) -> Result<ParsedMechanism, Self::Err> {
-        if s.contains("ip4:") || s.contains("ip6:") {
+        if s.contains(core::IP4) || s.contains(core::IP6) {
             Ok(ParsedMechanism::IP(Mechanism::<IpNetwork>::from_str(s)?))
         } else {
             Ok(ParsedMechanism::TXT(Mechanism::<String>::from_str(s)?))

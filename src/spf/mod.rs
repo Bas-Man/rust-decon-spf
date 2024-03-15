@@ -100,9 +100,9 @@ impl FromStr for Spf<String> {
         let mut spf = Spf::default();
         let mechanisms = s.split_whitespace();
         for m in mechanisms {
-            if m.contains("v=spf1") {
+            if m.contains(core::VSPF1) {
                 spf.version = m.to_string();
-            } else if m.contains("ip4:") || m.contains("ip6:") {
+            } else if m.contains(core::IP4) || m.contains(core::IP6) {
                 let m_ip = m.parse::<Mechanism<IpNetwork>>()?;
                 spf.mechanisms.push(m_ip.into());
             } else {
@@ -156,7 +156,7 @@ impl Spf<String> {
 
     /// Check that version is v1
     pub fn is_v1(&self) -> bool {
-        self.version.contains("v=spf1")
+        self.version.contains(core::VSPF1)
     }
     /// Give access to the redirect modifier if present
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
@@ -285,7 +285,7 @@ impl FromStr for SpfBuilder {
 
         for record in records {
             // Consider ensuring we do this once at least and then skip
-            if record.contains("v=spf1") || record.starts_with("spf2.0") {
+            if record.contains(core::VSPF1) || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
                 let m: Mechanism<String> = record.parse()?;
@@ -294,7 +294,7 @@ impl FromStr for SpfBuilder {
             } else if record.contains("include:") {
                 let m: Mechanism<String> = record.parse()?;
                 vec_of_includes.push(m);
-            } else if record.contains("ip4:") || record.contains("ip6:") {
+            } else if record.contains(core::IP4) || record.contains(core::IP6) {
                 let m = record.parse::<Mechanism<IpNetwork>>()?;
                 match m.kind() {
                     Kind::IpV4 => vec_of_ip4.push(m),
@@ -353,7 +353,7 @@ impl SpfBuilder {
     }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) -> &mut Self {
-        self.version = String::from("v=spf1");
+        self.version = String::from(core::VSPF1);
         self
     }
 }
@@ -362,27 +362,27 @@ impl SpfBuilder {
 impl SpfBuilder {
     /// Set version to `spf2.0/pra`
     pub fn set_v2_pra(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/pra");
+        self.version = String::from(core::SPF2_PRA);
         self
     }
     /// Set version to `spf2.0/mfrom`
     pub fn set_v2_mfrom(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/mfrom");
+        self.version = String::from(core::SPF2_MFROM);
         self
     }
     /// Set version to `spf2.0/pra,mfrom`
     pub fn set_v2_pra_mfrom(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/pra,mfrom");
+        self.version = String::from(core::SPF2_PRA_MFROM);
         self
     }
     /// Set version to `spf2.0/mfrom,pra`
     pub fn set_v2_mfrom_pra(&mut self) -> &mut Self {
-        self.version = String::from("spf2.0/mfrom,pra");
+        self.version = String::from(core::SPF2_MFROM_PRA);
         self
     }
     /// Check that version is v2
     pub fn is_v2(&self) -> bool {
-        self.version.starts_with("spf2.0/pra") || self.version.starts_with("spf2.0/mfrom")
+        self.version.starts_with(core::SPF2_PRA) || self.version.starts_with(core::SPF2_MFROM)
     }
 }
 

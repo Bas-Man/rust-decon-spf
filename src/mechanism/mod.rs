@@ -67,12 +67,12 @@ impl FromStr for Mechanism<String> {
         if s.ends_with(':') || s.ends_with('/') {
             return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         };
-        if s.contains("ip4:") || s.contains("ip6:") {
+        if s.contains(core::IP4) || s.contains(core::IP6) {
             return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         }
         let mut m: Option<Mechanism<String>> = None;
 
-        if s.contains("redirect=") {
+        if s.contains(core::REDIRECT) {
             let mut items = s.rsplit('=');
             if let Some(rrdata) = items.next() {
                 m = Some(Mechanism::generic_inclusive(
@@ -81,7 +81,7 @@ impl FromStr for Mechanism<String> {
                     Some(rrdata.to_string()),
                 ));
             }
-        } else if s.contains("include:") {
+        } else if s.contains(core::INCLUDE) {
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             if let Some(rrdata) = s.rsplit(':').next() {
                 m = Some(Mechanism::generic_inclusive(
@@ -90,7 +90,7 @@ impl FromStr for Mechanism<String> {
                     Some(rrdata.to_string()),
                 ));
             }
-        } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
+        } else if s.ends_with(core::ALL) && (s.len() == 3 || s.len() == 4) {
             m = Some(
                 Mechanism::all_with_qualifier(core::return_and_remove_qualifier(s, 'a').0).into(),
             );
@@ -162,15 +162,15 @@ impl FromStr for Mechanism<IpNetwork> {
     type Err = MechanismError;
 
     fn from_str(s: &str) -> Result<Mechanism<IpNetwork>, Self::Err> {
-        if s.contains("ip4:") || s.contains("ip6:") {
+        if s.contains(core::IP4) || s.contains(core::IP6) {
             let kind;
             let raw_ip: Option<&str>;
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             match qualifier_and_modified_str {
-                (_, str) if str.contains("ip4") => {
+                (_, str) if str.contains(core::IP4) => {
                     kind = Kind::IpV4;
                 }
-                (_, str) if str.contains("ip6") => {
+                (_, str) if str.contains(core::IP6) => {
                     kind = Kind::IpV6;
                 }
                 // This is probably unreachable.
