@@ -13,7 +13,7 @@ pub use crate::spf::errors::SpfError;
 use crate::{core, MechanismError, Qualifier};
 use ipnetwork::IpNetwork;
 // Make this public in the future
-use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
+use crate::spf::validate::{SpfRfcStandard, SpfValidationResult, Validate};
 use std::convert::TryInto;
 use std::fmt::{Debug, Display, Formatter};
 use std::{convert::TryFrom, str::FromStr};
@@ -191,8 +191,14 @@ impl Spf<String> {
         }
     }
     #[allow(dead_code)]
-    fn validate(&self) {
-        todo!()
+    fn validate(&self) -> Result<(), SpfError> {
+        self.validate_version()?;
+        self.validate_length()?;
+        #[cfg(feature = "ptr")]
+        self.validate_ptr()?;
+        self.validate_lookup_count()?;
+        self.validate_redirect_all()?;
+        Ok(())
     }
 }
 

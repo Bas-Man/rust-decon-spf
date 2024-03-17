@@ -4,7 +4,69 @@ mod tests;
 
 use crate::core::{self, spf_check_whitespace};
 use crate::spf::{SpfBuilder, SpfError};
+use crate::{Kind, Spf};
 
+pub trait Validate {
+    fn validate_version(&self) -> Result<(), SpfError>;
+    fn validate_length(&self) -> Result<(), SpfError>;
+    fn validate_ptr(&self) -> Result<(), SpfError> {
+        Ok(())
+    }
+    fn validate_redirect_all(&self) -> Result<(), SpfError>;
+    fn validate_lookup_count(&self) -> Result<(), SpfError>;
+}
+
+impl Validate for Spf<String> {
+    fn validate_version(&self) -> Result<(), SpfError> {
+        if self.version.starts_with(core::VSPF1)
+            || self.version.starts_with(core::SPF2_PRA)
+            || self.version.starts_with(core::SPF2_MFROM)
+            || self.version.starts_with(core::SPF2_PRA_MFROM)
+            || self.version.starts_with(core::SPF2_MFROM_PRA)
+        {
+            Ok(())
+        } else {
+            Err(SpfError::InvalidSource)
+        }
+    }
+
+    fn validate_length(&self) -> Result<(), SpfError> {
+        if self.source.len() > core::MAX_SPF_STRING_LENGTH {
+            return Err(SpfError::SourceLengthExceeded);
+        };
+        Ok(())
+    }
+
+    #[cfg(feature = "ptr")]
+    fn validate_ptr(&self) -> Result<(), SpfError> {
+        for m in self.iter() {
+            match m.kind() {
+                Kind::Ptr => return Err(SpfError::DeprecatedPtrPresent),
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    fn validate_redirect_all(&self) -> Result<(), SpfError> {
+        todo!()
+    }
+
+    fn validate_lookup_count(&self) -> Result<(), SpfError> {
+        let mut count: u8 = 0;
+        for m in self.iter() {
+            match m.kind() {
+                Kind::A | Kind::MX | Kind::Redirect | Kind::Include | Kind::Exists => count += 1,
+                _ => {}
+            }
+        }
+        if count < 10 {
+            Ok(())
+        } else {
+            Err(SpfError::LookupLimitExceeded)
+        }
+    }
+}
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
@@ -78,10 +140,9 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
 
 #[cfg(feature = "ptr")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
-    if spf.ptr.is_some() {
-        Err(SpfError::DeprecatedPtrPresent)
-    } else {
-        Ok(())
+    match spf.ptr {
+        Some(_) => Err(SpfError::DeprecatedPtrPresent),
+        None => Ok(()),
     }
 }
 
