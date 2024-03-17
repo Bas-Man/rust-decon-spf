@@ -400,6 +400,7 @@ impl SpfBuilder {
     /// Append a Redirect Mechanism to the Spf Struct.
     fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.redirect = Some(mechanism);
+        // # todo This line is not needed.
         if !self.is_redirected {}
         self.is_redirected = true;
         if self.all.is_some() {
