@@ -9,7 +9,7 @@ mod validate;
 
 use crate::helpers;
 use crate::mechanism::Kind;
-pub use crate::mechanism::{Mechanism, ParsedMechanism, Qualifier};
+pub use crate::mechanism::{Mechanism, Qualifier};
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
 // Make this public in the future
@@ -17,7 +17,7 @@ use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 /// The definition of the Spf struct which contains all information related a single
 /// SPF record.
 #[derive(Debug, Default, Clone, PartialEq)]
