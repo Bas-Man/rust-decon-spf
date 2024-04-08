@@ -29,7 +29,7 @@ use ipnetwork::{IpNetwork, IpNetworkError};
 use std::{convert::TryFrom, str::FromStr};
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Stores its [`Kind`], [`Qualifier`], and its `Value`
 #[derive(Default, Debug, Clone, PartialEq)]
@@ -51,8 +51,10 @@ mod serde_test {
         let a: Mechanism<String> = "a".parse().unwrap();
         let json = serde_json::to_string(&a).unwrap();
 
-        assert_eq!(json,
-                   "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}");
+        assert_eq!(
+            json,
+            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
+        );
         let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, a);
     }
@@ -61,8 +63,10 @@ mod serde_test {
         let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
         let json = serde_json::to_string(&mx).unwrap();
 
-        assert_eq!(json,
-                   "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}");
+        assert_eq!(
+            json,
+            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
+        );
         let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, mx);
     }
@@ -227,7 +231,7 @@ impl TryFrom<&str> for Mechanism<IpNetwork> {
 }
 
 impl<T> Mechanism<T> {
-    //! These are the generic methods for the struct of Mechanism.  
+    //! These are the generic methods for the struct of Mechanism.
     //! All the following methods can be used on any struct of type Mechanism.
     #[doc(hidden)]
     pub fn generic_inclusive(kind: Kind, qualifier: Qualifier, mechanism: Option<T>) -> Self {
@@ -269,7 +273,7 @@ impl<T> Mechanism<T> {
     pub fn qualifier(&self) -> &Qualifier {
         &self.qualifier
     }
-    /// Returns a reference to the Mechanism's Value.  
+    /// Returns a reference to the Mechanism's Value.
     /// This could return a `String`, `IpNetwork`, or `None`
     pub fn mechanism(&self) -> &Option<T> {
         &self.rrdata
@@ -440,9 +444,9 @@ impl Mechanism<String> {
         Ok(Mechanism::new(Kind::Exists, qualifier).with_rrdata(rrdata)?)
     }
     /// Set the rrdata for Mechanism
-    /// # Note: This is only applicable for Mechanisms of `A`, `MX` and `Ptr`.  
+    /// # Note: This is only applicable for Mechanisms of `A`, `MX` and `Ptr`.
     /// All other Mechanism types require `rrdata` to be set. That is to say that `rrdata` is
-    /// **optional** for `A`, `MX` and `PTR`  
+    /// **optional** for `A`, `MX` and `PTR`
     /// See: [`a`](Mechanism<String>::a) for an example.
     pub fn with_rrdata(mut self, rrdata: impl Into<String>) -> Result<Self, MechanismError> {
         let rrdata_string = rrdata.into();
@@ -450,7 +454,9 @@ impl Mechanism<String> {
         {
             match self.kind() {
                 Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => {
-                    if !helpers::dns_is_valid(helpers::get_domain_before_slash(rrdata_string.as_str())) {
+                    if !helpers::dns_is_valid(helpers::get_domain_before_slash(
+                        rrdata_string.as_str(),
+                    )) {
                         return Err(MechanismError::InvalidDomainHost(rrdata_string));
                     };
                 }
@@ -635,8 +641,7 @@ impl Mechanism<IpNetwork> {
     ///```
     ///
     pub fn raw(&self) -> String {
-        // Consider striping ':' and "/" if they are the first characters.
-        self.rrdata.unwrap().to_string()
+        Self::sanitize_ip_addr(self.rrdata.as_ref().expect("Missing IpNetwork"))
     }
 
     fn build_string(&self) -> String {
@@ -645,8 +650,27 @@ impl Mechanism<IpNetwork> {
             ip_mechanism_str.push_str(self.qualifier.as_str());
         };
         ip_mechanism_str.push_str(self.kind().as_str());
-        ip_mechanism_str.push_str(self.rrdata.unwrap().to_string().as_str());
+        let ip = self.rrdata.as_ref().unwrap();
+        let ip_str = Self::sanitize_ip_addr(ip);
+        ip_mechanism_str.push_str(ip_str.as_str());
         ip_mechanism_str
+    }
+
+    // IpNetwork contains a prefix of /32 or /128 for Ip4 and I6 respectively.
+    // This happens when the ip address provided does not contain a prefix.
+    // This means we need to strip this out before returning the string representation
+    fn sanitize_ip_addr(ip: &IpNetwork) -> String {
+        let ip_binding = ip.to_string();
+        match ip.is_ipv4() {
+            true => match ip.prefix() {
+                32 => ip.network().to_string(),
+                _ => ip_binding,
+            },
+            false => match ip.prefix() {
+                128 => ip.network().to_string(),
+                _ => ip_binding,
+            },
+        }
     }
 
     /// Returns a reference to the mechanism as an `IpNetwork`

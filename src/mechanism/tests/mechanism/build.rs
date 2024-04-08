@@ -152,8 +152,8 @@ mod Ip4 {
     fn ip4_pass() {
         let ip4_pass = Mechanism::new_ip4(Qualifier::Pass, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_pass.is_pass(), true);
-        assert_eq!(ip4_pass.raw(), "203.32.160.10/32");
-        assert_eq!(ip4_pass.to_string(), "ip4:203.32.160.10/32");
+        assert_eq!(ip4_pass.raw(), "203.32.160.10");
+        assert_eq!(ip4_pass.to_string(), "ip4:203.32.160.10");
         assert_eq!(ip4_pass.as_network().ip().to_string(), "203.32.160.10");
         assert_eq!(ip4_pass.as_network().prefix().to_string(), "32");
         assert_eq!(ip4_pass.as_network().network().to_string(), "203.32.160.10");
@@ -162,21 +162,21 @@ mod Ip4 {
     fn ip4_fail() {
         let ip4_fail = Mechanism::new_ip4(Qualifier::Fail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_fail.is_fail(), true);
-        assert_eq!(ip4_fail.to_string(), "-ip4:203.32.160.10/32");
+        assert_eq!(ip4_fail.to_string(), "-ip4:203.32.160.10");
     }
     #[test]
     fn ip4_softfail() {
         let ip4_softfail =
             Mechanism::new_ip4(Qualifier::SoftFail, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_softfail.is_softfail(), true);
-        assert_eq!(ip4_softfail.to_string(), "~ip4:203.32.160.10/32");
+        assert_eq!(ip4_softfail.to_string(), "~ip4:203.32.160.10");
     }
     #[test]
     fn ip4_neutral() {
         let ip4_neutral =
             Mechanism::new_ip4(Qualifier::Neutral, "203.32.160.10/32".parse().unwrap());
         assert_eq!(ip4_neutral.is_neutral(), true);
-        assert_eq!(ip4_neutral.to_string(), "?ip4:203.32.160.10/32");
+        assert_eq!(ip4_neutral.to_string(), "?ip4:203.32.160.10");
     }
     #[test]
     fn ip4_from_string_valid() {
@@ -184,7 +184,7 @@ mod Ip4 {
         let ip4 = Mechanism::ip_from_string(&string);
         let unwrapped = ip4.unwrap();
         assert_eq!(unwrapped.is_pass(), true);
-        assert_eq!(unwrapped.to_string(), "ip4:203.32.160.10/32");
+        assert_eq!(unwrapped.to_string(), "ip4:203.32.160.10");
     }
     #[test]
     fn ip4_from_string_invalid() {
