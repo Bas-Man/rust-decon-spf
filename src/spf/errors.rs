@@ -35,7 +35,7 @@ impl std::fmt::Display for SpfError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SpfError::InvalidSource => write!(f, "Source string not valid."),
-            SpfError::SourceLengthExceeded => write!(f, "Spf record exceeds 255 characters."),
+            SpfError::SourceLengthExceeded => write!(f, "Spf record exceeds 512 characters."),
             SpfError::LookupLimitExceeded => write!(f, "Too many DNS lookups."),
             SpfError::HasNotBeenParsed => write!(f, "Source string has not been parsed."),
             SpfError::WhiteSpaceSyntaxError => {

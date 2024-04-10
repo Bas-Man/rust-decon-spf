@@ -5,7 +5,7 @@ use regex::Regex;
 pub(crate) mod spf_regex;
 
 /// This is the maximum number of characters that an Spf Record can store.
-pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
+pub(crate) const MAX_SPF_STRING_LENGTH: usize = 512;
 
 /// Spf Versions
 pub(crate) const VSPF1: &str = "v=spf1";
