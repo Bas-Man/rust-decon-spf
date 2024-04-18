@@ -10,7 +10,7 @@ mod validate;
 pub use crate::mechanism::Mechanism;
 use crate::mechanism::{All, Kind};
 pub use crate::spf::errors::SpfError;
-use crate::{core, MechanismError, Qualifier};
+use crate::{core, MechanismError};
 use ipnetwork::IpNetwork;
 // Make this public in the future
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult, Validate};
