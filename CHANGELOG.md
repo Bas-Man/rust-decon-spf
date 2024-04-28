@@ -1,3 +1,11 @@
+0.2.7 2024-04-28
+================
+
+- Fix bug: IP4 IP6 returned an incorrectly formed network addess with CIDR
+notation.
+- Increased SPF length to 512
+
+
 0.2.6 2023-12-18
 ================
 
