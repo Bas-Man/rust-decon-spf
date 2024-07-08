@@ -765,6 +765,7 @@ impl SpfBuilder {
 
 #[test]
 fn spf_builder_iter() {
+    use crate::Qualifier;
     let mut spf_b = SpfBuilder::new();
     spf_b
         //.append(Mechanism::redirect(Qualifier::Pass, "example.com").unwrap())
