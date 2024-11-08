@@ -33,6 +33,10 @@ path = "examples/trust-dns-demo-builder.rs"
 required-features = ["builder"]
 
 [[example]]
+name = "trust-dns-spf"
+path = "examples/trust-dns-demo-spf.rs"
+
+[[example]]
 name = "build-spf"
 path = "examples/build-spf.rs"
 required-features = ["builder", "spf2"]
