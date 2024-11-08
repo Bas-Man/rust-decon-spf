@@ -725,6 +725,8 @@ impl SpfBuilder {
 }
 
 impl SpfBuilder {
+    /// Allows you to iterate over Mechanisms contained within the SPF record.
+    /// # Note: Version string is not included.
     pub fn iter(&self) -> SpfBuilderIterator {
         let mut m: Vec<Mechanism<String>> = vec![];
 
