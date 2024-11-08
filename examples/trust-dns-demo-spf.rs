@@ -9,7 +9,7 @@ fn main() {
 
     // Lookup the IP addresses associated with a name.
     // The final dot forces this to be an FQDN, otherwise the search rules as specified
-    //  in `ResolverOpts` will take effect. FQDN's are generally cheaper queries.
+    //  in `ResolverOpts` will take effect. FQDNs are generally cheaper queries.
     //let response = resolver.lookup_ip("example.com.").unwrap();
 
     // This is a list of servers you can test the code against. Feel free to edit
@@ -28,46 +28,6 @@ fn main() {
     println!("{:?}", spf_record);
     println!("\nSource Attribute Output");
     println!("SPF1: {}\n", spf_record.to_string());
-    /*
-    if spf_record.includes().is_some() {
-        println!("Include list");
-        for mechanism in spf_record.includes().unwrap().iter() {
-            println!("spf: {}", mechanism);
-        }
-    }
-    if let Some(list) = spf_record.ip4() {
-        println!("IP4 Address Ranges");
-        for mechanism in list.iter() {
-            println!(
-                "Network: {} prefix: {}",
-                mechanism.as_network().network(),
-                mechanism.as_network().prefix()
-            );
-            println!("Mechanism: {}", mechanism);
-        }
-    }
-    if let Some(list) = spf_record.ip6() {
-        println!("IP6 Address Ranges");
-        for mechanism in list.iter() {
-            println!(
-                "Network: {} prefix: {}",
-                mechanism.as_network().network(),
-                mechanism.as_network().prefix()
-            );
-            println!("spf: {}", mechanism);
-        }
-    }
-    println!("\nIs a redirect: {}", spf_record.is_redirect());
-    if spf_record.is_redirect() {
-        if let Some(mechanism) = spf_record.redirect() {
-            println!("\nRaw Redirect: {}", mechanism.raw());
-            println!("Mechanism: {}", mechanism);
-        }
-    }
-    println!("Build Spf from Struct. Not from source()");
-    println!("Spf: {}", spf_record);
-
-     */
 }
 
 fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf<String> {
