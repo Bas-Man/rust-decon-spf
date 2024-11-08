@@ -93,8 +93,11 @@ impl FromStr for Spf<String> {
         validate::check_spf_length(s)?;
         validate::check_whitespaces(s)?;
 
+        // Index of Redirect Mechanism
         let mut redirect_idx: usize = 0;
+        // There exists a redirect mechanism
         let mut redirect = false;
+        // Index of All Mechanism
         let mut all_idx = 0;
         let mut idx = 0;
         let mut spf = Spf::default();
@@ -124,9 +127,12 @@ impl FromStr for Spf<String> {
             }
         }
         if redirect {
+            // all_idx should not be greater han redirect_idx.
+            // all_idx should be 0 if a redirect mechanism was parsed.
             if all_idx > redirect_idx {
                 return Err(SpfError::RedirectWithAllMechanism);
             }
+            // redirect_idx should be the last item if it exists.
             if redirect_idx != idx - 1 {
                 return Err(SpfError::RedirectNotFinalMechanism(redirect_idx as u8));
             }
