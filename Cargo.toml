@@ -49,14 +49,14 @@ required-features = ["serde", "spf2"]
 
 [dependencies]
 ipnetwork = "0.20.0"
-regex = "1.10.5"
-lazy_static = "1.4.0"
+regex = "1.11.1"
+lazy_static = "1.5.0"
 addr = { version = "0.15.6", optional = true }
-serde = { version = "1.0.203", features = ["derive"], optional = true }
+serde = { version = "1.0.214", features = ["derive"], optional = true }
 
 [dev-dependencies]
 trust-dns-resolver = "0.23.2"
-serde_json = { version = "1.0.117" }
+serde_json = { version = "1.0.132" }
 
 [features]
 default = ["ptr"]
