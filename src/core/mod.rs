@@ -8,7 +8,7 @@ pub(crate) mod spf_regex;
 pub(crate) const MAX_SPF_STRING_LENGTH: usize = 512;
 
 /// Spf Versions
-pub(crate) const VSPF1: &str = "v=spf1";
+pub(crate) const SPF1: &str = "v=spf1";
 pub(crate) const SPF2_PRA: &str = "spf2.0/pra";
 pub(crate) const SPF2_MFROM: &str = "spf2.0/mfrom";
 pub(crate) const SPF2_PRA_MFROM: &str = "spf2.0/pra,mfrom";

@@ -100,7 +100,7 @@ impl FromStr for Spf<String> {
         let mut spf = Spf::default();
         let mechanisms = s.split_whitespace();
         for m in mechanisms {
-            if m.contains(core::VSPF1) {
+            if m.contains(core::SPF1) {
                 spf.version = m.to_string();
             } else if m.contains(core::IP4) || m.contains(core::IP6) {
                 let m_ip = m.parse::<Mechanism<IpNetwork>>()?;
@@ -156,7 +156,7 @@ impl Spf<String> {
 
     /// Check that version is v1
     pub fn is_v1(&self) -> bool {
-        self.version.contains(core::VSPF1)
+        self.version.contains(core::SPF1)
     }
     /// Give access to the redirect modifier if present
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
@@ -291,7 +291,7 @@ impl FromStr for SpfBuilder {
 
         for record in records {
             // Consider ensuring we do this once at least and then skip
-            if record.contains(core::VSPF1) || record.starts_with("spf2.0") {
+            if record.contains(core::SPF1) || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
                 let m: Mechanism<String> = record.parse()?;
@@ -359,7 +359,7 @@ impl SpfBuilder {
     }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) -> &mut Self {
-        self.version = String::from(core::VSPF1);
+        self.version = String::from(core::SPF1);
         self
     }
 }

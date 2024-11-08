@@ -18,7 +18,7 @@ pub trait Validate {
 
 impl Validate for Spf<String> {
     fn validate_version(&self) -> Result<(), SpfError> {
-        if self.version.starts_with(core::VSPF1)
+        if self.version.starts_with(core::SPF1)
             || self.version.starts_with(core::SPF2_PRA)
             || self.version.starts_with(core::SPF2_MFROM)
             || self.version.starts_with(core::SPF2_PRA_MFROM)
@@ -92,7 +92,7 @@ impl<'a> std::fmt::Display for SpfValidationResult<'a> {
 /// "spf2.0"
 /// Returns Ok() or and [`InvalidSource`](SpfError::InvalidSource)
 pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
-    if spf_string.starts_with(core::VSPF1)
+    if spf_string.starts_with(core::SPF1)
         || spf_string.starts_with(core::SPF2_PRA)
         || spf_string.starts_with(core::SPF2_MFROM)
         || spf_string.starts_with(core::SPF2_PRA_MFROM)
