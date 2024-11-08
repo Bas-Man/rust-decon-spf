@@ -28,8 +28,8 @@ name = "decon_spf"
 path = "src/lib.rs"
 
 [[example]]
-name = "trust-dns-demo"
-path = "examples/trust-dns-demo.rs"
+name = "trust-dns-builder"
+path = "examples/trust-dns-demo-builder.rs"
 required-features = ["builder"]
 
 [[example]]
