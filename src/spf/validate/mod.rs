@@ -3,7 +3,7 @@
 mod tests;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::{SpfBuilder, SpfError};
+use crate::spf::{builder::SpfBuilder, SpfError};
 use crate::{Kind, Spf};
 
 pub trait Validate {

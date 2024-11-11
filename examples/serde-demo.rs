@@ -1,4 +1,4 @@
-use decon_spf::SpfBuilder;
+use decon_spf::spf::builder::SpfBuilder;
 use decon_spf::{Mechanism, ParsedMechanism, Qualifier};
 use serde_json;
 

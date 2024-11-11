@@ -1,4 +1,4 @@
-use crate::spf::SpfBuilder;
+use crate::SpfBuilder;
 use crate::{Mechanism, Qualifier};
 use ipnetwork::IpNetwork;
 

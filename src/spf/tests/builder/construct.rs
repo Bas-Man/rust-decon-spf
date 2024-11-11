@@ -1,23 +1,23 @@
 mod spf1 {
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
 
     #[test]
     fn make_v1() {
         let mut spf = SpfBuilder::new();
         spf.set_v1();
-        assert_eq!(spf.version, "v=spf1");
+        assert_eq!(spf.version(), "v=spf1");
     }
 }
 
 #[cfg(feature = "spf2")]
 mod spf2 {
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
 
     #[test]
     fn make_v2_pra() {
         let mut spf = SpfBuilder::new();
         spf.set_v2_pra();
-        assert_eq!(spf.version, "spf2.0/pra");
+        assert_eq!(spf.version(), "spf2.0/pra");
         assert_eq!(spf.is_v2(), true);
         assert_eq!(spf.version(), "spf2.0/pra")
     }
@@ -26,7 +26,7 @@ mod spf2 {
     fn make_v2_mfrom() {
         let mut spf = SpfBuilder::new();
         spf.set_v2_mfrom();
-        assert_eq!(spf.version, "spf2.0/mfrom");
+        assert_eq!(spf.version(), "spf2.0/mfrom");
         assert_eq!(spf.is_v2(), true);
     }
 
@@ -34,7 +34,7 @@ mod spf2 {
     fn make_v2_mfrom_pra() {
         let mut spf = SpfBuilder::new();
         spf.set_v2_mfrom_pra();
-        assert_eq!(spf.version, "spf2.0/mfrom,pra");
+        assert_eq!(spf.version(), "spf2.0/mfrom,pra");
         assert_eq!(spf.is_v2(), true);
     }
 
@@ -42,7 +42,7 @@ mod spf2 {
     fn make_v2_pra_mfrom() {
         let mut spf = SpfBuilder::new();
         spf.set_v2_pra_mfrom();
-        assert_eq!(spf.version, "spf2.0/pra,mfrom");
+        assert_eq!(spf.version(), "spf2.0/pra,mfrom");
         assert_eq!(spf.is_v2(), true);
     }
 }
@@ -50,7 +50,7 @@ mod spf2 {
 #[allow(deprecated)]
 mod build {
     use crate::mechanism::{Mechanism, Qualifier};
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
 
     #[test]
     fn make_a_all() {

@@ -1,6 +1,6 @@
 mod parse {
     use crate::mechanism::MechanismError;
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
     use crate::{Mechanism, Qualifier, SpfError};
 
     #[test]
