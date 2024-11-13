@@ -14,7 +14,7 @@
 //! - Check and Create Spf Mechanism/Modifiers:
 //!     - [`Mechanism`]
 //!     - [`Mechanism::Qualifier`](Mechanism::is_pass)
-//!     - [`Mechanism::ind`](Mechanism::kind)
+//!     - [`Mechanism::Kind`](Mechanism::kind)
 //!
 //! # Feature Flags:
 //! - `ptr` (Enabled by default.)  
