@@ -207,7 +207,3 @@ impl Spf<String> {
         Ok(())
     }
 }
-
-pub trait Append<T> {
-    fn append(&mut self, mechanism: Mechanism<T>) -> &mut Self;
-}

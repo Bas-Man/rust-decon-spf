@@ -579,6 +579,9 @@ impl SpfBuilder {
     }
 }
 
+pub trait Append<T> {
+    fn append(&mut self, mechanism: Mechanism<T>) -> &mut Self;
+}
 impl Append<String> for SpfBuilder {
     fn append(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_string_mechanism(mechanism)
