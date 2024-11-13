@@ -14,7 +14,7 @@ use std::str::FromStr;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SpfBuilder {
     version: String,
-    // Version Usually v=spf1 but may be spf2.0/...
+    // Version is usually v=spf1 but may be spf2.0/...
     redirect: Option<Mechanism<String>>,
     is_redirected: bool,
     a: Option<Vec<Mechanism<String>>>,
@@ -57,7 +57,7 @@ impl Display for SpfBuilder {
     }
 }
 
-/// Creates an `Spf Struct` by parsing a string representation of Spf.
+/// Creates an `SpfBuilder struct` by parsing a string representation of Spf.
 ///
 /// # Examples:
 ///
@@ -139,7 +139,7 @@ impl FromStr for SpfBuilder {
                 ));
             }
         }
-        // Move vec_of_* into the SPF struct
+        // Move vec_of_* into the SpfBuilder struct
         if !vec_of_includes.is_empty() {
             spf.include = Some(vec_of_includes);
         };
