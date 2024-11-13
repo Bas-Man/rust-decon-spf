@@ -1,4 +1,4 @@
-use decon_spf::spf::builder::SpfBuilder;
+use decon_spf::SpfBuilder;
 use trust_dns_resolver::error::ResolveResult;
 use trust_dns_resolver::Resolver;
 use trust_dns_resolver::{config::*, lookup::TxtLookup};

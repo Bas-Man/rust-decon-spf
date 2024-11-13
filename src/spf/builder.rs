@@ -1,6 +1,6 @@
 use crate::mechanism::All;
+use crate::spf::validate;
 use crate::spf::validate::{SpfRfcStandard, SpfValidationResult};
-use crate::spf::{validate, Append};
 use crate::{Kind, Mechanism, MechanismError, Spf, SpfError};
 use ipnetwork::IpNetwork;
 #[cfg(feature = "serde")]
@@ -226,7 +226,7 @@ impl SpfBuilder {
     /// Sets the passed mechanism to `None`
     ///
     /// # Note:
-    /// This method clears all associated Mechanism for the [`Kind`](Kind) provided.
+    /// This method clears all associated Mechanism for the [`Kind`] provided.
     ///
     /// # Example:
     /// ```

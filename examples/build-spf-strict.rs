@@ -1,4 +1,4 @@
-use decon_spf::spf::builder::SpfBuilder;
+use decon_spf::SpfBuilder;
 use decon_spf::{Kind, Mechanism, ParsedMechanism, Qualifier};
 
 fn main() {
