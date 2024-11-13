@@ -317,20 +317,19 @@ impl SpfBuilder {
     }
     pub(crate) fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         match mechanism.kind() {
-            Kind::Redirect => return self.append_mechanism_of_redirect(mechanism),
-            Kind::A => return self.append_mechanism_of_a(mechanism),
-            Kind::MX => return self.append_mechanism_of_mx(mechanism),
-            Kind::Include => return self.append_mechanism_of_include(mechanism),
-            Kind::Exists => return self.append_mechanism_of_exists(mechanism),
-            Kind::Ptr => return self.append_mechanism_of_ptr(mechanism),
+            Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
+            Kind::A => self.append_mechanism_of_a(mechanism),
+            Kind::MX => self.append_mechanism_of_mx(mechanism),
+            Kind::Include => self.append_mechanism_of_include(mechanism),
+            Kind::Exists => self.append_mechanism_of_exists(mechanism),
+            Kind::Ptr => self.append_mechanism_of_ptr(mechanism),
             Kind::All => {
-                return self
-                    .append_mechanism_of_all(mechanism.try_into().expect("Not a Mechanism<All>"))
+                self.append_mechanism_of_all(mechanism.try_into().expect("Not a Mechanism<All>"))
             }
             _ => {
                 panic!("What the heck? Unmatched case?")
             }
-        };
+        }
     }
     pub(crate) fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         match mechanism.kind() {
