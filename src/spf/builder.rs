@@ -1,6 +1,6 @@
-use crate::mechanism::All;
+use crate::spf::mechanism::{All, Kind, Mechanism, MechanismError};
 use crate::spf::validate::{self, SpfRfcStandard, SpfValidationResult};
-use crate::{Kind, Mechanism, MechanismError, Spf, SpfError};
+use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -229,7 +229,7 @@ impl SpfBuilder {
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::{Qualifier, Kind, Mechanism};
+    /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
@@ -333,15 +333,15 @@ impl SpfBuilder {
     }
     pub(crate) fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         match mechanism.kind() {
-            Kind::IpV4 => return self.append_mechanism_of_ip4(mechanism),
-            Kind::IpV6 => return self.append_mechanism_of_ip6(mechanism),
+            Kind::IpV4 => self.append_mechanism_of_ip4(mechanism),
+            Kind::IpV6 => self.append_mechanism_of_ip6(mechanism),
             _ => {
                 unreachable!()
             }
         }
     }
     /// ```
-    /// use decon_spf::{Qualifier, Mechanism};
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// use decon_spf::SpfBuilder;
     /// let mut spf = SpfBuilder::new();
     /// spf.set_v1();
@@ -362,9 +362,9 @@ impl SpfBuilder {
     }
     #[allow(dead_code)]
     pub(crate) fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
-        return match rfc {
+        match rfc {
             SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
-        };
+        }
     }
     #[allow(dead_code)]
     pub(crate) fn validate_to_string(&mut self, rfc: SpfRfcStandard) -> SpfValidationResult {
@@ -600,7 +600,7 @@ impl Append<All> for SpfBuilder {
 
 #[test]
 fn spf_builder_iter() {
-    use crate::Qualifier;
+    use crate::spf::mechanism::Qualifier;
     let mut spf_b = SpfBuilder::new();
     spf_b
         //.append(Mechanism::redirect(Qualifier::Pass, "example.com").unwrap())

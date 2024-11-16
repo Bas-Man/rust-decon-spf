@@ -4,15 +4,16 @@
 
 pub mod builder;
 mod errors;
+pub mod mechanism;
 #[cfg(test)]
 mod tests;
 mod validate;
 
 use crate::core;
-use crate::mechanism::Kind;
-pub use crate::mechanism::Mechanism;
 pub use crate::spf::errors::SpfError;
 use ipnetwork::IpNetwork;
+use mechanism::Kind;
+pub use mechanism::Mechanism;
 // Make this public in the future
 use crate::spf::validate::Validate;
 use std::fmt::{Debug, Display, Formatter};

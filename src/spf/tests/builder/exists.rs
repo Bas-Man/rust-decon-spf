@@ -1,7 +1,7 @@
 mod parse {
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::{Mechanism, MechanismError, Qualifier};
     use crate::SpfBuilder;
-    use crate::{Mechanism, Qualifier, SpfError};
+    use crate::SpfError;
 
     #[test]
     fn test_exist() {

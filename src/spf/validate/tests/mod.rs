@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod validate {
-    use crate::mechanism::{Mechanism, Qualifier};
     use crate::spf::builder::SpfBuilder;
+    use crate::spf::mechanism::{Mechanism, Qualifier};
     use crate::spf::validate::SpfRfcStandard;
 
     #[test]

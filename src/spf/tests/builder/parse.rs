@@ -135,7 +135,7 @@ mod invalid_spf_from_str {
 
 #[cfg(test)]
 mod invalid_ip {
-    use crate::mechanism::MechanismError::InvalidIPNetwork;
+    use crate::spf::mechanism::MechanismError::InvalidIPNetwork;
     use crate::spf::SpfError;
     use crate::SpfBuilder;
     use crate::SpfError::InvalidMechanism;

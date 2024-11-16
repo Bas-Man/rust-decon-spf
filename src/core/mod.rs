@@ -1,4 +1,4 @@
-use crate::mechanism::{Mechanism, Qualifier};
+use crate::spf::mechanism::{Mechanism, Qualifier};
 use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use regex::Regex;

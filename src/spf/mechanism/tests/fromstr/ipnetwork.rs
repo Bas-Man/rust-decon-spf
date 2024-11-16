@@ -1,5 +1,5 @@
 mod ip4 {
-    use crate::mechanism::Mechanism;
+    use crate::spf::mechanism::Mechanism;
     use ipnetwork::IpNetwork;
 
     #[test]
@@ -45,7 +45,7 @@ mod ip4 {
     }
 
     mod invalid {
-        use crate::mechanism::{Mechanism, MechanismError};
+        use crate::spf::mechanism::{Mechanism, MechanismError};
         use ipnetwork::IpNetwork;
         use ipnetwork::IpNetworkError::InvalidAddr;
 
@@ -87,7 +87,7 @@ mod ip4 {
 }
 mod ip6 {
 
-    use crate::mechanism::Mechanism;
+    use crate::spf::mechanism::Mechanism;
     use ipnetwork::IpNetwork;
 
     #[test]
@@ -129,7 +129,7 @@ mod ip6 {
     }
 
     mod invalid {
-        use crate::mechanism::{Mechanism, MechanismError};
+        use crate::spf::mechanism::{Mechanism, MechanismError};
         use ipnetwork::IpNetwork;
 
         #[test]

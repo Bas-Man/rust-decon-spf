@@ -3,7 +3,7 @@ mod fromstr;
 mod create {
     mod a {
 
-        use crate::mechanism::{Kind, Mechanism, Qualifier};
+        use crate::spf::mechanism::{Kind, Mechanism, Qualifier};
         mod not_strict {
             use super::*;
             #[test]
@@ -53,7 +53,7 @@ mod create {
         mod strict {
 
             use super::*;
-            use crate::mechanism::MechanismError;
+            use crate::spf::mechanism::MechanismError;
 
             #[test]
             fn with_rrdata_strict() {
@@ -90,7 +90,7 @@ mod create {
 
     mod mx {
 
-        use crate::mechanism::{Mechanism, Qualifier};
+        use crate::spf::mechanism::{Mechanism, Qualifier};
         mod not_strict {
             use super::*;
             #[test]
@@ -133,7 +133,7 @@ mod create {
         #[cfg(feature = "strict-dns")]
         mod strict {
             use super::*;
-            use crate::mechanism::MechanismError;
+            use crate::spf::mechanism::MechanismError;
             #[test]
             fn with_invalid_rrdata() {
                 let mx = Mechanism::mx(Qualifier::Neutral).with_rrdata("example.xx");
@@ -168,7 +168,7 @@ mod create {
 
     mod exists {
 
-        use crate::mechanism::{Mechanism, Qualifier};
+        use crate::spf::mechanism::{Mechanism, Qualifier};
         mod not_strict {
             use super::*;
             #[test]
@@ -192,7 +192,7 @@ mod create {
         #[cfg(feature = "strict-dns")]
         mod strict {
             use super::*;
-            use crate::mechanism::MechanismError;
+            use crate::spf::mechanism::MechanismError;
             #[test]
             fn pass_valid_domain() {
                 match Mechanism::exists(Qualifier::Neutral, "bogus.com") {
@@ -219,7 +219,7 @@ mod create {
 
     mod include {
 
-        use crate::mechanism::{Kind, Mechanism, Qualifier};
+        use crate::spf::mechanism::{Kind, Mechanism, Qualifier};
         mod not_strict {
             use super::*;
             #[test]
@@ -262,7 +262,7 @@ mod create {
         #[cfg(feature = "strict-dns")]
         mod strict {
             use super::*;
-            use crate::mechanism::MechanismError;
+            use crate::spf::mechanism::MechanismError;
 
             #[test]
             fn invalid_not_strict() {
@@ -281,8 +281,8 @@ mod create {
 
     mod ptr {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::Qualifier;
+        use crate::spf::mechanism::Mechanism;
+        use crate::spf::mechanism::Qualifier;
 
         #[test]
         fn without_mechanism() {
@@ -303,9 +303,9 @@ mod create {
     }
     mod redirect {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::MechanismError;
-        use crate::mechanism::Qualifier;
+        use crate::spf::mechanism::Mechanism;
+        use crate::spf::mechanism::MechanismError;
+        use crate::spf::mechanism::Qualifier;
 
         #[test]
         fn redirect() {
@@ -326,8 +326,8 @@ mod create {
     }
     mod ip4 {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::MechanismError;
+        use crate::spf::mechanism::Mechanism;
+        use crate::spf::mechanism::MechanismError;
         mod valid {
             use super::*;
             use std::convert::TryInto;
@@ -364,8 +364,8 @@ mod create {
 
     mod ip6 {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::MechanismError;
+        use crate::spf::mechanism::Mechanism;
+        use crate::spf::mechanism::MechanismError;
 
         mod valid {
             use super::*;
@@ -391,8 +391,8 @@ mod create {
     }
     mod all {
 
-        use crate::mechanism::Mechanism;
-        use crate::mechanism::Qualifier;
+        use crate::spf::mechanism::Mechanism;
+        use crate::spf::mechanism::Qualifier;
 
         #[test]
         fn default() {
@@ -411,7 +411,7 @@ mod create {
         }
         #[test]
         fn mechanism_all() {
-            use crate::mechanism::{All, Kind};
+            use crate::spf::mechanism::{All, Kind};
             let m: Mechanism<All> = Mechanism::default();
             assert_eq!(m.kind(), &Kind::All);
             assert_eq!(m.qualifier(), &Qualifier::Fail);
@@ -420,7 +420,7 @@ mod create {
 }
 mod parsedmechanism {
     mod ip {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
         mod v4 {
             use super::*;
             #[test]
@@ -436,7 +436,7 @@ mod parsedmechanism {
             }
 
             mod invalid {
-                use crate::mechanism::{MechanismError, ParsedMechanism};
+                use crate::spf::mechanism::{MechanismError, ParsedMechanism};
 
                 #[test]
                 fn ip4() {
@@ -455,7 +455,7 @@ mod parsedmechanism {
         }
     }
     mod a {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
 
         #[test]
         fn make_mechanism() {
@@ -490,7 +490,7 @@ mod parsedmechanism {
             assert_eq!(m.txt().to_string(), "?a/24");
         }
         mod invalid {
-            use crate::mechanism::{MechanismError, ParsedMechanism};
+            use crate::spf::mechanism::{MechanismError, ParsedMechanism};
 
             #[test]
             fn make_fail() {
@@ -505,7 +505,7 @@ mod parsedmechanism {
         }
         #[cfg(feature = "strict-dns")]
         mod strict_dns {
-            use crate::mechanism::ParsedMechanism;
+            use crate::spf::mechanism::ParsedMechanism;
 
             #[test]
             fn check() {
@@ -518,7 +518,7 @@ mod parsedmechanism {
     }
 
     mod redirect {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
 
         #[test]
         fn parse_redirect() {
@@ -530,7 +530,7 @@ mod parsedmechanism {
     }
     #[cfg(feature = "strict-dns")]
     mod mx {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
 
         mod invalid {
             use super::*;
@@ -545,7 +545,7 @@ mod parsedmechanism {
     }
     #[cfg(feature = "strict-dns")]
     mod include_invalid {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
 
         #[test]
         fn check_a() {
@@ -558,7 +558,7 @@ mod parsedmechanism {
     mod ptr {
         #[cfg(feature = "strict-dns")]
         mod invalid {
-            use crate::mechanism::ParsedMechanism;
+            use crate::spf::mechanism::ParsedMechanism;
 
             #[test]
             fn check_a() {
@@ -571,7 +571,7 @@ mod parsedmechanism {
     }
     #[cfg(feature = "strict-dns")]
     mod exists_invalid {
-        use crate::mechanism::ParsedMechanism;
+        use crate::spf::mechanism::ParsedMechanism;
 
         #[test]
         fn check() {

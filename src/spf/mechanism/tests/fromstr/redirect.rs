@@ -1,7 +1,7 @@
 #[cfg(test)]
-use crate::mechanism::Mechanism;
+use crate::spf::mechanism::Mechanism;
 #[cfg(feature = "strict-dns")]
-use crate::mechanism::MechanismError;
+use crate::spf::mechanism::MechanismError;
 
 #[test]
 fn default() {

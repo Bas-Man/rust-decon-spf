@@ -1,8 +1,5 @@
 use crate::spf::Spf;
 
-#[cfg(feature = "serde")]
-mod serde;
-
 mod default_checks {
     use super::*;
     use crate::SpfError;
@@ -23,7 +20,7 @@ mod default_checks {
 
 mod minus_all {
     use super::*;
-    use crate::Mechanism;
+    use crate::mechanism::Mechanism;
 
     #[test]
     fn minimum_spf() {
@@ -72,7 +69,7 @@ mod a {
         #[cfg(feature = "strict-dns")]
         mod strict {
             use super::*;
-            use crate::{MechanismError, SpfError};
+            use crate::{mechanism::MechanismError, SpfError};
 
             mod invalid {
                 use super::*;
@@ -108,7 +105,7 @@ mod a {
 
     mod invalid {
         use super::*;
-        use crate::MechanismError;
+        use crate::mechanism::MechanismError;
         use crate::SpfError;
 
         #[test]
@@ -186,7 +183,7 @@ mod ip {
 
         mod invalid {
             use super::*;
-            use crate::MechanismError::InvalidIPNetwork;
+            use crate::mechanism::MechanismError::InvalidIPNetwork;
             use crate::SpfError;
             use ipnetwork::IpNetwork;
 
@@ -212,7 +209,7 @@ mod redirect {
 
     mod valid {
         use super::*;
-        use crate::{Kind, Mechanism, Qualifier};
+        use crate::mechanism::{Kind, Mechanism, Qualifier};
 
         #[test]
         fn redirect_at_start() {
@@ -244,7 +241,7 @@ mod redirect {
 
     mod invalid {
         use super::*;
-        use crate::{Kind, SpfError};
+        use crate::{mechanism::Kind, SpfError};
 
         #[test]
         fn redirect_not_final() {
@@ -264,7 +261,7 @@ mod redirect {
 
 #[cfg(feature = "builder")]
 mod spf_to_spf_builder {
-    use crate::{Mechanism, Qualifier, Spf, SpfBuilder};
+    use crate::{mechanism::Mechanism, mechanism::Qualifier, Spf, SpfBuilder};
 
     #[test]
     fn basic() {

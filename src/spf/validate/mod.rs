@@ -3,8 +3,8 @@
 mod tests;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::{builder::SpfBuilder, SpfError};
-use crate::{Kind, Spf};
+use crate::spf::mechanism::Kind;
+use crate::spf::{builder::SpfBuilder, Spf, SpfError};
 
 pub trait Validate {
     fn validate_version(&self) -> Result<(), SpfError>;

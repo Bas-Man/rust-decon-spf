@@ -1,5 +1,5 @@
-use crate::mechanism::MechanismError;
-use crate::Kind;
+use crate::spf::mechanism::Kind;
+use crate::spf::mechanism::MechanismError;
 use ipnetwork::IpNetworkError;
 
 /// A list of expected and possible errors for SPF records.

@@ -1,5 +1,5 @@
+use crate::mechanism::{Mechanism, Qualifier};
 use crate::SpfBuilder;
-use crate::{Mechanism, Qualifier};
 use ipnetwork::IpNetwork;
 
 #[test]

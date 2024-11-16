@@ -1,4 +1,4 @@
-use crate::mechanism::Mechanism;
+use crate::spf::mechanism::Mechanism;
 
 #[test]
 fn default() {

@@ -1,6 +1,6 @@
 mod general {
 
-    use crate::mechanism::{Mechanism, MechanismError};
+    use crate::spf::mechanism::{Mechanism, MechanismError};
 
     #[test]
     fn unsupported_mechanism_str() {
