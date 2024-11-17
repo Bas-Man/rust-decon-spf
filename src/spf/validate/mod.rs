@@ -107,11 +107,11 @@ pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
 #[test]
 fn valid_versions() {
     let input = vec![
-        "v=spf1",
-        "spf2.0/pra",
-        "spf2.0/mfrom",
-        "spf2.0/pra,mfrom",
-        "spf2.0/mfrom,pra",
+        core::SPF1,
+        core::SPF2_PRA,
+        core::SPF2_MFROM,
+        core::SPF2_PRA_MFROM,
+        core::SPF2_MFROM_PRA,
     ];
     for v in input.into_iter() {
         assert_eq!(check_start_of_spf(v), Ok(()))
