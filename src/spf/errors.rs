@@ -7,6 +7,8 @@ use ipnetwork::IpNetworkError;
 pub enum SpfError {
     /// Source is invalid, SPF struct was not created using `from_str()`
     InvalidSource,
+    /// Version is invalid
+    InvalidVersion,
     /// Source string length exceeds 255 Characters
     SourceLengthExceeded,
     /// Exceeds RFC lookup limit.
@@ -35,6 +37,7 @@ impl std::fmt::Display for SpfError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SpfError::InvalidSource => write!(f, "Source string not valid."),
+            SpfError::InvalidVersion => write!(f, "Version string not valid."),
             SpfError::SourceLengthExceeded => write!(f, "Spf record exceeds 512 characters."),
             SpfError::LookupLimitExceeded => write!(f, "Too many DNS lookups."),
             SpfError::HasNotBeenParsed => write!(f, "Source string has not been parsed."),
@@ -78,6 +81,7 @@ impl SpfError {
     /// Returns `true` if the SpfError is any of those listed [`SpfError`](SpfError).
     pub fn is_spf_error(&self) -> bool {
         matches!(self, Self::InvalidSource)
+            || matches!(self, Self::InvalidVersion)
             || matches!(self, Self::SourceLengthExceeded)
             || matches!(self, Self::LookupLimitExceeded)
             || matches!(self, Self::HasNotBeenParsed)
@@ -89,9 +93,13 @@ impl SpfError {
     pub fn is_invalid_source(&self) -> bool {
         matches!(self, Self::InvalidSource)
     }
-    /// Returns `true` if the SpfError indicates and Invalid Source error.
+    /// Returns `true` if the SpfError indicates an Invalid Source error.
     pub fn source_is_invalid(&self) -> bool {
         matches!(self, Self::InvalidSource)
+    }
+    /// Returns `true` if the SpfError indicates an invalid version type.
+    pub fn version_is_invalid(&self) -> bool {
+        matches!(self, Self::InvalidVersion)
     }
     /// Returns `true` if the SpfError indicates source length exceeds 255 characters.
     pub fn is_source_length_exceeded(&self) -> bool {

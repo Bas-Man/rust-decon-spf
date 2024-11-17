@@ -92,9 +92,9 @@ mod invalid_spf_from_str {
         assert_eq!(spf.is_err(), true);
         let err = spf.unwrap_err();
         assert_eq!(err.is_spf_error(), true);
-        assert_eq!(err.is_invalid_source(), true);
-        assert_eq!(err.to_string(), "Source string not valid.");
-        assert_eq!(err, SpfError::InvalidSource);
+        assert_eq!(err.version_is_invalid(), true);
+        assert_eq!(err.to_string(), "Version string not valid.");
+        assert_eq!(err, SpfError::InvalidVersion);
     }
 
     #[test]

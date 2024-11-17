@@ -26,7 +26,7 @@ impl Validate for Spf<String> {
         {
             Ok(())
         } else {
-            Err(SpfError::InvalidSource)
+            Err(SpfError::InvalidVersion)
         }
     }
 
@@ -90,7 +90,7 @@ impl<'a> std::fmt::Display for SpfValidationResult<'a> {
 
 /// Checks that the spf record has the minimum start string of "v=spf1" or
 /// "spf2.0"
-/// Returns Ok() or and [`InvalidSource`](SpfError::InvalidSource)
+/// Returns Ok() or and [`InvalidSource`](SpfError::InvalidVersion)
 pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
     if spf_string.starts_with(core::SPF1)
         || spf_string.starts_with(core::SPF2_PRA)
@@ -100,7 +100,7 @@ pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
     {
         Ok(())
     } else {
-        Err(SpfError::InvalidSource)
+        Err(SpfError::InvalidVersion)
     }
 }
 
