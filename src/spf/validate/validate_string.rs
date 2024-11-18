@@ -26,9 +26,8 @@ impl Validate for Spf<String> {
     #[cfg(feature = "ptr")]
     fn validate_ptr(&self) -> Result<(), SpfError> {
         for m in self.iter() {
-            match m.kind() {
-                Kind::Ptr => return Err(SpfError::DeprecatedPtrPresent),
-                _ => {}
+            if m.kind() == &Kind::Ptr {
+                return Err(SpfError::DeprecatedPtrPresent);
             }
         }
         Ok(())
