@@ -1,10 +1,10 @@
 #[cfg(feature = "builder")]
 #[cfg(test)]
 mod tests;
+mod validate_string;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::mechanism::Kind;
-use crate::spf::{builder::SpfBuilder, Spf, SpfError};
+use crate::spf::{builder::SpfBuilder, SpfError};
 
 pub trait Validate {
     fn validate_version(&self) -> Result<(), SpfError>;
@@ -16,57 +16,6 @@ pub trait Validate {
     fn validate_lookup_count(&self) -> Result<(), SpfError>;
 }
 
-impl Validate for Spf<String> {
-    fn validate_version(&self) -> Result<(), SpfError> {
-        if self.version.starts_with(core::SPF1)
-            || self.version.starts_with(core::SPF2_PRA)
-            || self.version.starts_with(core::SPF2_MFROM)
-            || self.version.starts_with(core::SPF2_PRA_MFROM)
-            || self.version.starts_with(core::SPF2_MFROM_PRA)
-        {
-            Ok(())
-        } else {
-            Err(SpfError::InvalidVersion)
-        }
-    }
-
-    fn validate_length(&self) -> Result<(), SpfError> {
-        if self.source.len() > core::MAX_SPF_STRING_LENGTH {
-            return Err(SpfError::SourceLengthExceeded);
-        };
-        Ok(())
-    }
-
-    #[cfg(feature = "ptr")]
-    fn validate_ptr(&self) -> Result<(), SpfError> {
-        for m in self.iter() {
-            match m.kind() {
-                Kind::Ptr => return Err(SpfError::DeprecatedPtrPresent),
-                _ => {}
-            }
-        }
-        Ok(())
-    }
-
-    fn validate_redirect_all(&self) -> Result<(), SpfError> {
-        todo!()
-    }
-
-    fn validate_lookup_count(&self) -> Result<(), SpfError> {
-        let mut count: u8 = 0;
-        for m in self.iter() {
-            match m.kind() {
-                Kind::A | Kind::MX | Kind::Redirect | Kind::Include | Kind::Exists => count += 1,
-                _ => {}
-            }
-        }
-        if count < 10 {
-            Ok(())
-        } else {
-            Err(SpfError::LookupLimitExceeded)
-        }
-    }
-}
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
     Rfc4408,
