@@ -1,6 +1,5 @@
 use crate::mechanism::{Kind, Mechanism};
-use crate::spf::validate;
-use crate::spf::validate::Validate;
+use crate::spf::validate::{self, Validate};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 use std::convert::TryFrom;
