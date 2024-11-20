@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-//! This crate is responsible for providing tools to access and modify information about spf records.  
-//! Provides methods for building spf records programmatically.  
+//! This crate is responsible for providing tools to access and modify information about spf records.
+//! Provides methods for building spf records programmatically.
 //!
 //!
 //! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)  

@@ -1,4 +1,3 @@
-#[cfg(feature = "builder")]
 #[cfg(test)]
 mod tests;
 mod validate_string;

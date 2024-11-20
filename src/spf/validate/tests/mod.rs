@@ -1,4 +1,7 @@
+mod string;
+
 #[cfg(test)]
+#[cfg(feature = "builder")]
 mod validate {
     use crate::spf::builder::SpfBuilder;
     use crate::spf::mechanism::{Mechanism, Qualifier};
