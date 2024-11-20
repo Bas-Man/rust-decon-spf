@@ -46,6 +46,7 @@ mod a {
             assert_eq!(spf.version(), "v=spf1");
             assert_eq!(spf.is_v1(), true);
             assert_eq!(spf.mechanisms.len(), 2);
+            assert_eq!(spf.all().unwrap().to_string(), "-all");
         }
 
         #[test]
