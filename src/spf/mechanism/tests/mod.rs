@@ -390,7 +390,7 @@ mod create {
         }
     }
     mod all {
-
+        use crate::spf::mechanism::builder::All;
         use crate::spf::mechanism::Mechanism;
         use crate::spf::mechanism::Qualifier;
 
@@ -411,7 +411,7 @@ mod create {
         }
         #[test]
         fn mechanism_all() {
-            use crate::spf::mechanism::{All, Kind};
+            use crate::spf::mechanism::Kind;
             let m: Mechanism<All> = Mechanism::default();
             assert_eq!(m.kind(), &Kind::All);
             assert_eq!(m.qualifier(), &Qualifier::Fail);

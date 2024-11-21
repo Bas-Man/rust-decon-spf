@@ -1,5 +1,7 @@
-use crate::spf::mechanism::{All, Kind, Mechanism, MechanismError};
-use crate::spf::validate::{self, SpfRfcStandard, SpfValidationResult};
+use crate::spf::mechanism::builder::All;
+use crate::spf::mechanism::{Kind, Mechanism, MechanismError};
+use crate::spf::validate::builder_results::SpfValidationResult;
+use crate::spf::validate::{self, SpfRfcStandard};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 #[cfg(feature = "serde")]

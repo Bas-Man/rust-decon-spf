@@ -2,6 +2,7 @@
 //! constituent parts.  
 //! It is not intended to validate the spf record.
 
+#[cfg(feature = "builder")]
 pub mod builder;
 mod errors;
 pub mod mechanism;

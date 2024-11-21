@@ -1,9 +1,11 @@
+#[cfg(feature = "builder")]
+mod builder_results;
 #[cfg(test)]
 mod tests;
 mod validate_string;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::{builder::SpfBuilder, SpfError};
+use crate::spf::SpfError;
 
 pub trait Validate {
     fn validate_version(&self) -> Result<(), SpfError>;
@@ -19,21 +21,6 @@ pub trait Validate {
 pub enum SpfRfcStandard {
     Rfc4408,
     // Add Rfc7208. I think this should be changed to a struct and then make traits
-}
-
-#[derive(Debug)]
-pub enum SpfValidationResult<'a> {
-    Valid(&'a SpfBuilder),
-    InValid(SpfError),
-}
-
-impl<'a> std::fmt::Display for SpfValidationResult<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SpfValidationResult::Valid(obj) => write!(f, "{}", obj),
-            SpfValidationResult::InValid(obj) => write!(f, "{}", obj),
-        }
-    }
 }
 
 /// Checks that the spf record has the minimum start string of "v=spf1" or
@@ -86,6 +73,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
     Ok(())
 }
 
+/*
 #[cfg(feature = "ptr")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     match spf.ptr {
@@ -93,7 +81,6 @@ pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
         None => Ok(()),
     }
 }
-
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
 pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
@@ -136,3 +123,4 @@ pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfE
     spf.is_valid = true;
     Ok(spf)
 }
+*/
