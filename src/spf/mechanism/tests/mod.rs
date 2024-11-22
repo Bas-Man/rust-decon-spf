@@ -390,26 +390,29 @@ mod create {
         }
     }
     mod all {
+        use crate::mechanism::Kind;
+        #[cfg(feature = "builder")]
         use crate::spf::mechanism::builder::All;
         use crate::spf::mechanism::Mechanism;
         use crate::spf::mechanism::Qualifier;
 
         #[test]
         fn default() {
-            let m = Mechanism::all_default();
+            let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");
         }
         #[test]
         fn with_rrdata_is_none() {
-            let m: Mechanism<String> = Mechanism::all_default().into();
+            let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
             assert_eq!(m.is_fail(), true);
             assert_eq!(m.raw(), "all");
             assert_eq!(m.to_string(), "-all");
             assert_eq!(m.rrdata, None);
         }
         #[test]
+        #[cfg(feature = "builder")]
         fn mechanism_all() {
             use crate::spf::mechanism::Kind;
             let m: Mechanism<All> = Mechanism::default();

@@ -1,5 +1,6 @@
 use crate::{SpfBuilder, SpfError};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum SpfValidationResult<'a> {
     Valid(&'a SpfBuilder),

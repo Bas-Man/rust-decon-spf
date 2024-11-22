@@ -1,5 +1,7 @@
 #[cfg(feature = "builder")]
-mod builder_results;
+pub(crate) mod builder_results;
+#[cfg(feature = "builder")]
+use crate::SpfBuilder;
 #[cfg(test)]
 mod tests;
 mod validate_string;
@@ -10,6 +12,7 @@ use crate::spf::SpfError;
 pub trait Validate {
     fn validate_version(&self) -> Result<(), SpfError>;
     fn validate_length(&self) -> Result<(), SpfError>;
+    #[allow(dead_code)]
     fn validate_ptr(&self) -> Result<(), SpfError> {
         Ok(())
     }
@@ -73,14 +76,15 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
     Ok(())
 }
 
-/*
 #[cfg(feature = "ptr")]
+#[cfg(feature = "builder")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     match spf.ptr {
         Some(_) => Err(SpfError::DeprecatedPtrPresent),
         None => Ok(()),
     }
 }
+#[cfg(feature = "builder")]
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
 pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
@@ -90,6 +94,7 @@ pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
     Ok(())
 }
 
+#[cfg(feature = "builder")]
 pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     let mut lookup_count: usize = 0;
 
@@ -108,6 +113,7 @@ pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     lookup_count
 }
 
+#[cfg(feature = "builder")]
 #[allow(dead_code)]
 pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfError> {
     if spf.is_valid {
@@ -123,4 +129,3 @@ pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfE
     spf.is_valid = true;
     Ok(spf)
 }
-*/

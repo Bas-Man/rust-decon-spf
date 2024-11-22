@@ -362,6 +362,7 @@ impl SpfBuilder {
         self.append(mechanism);
         self
     }
+
     #[allow(dead_code)]
     pub(crate) fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
         match rfc {
@@ -378,7 +379,6 @@ impl SpfBuilder {
             Err(x) => SpfValidationResult::InValid(x),
         }
     }
-
     fn build_spf_string(&self) -> String {
         let mut spf = String::new();
         spf.push_str(self.version());

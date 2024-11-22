@@ -20,13 +20,13 @@ mod default_checks {
 
 mod minus_all {
     use super::*;
-    use crate::mechanism::Mechanism;
+    use crate::mechanism::{Kind, Mechanism, Qualifier};
 
     #[test]
     fn minimum_spf() {
         let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
         assert_eq!(spf.version(), "v=spf1");
-        let m: Mechanism<String> = Mechanism::all_default().into();
+        let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
         assert_eq!(*spf.all().unwrap(), m);
     }
 }

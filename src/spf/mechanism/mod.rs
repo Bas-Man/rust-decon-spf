@@ -12,6 +12,7 @@
 //! - The `Mechanism` struct also has a number of specific methods which can be used to create related mechanisms; which are
 //! used with the `FromStr` trait.
 //!
+#[cfg(feature = "builder")]
 pub(crate) mod builder;
 mod errors;
 mod kind;
@@ -92,9 +93,11 @@ impl FromStr for Mechanism<String> {
                 ));
             }
         } else if s.ends_with(core::ALL) && (s.len() == 3 || s.len() == 4) {
-            m = Some(
-                Mechanism::all_with_qualifier(core::return_and_remove_qualifier(s, 'a').0).into(),
-            );
+            m = Some(Mechanism::generic_inclusive(
+                Kind::All,
+                core::return_and_remove_qualifier(s, 'a').0,
+                None,
+            ));
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(mechanism);
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
