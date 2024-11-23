@@ -62,7 +62,7 @@ impl FromStr for Spf<String> {
             }
         }
         if redirect {
-            // all_idx should not be greater han redirect_idx.
+            // all_idx should not be greater than redirect_idx.
             // all_idx should be 0 if a redirect mechanism was parsed.
             if all_idx > redirect_idx {
                 return Err(SpfError::RedirectWithAllMechanism);

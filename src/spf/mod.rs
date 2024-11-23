@@ -57,6 +57,9 @@ where
             mechanism_iter: self.mechanisms.iter(),
         }
     }
+    fn len(&self) -> usize {
+        self.mechanisms.len()
+    }
 }
 
 impl<T> IntoIterator for Spf<T> {
