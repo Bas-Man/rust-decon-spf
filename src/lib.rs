@@ -35,4 +35,3 @@ mod spf;
 pub use crate::spf::builder::SpfBuilder;
 pub use crate::spf::{Spf, SpfError};
 pub use spf::mechanism::{self};
-//pub use spf::mechanism::{Kind, Mechanism, MechanismError, ParsedMechanism, Qualifier};
