@@ -470,6 +470,7 @@ impl SpfBuilder {
             return Err(SpfError::LookupLimitExceeded);
         }
         let mut redirect_idx = 0;
+        let mut has_redirect = false;
         let mut all_idx = 0;
         let mut mechanisms: Vec<Mechanism<String>> = Vec::with_capacity(10);
 
@@ -501,12 +502,14 @@ impl SpfBuilder {
         }
         if let Some(redirect) = self.redirect {
             mechanisms.push(redirect);
+            has_redirect = true;
             redirect_idx = mechanisms.len() - 1;
         }
         Ok(Spf::<String> {
             source: "".to_string(),
             version: self.version,
             redirect_idx,
+            has_redirect,
             all_idx,
             mechanisms,
         })
