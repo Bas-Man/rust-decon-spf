@@ -9,7 +9,7 @@ pub enum SpfError {
     InvalidSource,
     /// Version is invalid
     InvalidVersion,
-    /// Source string length exceeds 255 Characters
+    /// Source string length exceeds 512 Characters
     SourceLengthExceeded,
     /// Exceeds RFC lookup limit.
     LookupLimitExceeded,
@@ -19,11 +19,13 @@ pub enum SpfError {
     WhiteSpaceSyntaxError,
     /// Invalid SPF
     InvalidSPF,
-    /// Redirect with `All` Mechanism
+    /// According to RFC7208, **ALL** REDIRECT **MUST** be ignored when found with an 'ALL' Mechanism,
+    /// irrespective of relative location.
+    /// [See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)
     RedirectWithAllMechanism,
-    /// Redirect Not Final Mechanism
+    /// REDIRECT **SHOULD** be the final item given in an Spf record when present.
     RedirectNotFinalMechanism(u8),
-    /// Modifiers May only occur once in any Spf Record
+    /// Modifiers may only occur once in any Spf Record
     ModifierMayOccurOnlyOnce(Kind),
     /// Network Address is not valid
     InvalidIPAddr(IpNetworkError),
@@ -49,7 +51,7 @@ impl std::fmt::Display for SpfError {
             }
             SpfError::InvalidSPF => write!(f, "Spf record is invalid."),
             SpfError::RedirectWithAllMechanism => {
-                write!(f, "Redirect with unexpected 'All' Mechanism")
+                write!(f, "Spf record contains both a 'REDIRECT' modifier and 'ALL' mechanism.\nAccording to RFC7208 any redirect MUST be ignored in this case.\n[See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)")
             }
             SpfError::RedirectNotFinalMechanism(err) => write!(f, "Redirect not last mechanism. Found at idx: {}", err),
             SpfError::ModifierMayOccurOnlyOnce(kind) => write!(f, "Mechanism: {} occurred more than once.", kind),
