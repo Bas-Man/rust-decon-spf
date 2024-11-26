@@ -25,6 +25,7 @@ pub struct Spf<T> {
     source: T,
     version: T,
     redirect_idx: usize,
+    has_redirect: bool,
     all_idx: usize,
     mechanisms: Vec<Mechanism<T>>,
 }
@@ -57,6 +58,7 @@ where
             mechanism_iter: self.mechanisms.iter(),
         }
     }
+    #[allow(dead_code)]
     fn len(&self) -> usize {
         self.mechanisms.len()
     }

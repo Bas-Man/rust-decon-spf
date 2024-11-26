@@ -26,12 +26,12 @@ impl Validate for Spf<String> {
         Ok(())
     }
 
-    #[cfg(feature = "ptr")]
     /// Check for the existence of a `ptr` mechanism.
-    /// # Results:
-    ///     Ok: If `ptr` is not present.
+    ///  Results:
+    ///     Ok If 'ptr' is not present.
     ///     SpfError::DeprecatedPtrPresent if present.
-    /// A `ptr` should generally not be used according to RFC...
+    /// A 'ptr' should generally not be used according to RFC...
+    #[cfg(feature = "ptr")]
     fn validate_ptr(&self) -> Result<(), SpfError> {
         for m in self.iter() {
             if m.kind() == &Kind::Ptr {
@@ -42,7 +42,14 @@ impl Validate for Spf<String> {
     }
 
     fn validate_redirect_all(&self) -> Result<(), SpfError> {
-        todo!()
+        if self.all_idx == self.redirect_idx {
+            return Ok(());
+        } else if self.all().is_some() && self.has_redirect {
+            return Err(SpfError::RedirectWithAllMechanism);
+        } else if (self.redirect_idx != self.len() - 1) && self.has_redirect {
+            return Err(SpfError::RedirectNotFinalMechanism(self.redirect_idx as u8));
+        }
+        Ok(())
     }
 
     /// Check that the number of looks up does not exceed the limit: 10

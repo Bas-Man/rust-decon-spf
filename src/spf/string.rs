@@ -49,6 +49,7 @@ impl FromStr for Spf<String> {
                     Kind::Redirect => {
                         if !redirect {
                             redirect = true;
+                            spf.has_redirect = true;
                             redirect_idx = idx;
                         } else {
                             return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
@@ -135,10 +136,52 @@ impl Spf<String> {
     fn validate(&self) -> Result<(), SpfError> {
         self.validate_version()?;
         self.validate_length()?;
-        #[cfg(feature = "ptr")]
         self.validate_ptr()?;
         self.validate_lookup_count()?;
         self.validate_redirect_all()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod string_tests {
+    use crate::{Spf, SpfError};
+
+    #[test]
+    fn basic_disallow() {
+        let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+        assert!(!spf.source.is_empty());
+        assert_eq!(spf.redirect(), None);
+        assert_eq!(spf.has_redirect, false);
+        assert_eq!(spf.all_idx, 0);
+        assert_eq!(spf.all().unwrap().to_string(), "-all");
+        let validation_result = spf.validate();
+        assert!(validation_result.is_ok());
+    }
+    #[test]
+    #[cfg(not(feature = "ptr"))]
+    fn ptr_allowed_() {
+        let spf = "v=spf1 ptr -all".parse::<Spf<String>>().unwrap();
+        assert!(!spf.source.is_empty());
+        assert_eq!(spf.redirect(), None);
+        assert_eq!(spf.has_redirect, false);
+        assert_eq!(spf.all_idx, 1);
+        let validation_result = spf.validate();
+        assert!(validation_result.is_ok());
+    }
+    #[test]
+    #[cfg(feature = "ptr")]
+    fn ptr_not_allowed_() {
+        let spf = "v=spf1 ptr -all".parse::<Spf<String>>().unwrap();
+        assert!(!spf.source.is_empty());
+        assert_eq!(spf.redirect(), None);
+        assert_eq!(spf.has_redirect, false);
+        assert_eq!(spf.all_idx, 1);
+        let validation_result = spf.validate();
+        assert!(validation_result.is_err());
+        assert_eq!(
+            validation_result.unwrap_err(),
+            SpfError::DeprecatedPtrPresent
+        );
     }
 }

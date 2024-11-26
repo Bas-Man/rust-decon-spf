@@ -12,7 +12,6 @@ use crate::spf::SpfError;
 pub trait Validate {
     fn validate_version(&self) -> Result<(), SpfError>;
     fn validate_length(&self) -> Result<(), SpfError>;
-    #[allow(dead_code)]
     fn validate_ptr(&self) -> Result<(), SpfError> {
         Ok(())
     }
