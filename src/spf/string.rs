@@ -103,15 +103,15 @@ impl Spf<String> {
     /// Give access to the redirect modifier if present
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         if self.redirect_idx == 0 {
-            return match self
+            match self
                 .mechanisms
                 .first()
                 .expect("There should be a Mechanism<>")
                 .kind()
             {
-                Kind::Redirect => return self.mechanisms.first(),
+                Kind::Redirect => self.mechanisms.first(),
                 _ => None,
-            };
+            }
         } else {
             Some(&self.mechanisms[self.redirect_idx])
         }
@@ -119,34 +119,58 @@ impl Spf<String> {
     /// Give access to the `all` mechanism if it is present.
     pub fn all(&self) -> Option<&Mechanism<String>> {
         if self.all_idx == 0 {
-            return match self
+            match self
                 .mechanisms
                 .first()
                 .expect("There should be a Mechanism<>")
                 .kind()
             {
-                Kind::All => return self.mechanisms.first(),
+                Kind::All => self.mechanisms.first(),
                 _ => None,
-            };
+            }
         } else {
             Some(&self.mechanisms[self.all_idx])
         }
     }
     #[allow(dead_code)]
-    fn validate(&self) -> Result<(), SpfError> {
-        self.validate_version()?;
-        self.validate_length()?;
-        self.validate_ptr()?;
-        self.validate_lookup_count()?;
-        self.validate_redirect_all()?;
-        Ok(())
+    fn validate(&self) -> Result<(), Vec<SpfError>> {
+        let mut spf_errors: Vec<SpfError> = Vec::new();
+
+        // Handle hard errors that stop further validation
+        for check in [self.validate_version(), self.validate_length()] {
+            if let Err(e) = check {
+                return Err(vec![e]);
+            }
+        }
+
+        // Handle soft errors that allow continued validation
+        let soft_checks = [
+            self.validate_ptr(),
+            self.validate_lookup_count(),
+            self.validate_redirect_all(),
+        ];
+
+        for check in soft_checks {
+            if let Err(e) = check {
+                spf_errors.push(e);
+            }
+        }
+
+        // Return errors if any occurred
+        if spf_errors.is_empty() {
+            Ok(())
+        } else {
+            Err(spf_errors)
+        }
     }
 }
 
 #[cfg(test)]
 mod string_tests {
-    use crate::{Spf, SpfError};
+    use crate::Spf;
 
+    #[cfg(feature = "ptr")]
+    use crate::SpfError;
     #[test]
     fn basic_disallow() {
         let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
@@ -177,11 +201,9 @@ mod string_tests {
         assert_eq!(spf.redirect(), None);
         assert_eq!(spf.has_redirect, false);
         assert_eq!(spf.all_idx, 1);
-        let validation_result = spf.validate();
-        assert!(validation_result.is_err());
-        assert_eq!(
-            validation_result.unwrap_err(),
-            SpfError::DeprecatedPtrPresent
-        );
+        let validation_result_vec = spf.validate();
+        assert!(validation_result_vec.is_err());
+        let result = validation_result_vec.unwrap_err();
+        assert_eq!(result[0], SpfError::DeprecatedPtrPresent);
     }
 }
