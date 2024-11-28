@@ -132,7 +132,6 @@ impl Spf<String> {
             Some(&self.mechanisms[self.all_idx])
         }
     }
-    #[allow(dead_code)]
     fn validate(&self) -> Result<(), Vec<SpfError>> {
         let mut spf_errors: Vec<SpfError> = Vec::new();
 
