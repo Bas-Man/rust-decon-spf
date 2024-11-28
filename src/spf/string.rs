@@ -166,6 +166,7 @@ impl Spf<String> {
 
 #[cfg(test)]
 mod string_tests {
+    use crate::mechanism::Kind;
     use crate::Spf;
 
     #[cfg(feature = "ptr")]
@@ -204,5 +205,14 @@ mod string_tests {
         assert!(validation_result_vec.is_err());
         let result = validation_result_vec.unwrap_err();
         assert_eq!(result[0], SpfError::DeprecatedPtrPresent);
+    }
+
+    #[test]
+    #[cfg(feature = "ptr")]
+    fn multiple_redirects() {
+        let spf = "v=spf1 redirect=_spf.example.com redirect=_spf.example.com"
+            .parse::<Spf<String>>()
+            .unwrap_err();
+        assert_eq!(spf, SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
     }
 }
