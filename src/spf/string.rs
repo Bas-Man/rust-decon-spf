@@ -1,5 +1,5 @@
 use crate::mechanism::{Kind, Mechanism};
-use crate::spf::validate::{self, Validate};
+use crate::spf::validate::{self, check_whitespaces, Validate};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 use std::convert::TryFrom;
@@ -26,6 +26,7 @@ impl FromStr for Spf<String> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
         validate::check_spf_length(s)?;
+        // Todo: Move this to validate() function? This is a soft error?
         validate::check_whitespaces(s)?;
 
         // Index of Redirect Mechanism
@@ -147,6 +148,8 @@ impl Spf<String> {
             self.validate_ptr(),
             self.validate_lookup_count(),
             self.validate_redirect_all(),
+            // todo: Consider changing this to be part of Trait Validate??
+            check_whitespaces(&self.source),
         ];
 
         for check in soft_checks {
