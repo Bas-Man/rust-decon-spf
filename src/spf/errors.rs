@@ -19,8 +19,8 @@ pub enum SpfError {
     WhiteSpaceSyntaxError,
     /// Invalid SPF
     InvalidSPF,
-    /// According to RFC7208, **ALL** REDIRECT **MUST** be ignored when found with an 'ALL' Mechanism,
-    /// irrespective of relative location.
+    /// According to RFC7208, **ALL** REDIRECT **MUST** be ignored when found with an\
+    /// 'ALL' Mechanism, irrespective of relative location.\
     /// [See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)
     RedirectWithAllMechanism,
     /// REDIRECT **SHOULD** be the final item given in an Spf record when present.
