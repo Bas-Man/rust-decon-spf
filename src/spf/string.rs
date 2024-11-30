@@ -21,6 +21,10 @@ impl Display for Spf<String> {
     }
 }
 
+/// Implement parse for `Spf<String>`
+/// # Errors
+/// - Invalid Version
+/// - String length exceeds 512 octets (characters)
 impl FromStr for Spf<String> {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -133,7 +137,18 @@ impl Spf<String> {
             Some(&self.mechanisms[self.all_idx])
         }
     }
-    fn validate(&self) -> Result<(), Vec<SpfError>> {
+
+    /// Validation of for `Spf<String>`
+    /// # Errors
+    /// - Hard Errors
+    ///     - Version Check
+    ///     - String Length check
+    /// - Soft Errors
+    ///     - Deprecated PTR
+    ///     - Lookup Count
+    ///     - Redirect and All together warning
+    ///     - Redirect not final item warning
+    pub fn validate(&self) -> Result<(), Vec<SpfError>> {
         let mut spf_errors: Vec<SpfError> = Vec::new();
 
         // Handle hard errors that stop further validation
