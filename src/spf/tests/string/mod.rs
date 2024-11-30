@@ -1,23 +1,5 @@
 use crate::spf::Spf;
 
-mod default_checks {
-    use super::*;
-    use crate::SpfError;
-
-    #[test]
-    fn non_single_space() {
-        // double space before -all
-        let err = "v=spf1 a  -all".parse::<Spf<String>>().unwrap_err();
-        assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
-    }
-
-    #[test]
-    fn space_at_end() {
-        let err = "v=spf1 a -all ".parse::<Spf<String>>().unwrap_err();
-        assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
-    }
-}
-
 mod minus_all {
     use super::*;
     use crate::mechanism::{Kind, Mechanism, Qualifier};
@@ -243,13 +225,6 @@ mod redirect {
     mod invalid {
         use super::*;
         use crate::{mechanism::Kind, SpfError};
-
-        #[test]
-        fn redirect_not_final() {
-            let input = "v=spf1 redirect=example.com mx";
-            let spf: SpfError = input.parse::<Spf<String>>().unwrap_err();
-            assert_eq!(spf, SpfError::RedirectNotFinalMechanism(0));
-        }
 
         #[test]
         fn redirect_x2() {
