@@ -31,7 +31,10 @@ pub enum SpfError {
     InvalidIPAddr(IpNetworkError),
     /// SpfError for an invalid Mechanism
     InvalidMechanism(MechanismError),
-    /// Deprecated PTR Present in Spf Record
+    /// Deprecated PTR Present in Spf record.
+    ///
+    /// According to RFCs `ptr` is obsolete and should not be used.
+    /// [See Section: 5.5](https://datatracker.ietf.org/doc/html/rfc7208#section-5.5)
     DeprecatedPtrPresent,
 }
 

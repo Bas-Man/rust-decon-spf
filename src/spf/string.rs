@@ -122,16 +122,27 @@ impl Spf<String> {
         }
     }
 
-    /// Validation of for `Spf<String>`
-    /// # Errors
+    /// Validation for `Spf<String>`
+    /// # Examples
+    /// ```rust
+    /// use decon_spf::{Spf, SpfError};
+    /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+    /// assert!(spf.validate().is_ok());
+    /// let spf = "v=spf1 redirect=_spf.example.com -all".parse::<Spf<String>>().unwrap();
+    /// assert!(spf.validate().is_err());
+    /// assert_eq!(spf.validate().unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+    /// ```
+    /// # Returns
+    /// Either Ok or a `Vec<SpfError>`
+    /// # Errors: [SpfError]
     /// - Hard Errors
-    ///     - Version Check
-    ///     - String Length check
+    ///     - [Invalid version](SpfError::InvalidVersion)
+    ///     - [Source Length Exceeded](SpfError::SourceLengthExceeded)
     /// - Soft Errors
-    ///     - Deprecated PTR
-    ///     - Lookup Count
-    ///     - Redirect and All together warning
-    ///     - Redirect not final item warning
+    ///     - [Deprecated PTR detected](SpfError::DeprecatedPtrPresent)
+    ///     - [Lookup Count Exceeded](SpfError::LookupLimitExceeded)
+    ///     - [Redirect & All](SpfError::RedirectWithAllMechanism)
+    ///     - [Redirect Position](SpfError::RedirectNotFinalMechanism)
     pub fn validate(&self) -> Result<(), Vec<SpfError>> {
         let mut spf_errors: Vec<SpfError> = Vec::new();
 
