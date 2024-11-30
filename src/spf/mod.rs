@@ -2,6 +2,7 @@
 //! constituent parts.  
 //! It is not intended to validate the spf record.
 
+#[cfg_attr(docsrs, doc(cfg(feature = "builder")))]
 #[cfg(feature = "builder")]
 pub mod builder;
 mod errors;
