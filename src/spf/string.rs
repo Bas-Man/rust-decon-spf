@@ -33,8 +33,6 @@ impl FromStr for Spf<String> {
 
         // Index of Redirect Mechanism
         let mut redirect_idx: usize = 0;
-        // There exists a redirect mechanism
-        let mut redirect = false;
         // Index of All Mechanism
         let mut all_idx = 0;
         let mut idx = 0;
@@ -50,8 +48,7 @@ impl FromStr for Spf<String> {
                 let m_str = m.parse::<Mechanism<String>>()?;
                 match *m_str.kind() {
                     Kind::Redirect => {
-                        if !redirect {
-                            redirect = true;
+                        if !spf.has_redirect {
                             spf.has_redirect = true;
                             redirect_idx = idx;
                         } else {
@@ -63,17 +60,6 @@ impl FromStr for Spf<String> {
                 }
                 spf.mechanisms.push(m_str);
                 idx += 1;
-            }
-        }
-        if redirect {
-            // all_idx should not be greater than redirect_idx.
-            // all_idx should be 0 if a redirect mechanism was parsed.
-            if all_idx > redirect_idx {
-                return Err(SpfError::RedirectWithAllMechanism);
-            }
-            // redirect_idx should be the last item if it exists.
-            if redirect_idx != idx - 1 {
-                return Err(SpfError::RedirectNotFinalMechanism(redirect_idx as u8));
             }
         }
         spf.source = s.to_string();
