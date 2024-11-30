@@ -28,6 +28,7 @@ fn main() {
     println!("{:?}", spf_record);
     println!("\nSource Attribute Output");
     println!("SPF1: {}\n", spf_record.to_string());
+    spf_record.validate().expect("invalid spf");
 }
 
 fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf<String> {
