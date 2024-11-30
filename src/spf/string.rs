@@ -30,8 +30,6 @@ impl FromStr for Spf<String> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
         validate::check_spf_length(s)?;
-        // Todo: Move this to validate() function? This is a soft error?
-        validate::check_whitespaces(s)?;
 
         // Index of Redirect Mechanism
         let mut redirect_idx: usize = 0;
