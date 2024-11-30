@@ -31,11 +31,10 @@ pub enum SpfError {
     InvalidIPAddr(IpNetworkError),
     /// SpfError for an invalid Mechanism
     InvalidMechanism(MechanismError),
-    /// Deprecated PTR Present in Spf record.
-    ///
+    /// Deprecated `ptr` detected in Spf record.\
     /// According to RFCs `ptr` is obsolete and should not be used.
     /// [See Section: 5.5](https://datatracker.ietf.org/doc/html/rfc7208#section-5.5)
-    DeprecatedPtrPresent,
+    DeprecatedPtrDetected,
 }
 
 impl std::fmt::Display for SpfError {
@@ -60,7 +59,7 @@ impl std::fmt::Display for SpfError {
             SpfError::ModifierMayOccurOnlyOnce(kind) => write!(f, "Mechanism: {} occurred more than once.", kind),
             SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
             SpfError::InvalidMechanism(err) => write!(f, "{}", err),
-            SpfError::DeprecatedPtrPresent => write!(
+            SpfError::DeprecatedPtrDetected => write!(
                 f,
                 "Deprecated Ptr mechanism detected.\nThe use of this mechanism is highly discouraged"
             ),

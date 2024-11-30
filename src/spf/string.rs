@@ -139,7 +139,7 @@ impl Spf<String> {
     ///     - [Invalid version](SpfError::InvalidVersion)
     ///     - [Source Length Exceeded](SpfError::SourceLengthExceeded)
     /// - Soft Errors
-    ///     - [Deprecated PTR detected](SpfError::DeprecatedPtrPresent)
+    ///     - [Deprecated PTR detected](SpfError::DeprecatedPtrDetected)
     ///     - [Lookup Count Exceeded](SpfError::LookupLimitExceeded)
     ///     - [Redirect & All](SpfError::RedirectWithAllMechanism)
     ///     - [Redirect Position](SpfError::RedirectNotFinalMechanism)
@@ -216,7 +216,7 @@ mod tests {
         let validation_result_vec = spf.validate();
         assert!(validation_result_vec.is_err());
         let result = validation_result_vec.unwrap_err();
-        assert_eq!(result[0], SpfError::DeprecatedPtrPresent);
+        assert_eq!(result[0], SpfError::DeprecatedPtrDetected);
     }
 
     mod hard_errors {

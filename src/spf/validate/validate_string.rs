@@ -35,7 +35,7 @@ impl Validate for Spf<String> {
     fn validate_ptr(&self) -> Result<(), SpfError> {
         for m in self.iter() {
             if m.kind() == &Kind::Ptr {
-                return Err(SpfError::DeprecatedPtrPresent);
+                return Err(SpfError::DeprecatedPtrDetected);
             }
         }
         Ok(())

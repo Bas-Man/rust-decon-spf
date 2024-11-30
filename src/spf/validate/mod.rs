@@ -79,7 +79,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
 #[cfg(feature = "builder")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     match spf.ptr {
-        Some(_) => Err(SpfError::DeprecatedPtrPresent),
+        Some(_) => Err(SpfError::DeprecatedPtrDetected),
         None => Ok(()),
     }
 }
