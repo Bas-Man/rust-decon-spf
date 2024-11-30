@@ -167,8 +167,7 @@ impl Spf<String> {
 }
 
 #[cfg(test)]
-mod string_tests {
-    use crate::mechanism::Kind;
+mod tests {
     use crate::Spf;
 
     #[cfg(feature = "ptr")]
@@ -209,12 +208,40 @@ mod string_tests {
         assert_eq!(result[0], SpfError::DeprecatedPtrPresent);
     }
 
-    #[test]
-    #[cfg(feature = "ptr")]
-    fn multiple_redirects() {
-        let spf = "v=spf1 redirect=_spf.example.com redirect=_spf.example.com"
-            .parse::<Spf<String>>()
-            .unwrap_err();
-        assert_eq!(spf, SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
+    mod hard_errors {
+        use crate::mechanism::Kind;
+        use crate::{Spf, SpfError};
+
+        #[test]
+        #[cfg(feature = "ptr")]
+        fn multiple_redirects() {
+            let spf = "v=spf1 redirect=_spf.example.com redirect=_spf.example.com"
+                .parse::<Spf<String>>()
+                .unwrap_err();
+            assert_eq!(spf, SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
+        }
+    }
+    mod soft_errors {
+        use crate::{Spf, SpfError};
+
+        #[test]
+        #[cfg(feature = "ptr")]
+        fn redirect_with_all() {
+            let spf = "v=spf1 redirect=_spf.example.com -all"
+                .parse::<Spf<String>>()
+                .unwrap()
+                .validate();
+
+            assert_eq!(spf.unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+        }
+        #[test]
+        #[cfg(feature = "ptr")]
+        fn all_with_redirect() {
+            let spf = "v=spf1 -all redirect=_spf.example.com"
+                .parse::<Spf<String>>()
+                .unwrap()
+                .validate();
+            assert_eq!(spf.unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+        }
     }
 }
