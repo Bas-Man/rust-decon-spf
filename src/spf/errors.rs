@@ -168,9 +168,11 @@ impl SpfErrors {
     pub(crate) fn register_source(&mut self, source: String) {
         self.source = source;
     }
+    /// Gives access to the Spf string that was being parsed.
     pub fn source(&self) -> &String {
         &self.source
     }
+    /// Gives access to the **Soft** errors contained within the Spf string.
     pub fn errors(&self) -> &Vec<SpfError> {
         self.errors.as_ref()
     }
