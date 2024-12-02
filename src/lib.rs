@@ -22,7 +22,9 @@
 //! - `strict-dns` (Disabled by default.)  
 //!   This enables syntactical checking of Domain Names.
 //!     - When enabled it changes the behaviour of `FromStr` for `Mechanism<String>` and
-//! `ParsedMechanism`. By default, `Mechanism<String>`'s `rrdata` is not checked.
+//! `ParsedMechanism`. By default, `rrdata` is not checked.\
+//!   When `strict-dns` is enabled an invalid domain host will be seen as **Hard** error.
+//! Any additional parsing will be halted.
 //! - `builder` (Disabled by default.)\
 //!   This enables the use of [SpfBuilder] and its related features\
 //!   You are able to convert and `Spf<String>` `into()` an `SpfBuilder` Struct.
