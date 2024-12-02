@@ -263,5 +263,22 @@ mod tests {
                 SpfError::RedirectWithAllMechanism
             );
         }
+
+        #[cfg(feature = "strict-dns")]
+        mod strict_dns {
+            use crate::mechanism::MechanismError;
+            use crate::{Spf, SpfError};
+
+            #[test]
+            fn test() {
+                let spf = "v=spf1 redirect=_spf.example.xx -all"
+                    .parse::<Spf<String>>()
+                    .unwrap_err();
+                assert!(matches!(
+                    spf,
+                    SpfError::InvalidMechanism(MechanismError::InvalidDomainHost(_))
+                ))
+            }
+        }
     }
 }
