@@ -1,4 +1,5 @@
 use crate::mechanism::{Kind, Mechanism};
+use crate::spf::errors::SpfErrors;
 use crate::spf::validate::{self, check_whitespaces, Validate};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
@@ -125,12 +126,12 @@ impl Spf<String> {
     /// Validation for `Spf<String>`
     /// # Examples
     /// ```rust
-    /// use decon_spf::{Spf, SpfError};
+    /// use decon_spf::{Spf, SpfError, SpfErrors};
     /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
     /// assert!(spf.validate().is_ok());
     /// let spf = "v=spf1 redirect=_spf.example.com -all".parse::<Spf<String>>().unwrap();
     /// assert!(spf.validate().is_err());
-    /// assert_eq!(spf.validate().unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+    /// assert_eq!(spf.validate().unwrap_err().errors()[0], SpfError::RedirectWithAllMechanism);
     /// ```
     /// # Returns
     /// Either Ok or a `Vec<SpfError>`
@@ -143,13 +144,15 @@ impl Spf<String> {
     ///     - [Lookup Count Exceeded](SpfError::LookupLimitExceeded)
     ///     - [Redirect & All](SpfError::RedirectWithAllMechanism)
     ///     - [Redirect Position](SpfError::RedirectNotFinalMechanism)
-    pub fn validate(&self) -> Result<(), Vec<SpfError>> {
-        let mut spf_errors: Vec<SpfError> = Vec::new();
+    pub fn validate(&self) -> Result<(), SpfErrors> {
+        let mut errors = SpfErrors::new();
 
         // Handle hard errors that stop further validation
         for check in [self.validate_version(), self.validate_length()] {
             if let Err(e) = check {
-                return Err(vec![e]);
+                errors.register_source(self.source.clone());
+                errors.register_error(e);
+                return Err(errors);
             }
         }
 
@@ -164,15 +167,15 @@ impl Spf<String> {
 
         for check in soft_checks {
             if let Err(e) = check {
-                spf_errors.push(e);
+                errors.register_error(e);
             }
         }
-
         // Return errors if any occurred
-        if spf_errors.is_empty() {
+        if errors.errors().is_empty() {
             Ok(())
         } else {
-            Err(spf_errors)
+            errors.register_source(self.source.clone());
+            Err(errors)
         }
     }
 }
@@ -216,7 +219,7 @@ mod tests {
         let validation_result_vec = spf.validate();
         assert!(validation_result_vec.is_err());
         let result = validation_result_vec.unwrap_err();
-        assert_eq!(result[0], SpfError::DeprecatedPtrDetected);
+        assert_eq!(result.errors()[0], SpfError::DeprecatedPtrDetected);
     }
 
     mod hard_errors {
@@ -243,7 +246,10 @@ mod tests {
                 .unwrap()
                 .validate();
 
-            assert_eq!(spf.unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+            assert_eq!(
+                spf.unwrap_err().errors()[0],
+                SpfError::RedirectWithAllMechanism
+            );
         }
         #[test]
         #[cfg(feature = "ptr")]
@@ -252,7 +258,10 @@ mod tests {
                 .parse::<Spf<String>>()
                 .unwrap()
                 .validate();
-            assert_eq!(spf.unwrap_err()[0], SpfError::RedirectWithAllMechanism);
+            assert_eq!(
+                spf.unwrap_err().errors()[0],
+                SpfError::RedirectWithAllMechanism
+            );
         }
     }
 }

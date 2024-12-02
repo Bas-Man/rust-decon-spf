@@ -15,7 +15,8 @@ pub enum SpfError {
     LookupLimitExceeded,
     /// Source Spf String has not been parsed.
     HasNotBeenParsed,
-    /// Only one white space is permitted between mechanisms.
+    /// Only one white space is permitted between mechanisms or extra whitespace at the
+    /// end of the spf string.
     WhiteSpaceSyntaxError,
     /// Invalid SPF
     InvalidSPF,
@@ -145,7 +146,7 @@ impl SpfError {
         )
     }
 }
-/// [SpfErrors] contains a vector of parsing or validation errors which are represented using
+/// Contains a vector of parsing or validation errors which are represented using
 /// various [SpfError] codes.
 #[derive(Debug, Default, Clone)]
 pub struct SpfErrors {
@@ -155,16 +156,16 @@ pub struct SpfErrors {
 
 #[allow(dead_code)]
 impl SpfErrors {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             errors: Vec::new(),
             source: String::new(),
         }
     }
-    pub fn register_error(&mut self, error: SpfError) {
+    pub(crate) fn register_error(&mut self, error: SpfError) {
         self.errors.push(error);
     }
-    pub fn register_source(&mut self, source: String) {
+    pub(crate) fn register_source(&mut self, source: String) {
         self.source = source;
     }
     pub fn source(&self) -> &String {

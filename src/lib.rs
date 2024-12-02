@@ -36,5 +36,6 @@ mod spf;
 
 #[cfg(feature = "builder")]
 pub use crate::spf::builder::SpfBuilder;
+pub use crate::spf::errors::SpfErrors;
 pub use crate::spf::{Spf, SpfError};
 pub use spf::mechanism::{self};
