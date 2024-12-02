@@ -67,7 +67,7 @@ default = ["ptr"]
 builder = []
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
-spf2 = []
+spf2 = ["builder"]
 ptr = []
 
 [package.metadata.docs.rs]
