@@ -23,6 +23,9 @@
 //!   This enables syntactical checking of Domain Names.
 //!     - When enabled it changes the behaviour of `FromStr` for `Mechanism<String>` and
 //! `ParsedMechanism`. By default, `Mechanism<String>`'s `rrdata` is not checked.
+//! - `builder` (Disabled by default.)\
+//!   This enables the use of [SpfBuilder] and its related features\
+//!   You are able to convert and `Spf<String>` `into()` an `SpfBuilder` Struct.
 //! - `spf2` (Disabled by default)  
 //!   This enables the ability to programmatically create Spf2 (SenderID) records. As this
 //!   has become defunct. There is no real need for it. But it remains as an option if desired.
