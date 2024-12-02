@@ -537,17 +537,20 @@ mod parsedmechanism {
 
         mod invalid {
             use super::*;
+            use crate::mechanism::MechanismError;
             #[test]
             fn check() {
                 let input = "+mx:example.xx";
                 let m = ParsedMechanism::new(input);
                 let err = m.unwrap_err();
+                assert!(matches!(err, MechanismError::InvalidDomainHost(_)));
                 assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
             }
         }
     }
     #[cfg(feature = "strict-dns")]
     mod include_invalid {
+        use crate::mechanism::MechanismError;
         use crate::spf::mechanism::ParsedMechanism;
 
         #[test]
@@ -555,6 +558,7 @@ mod parsedmechanism {
             let input = "+include:example.xx";
             let m = ParsedMechanism::new(input);
             let err = m.unwrap_err();
+            assert!(matches!(err, MechanismError::InvalidDomainHost(_)));
             assert_eq!(err.to_string(), "Invalid DNS string: example.xx");
         }
     }
