@@ -1,6 +1,5 @@
 //! This module allows you to deconstruct an existing SPF DNS record into its
 //! constituent parts.  
-//! It is not intended to validate the spf record.
 
 #[cfg_attr(docsrs, doc(cfg(feature = "builder")))]
 #[cfg(feature = "builder")]
@@ -53,7 +52,8 @@ where
     pub fn version(&self) -> &T {
         &self.version
     }
-    /// Iterate over the Spf Mechanisms of the Spf Record. This does not return the Spf `version`
+    /// Iterate over the Spf Mechanisms of the Spf Record. This does not return the Spf `version`,
+    /// but iterates over the mechanisms contained within the Spf record.
     pub fn iter(&self) -> SpfIterator<'_, T> {
         SpfIterator {
             mechanism_iter: self.mechanisms.iter(),

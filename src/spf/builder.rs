@@ -42,6 +42,7 @@ impl Iterator for SpfBuilderIterator {
     }
 }
 
+/// Converts a `Spf<String> into a `SpfBuilder`struct.
 impl From<Spf<String>> for SpfBuilder {
     fn from(source: Spf<String>) -> Self {
         let mut new_spf = SpfBuilder::new();
@@ -73,7 +74,7 @@ impl Display for SpfBuilder {
 ///
 /// // Additional Space between `A` and `MX`
 /// let invalid_input = "v=spf1 a   mx -all";
-/// let err: SpfError =invalid_input.parse::<SpfBuilder>().unwrap_err();
+/// let err: SpfError = invalid_input.parse::<SpfBuilder>().unwrap_err();
 /// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///```

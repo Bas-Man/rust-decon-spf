@@ -1,13 +1,14 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-//! This crate is responsible for providing tools to access and modify information about spf records.
-//! Provides methods for building spf records programmatically.
+//! This crate is responsible for providing tools to parse and validate Spf Records.
+//! When the `builder` features is enabled access to the [SpfBuilder] struct and related
+//! functions is provided.
 //!
+//! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)
 //!
-//! For a list of supported *Modifiers* and *Mechanism*. See [`Kind`](mechanism::Kind)  
-//!
-//! This crate is able to deconstruct `v=spf1` and `spf2.0` records.
+//! This crate is able to deconstruct `v=spf1` and `spf2.0` records. *Note:* Spf2.0 records are
+//! essentially defunct are its support is for historical reasons and may be removed in a future release.
 //!
 //! # Abilities:
 //! - Check and Set Spf record version. See: [`Spf Versions`](SpfBuilder::set_v1)
@@ -17,9 +18,10 @@
 //!     - [`Mechanism::Kind`](mechanism::Mechanism::kind)
 //!
 //! # Feature Flags:
-//! - `ptr` (Enabled by default.)  
-//!    This feature will impact a future validation feature.
-//! - `strict-dns` (Disabled by default.)  
+//! - `ptr` (Enabled by default.)\
+//!   The `ptr` mechanism is highly discouraged. If you want to allow it without warnings, then you
+//! should provide the `--no-default-features` option.
+//! - `strict-dns` (Disabled by default.)
 //!   This enables syntactical checking of Domain Names.
 //!     - When enabled it changes the behaviour of `FromStr` for `Mechanism<String>` and
 //! `ParsedMechanism`. By default, `rrdata` is not checked.\

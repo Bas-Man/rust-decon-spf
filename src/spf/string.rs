@@ -26,6 +26,9 @@ impl Display for Spf<String> {
 /// # Errors
 /// - Invalid Version
 /// - String length exceeds 512 octets (characters)
+///
+/// # Soft Errors
+/// These will be found when calling `validate()` on `Spf<String>`
 impl FromStr for Spf<String> {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
