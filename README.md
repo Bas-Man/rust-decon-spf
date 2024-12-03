@@ -35,7 +35,8 @@ $ cargo run -F serde --example serde-demo
 
 ## Syntax Validation
 
-This crate is not intended to provide syntax validation.  
+Whilst this crate is not intended to provide syntax validation, some validation has been added as
+of Version **0.3.0**.  
 If you are looking to validate your SPF record. I would suggest you use one of
 the following:
 

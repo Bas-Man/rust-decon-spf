@@ -1,32 +1,32 @@
-0.3.0 2024-0X-XX
+0.3.0 2024-12-03
 ================
 
 - Breaking Changes
-  - `Spf` Struct renamed to `SpfBuilder`  and placed behind `builder` flag
-  - New simplified `Spf<T>` struct defined
-  - New Spf<String> Implementation
+    - `Spf` struct renamed to `SpfBuilder` and placed behind a `builder` flag.
+    - New simplified `Spf<T>` struct defined.
+    - New Spf<String> Implementation.
 
 ___
 
 - Add
-  
-  - `iter()` functionality for `Spf` & `SpfBuilder`
-  - `From` implementations
-    - From `Mechanism<IpNetwork>` for `Mechanism<String>`
-    - From `Mechanism<All>` for `Mechanism<String>`
-    - From `Spf<String>` for `SpfBuilder`
-  - `trait Appendable`
-    - This provides a dynamically dispatched `append()` function that accepts
-      either a `Mechanism<String>` or `Mechanism<IpNetwork>`
-  - `validate()` for Spf<String>
-    - This function returns either `()` or `Vec<SpfError>`
+
+    - `iter()` functionality for `Spf` & `SpfBuilder`
+    - `From` implementations
+        - From `Mechanism<IpNetwork>` for `Mechanism<String>`
+        - From `Mechanism<All>` for `Mechanism<String>`
+        - From `Spf<String>` for `SpfBuilder`
+    - `trait Appendable`
+        - This provides a dynamically dispatched `append()` function that accepts
+          either a `Mechanism<String>` or `Mechanism<IpNetwork>`
+    - `validate()` for `Spf<String>`
+        - This function returns either `()` or a `SpfErrors`
 
 - Fix
-  
-  - `Mechanism<IpNetwork>`
-    - This Mechanism now correctly returns IP Addresses and Networks.
-      Previously `ip4:192.168.1.10` would later be returned as `ip4:192.168.1.10/32`.
-      This has now been corrected for both ip4 and ip6.
+
+    - `Mechanism<IpNetwork>`
+        - This Mechanism now correctly returns IP Addresses and Networks.
+          Previously `ip4:192.168.1.10` would later be returned as `ip4:192.168.1.10/32`.
+          This has now been corrected for both ip4 and ip6.
 
 ___
 
@@ -34,7 +34,7 @@ ___
 ================
 
 - Add Serialize and Deserialize Support
-  - Requires the serde feature to be enabled.
+    - Requires the serde feature to be enabled.
 
 0.2.5 2023-11-04
 ================
@@ -47,8 +47,8 @@ ___
 
 - Remove code which has been deprecated since 0.2.0
 - Implement `strict-dns` feature
-  - Use crate `addr` to validate *domain* information for `a`, `mx`, `ptr`, `include`, and `exists`
-  - See: `examples/build-spf-strict.rs`
+    - Use crate `addr` to validate *domain* information for `a`, `mx`, `ptr`, `include`, and `exists`
+    - See: `examples/build-spf-strict.rs`
 - Deprecate `Mechanism::new_` functions.
 - Breaking Change: Rename some `MechanismError::` messages.
 
@@ -84,14 +84,14 @@ Changes
 - Bump Version to 0.2.0
 - Add this CHANGELOG.md file.
 - Complete re-orginisation of the crate's module layout.
-  - Note that spf::{qualifier::Qualifier, kinds::MechanismKind, mechanism::Mechanism} no longer exist. These can now
-    be accessed more simply as:
-    - mechanism::{Qualifer, Kind, Mechanism}
+    - Note that spf::{qualifier::Qualifier, kinds::MechanismKind, mechanism::Mechanism} no longer exist. These can now
+      be accessed more simply as:
+        - mechanism::{Qualifer, Kind, Mechanism}
 - Correct license reference to correctly show as MIT license
 - Introduced ability to build SPF records programmatically.
-  - See examples/build-new-spf.rs
+    - See examples/build-new-spf.rs
 - Implemented **Display** trait for structs *Spf* and *Mechanism*
-  - This also depreciates the previously implemented *as_spf()* and *string()* methods.
+    - This also depreciates the previously implemented *as_spf()* and *string()* methods.
 - implemented **FromStr** trait for Struct *Spf*
 - Implemented Errors for `Mechanism`
 - Improved regular expressions to handle more strings when parsing.
