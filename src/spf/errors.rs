@@ -58,6 +58,7 @@ impl std::fmt::Display for SpfError {
             }
             SpfError::RedirectNotFinalMechanism => write!(f, "Redirect not last mechanism."),
             SpfError::ModifierMayOccurOnlyOnce(kind) => write!(f, "Mechanism: {} occurred more than once.", kind),
+            // Is this even needed?
             SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
             SpfError::InvalidMechanism(err) => write!(f, "{}", err),
             SpfError::DeprecatedPtrDetected => write!(
