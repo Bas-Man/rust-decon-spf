@@ -1,11 +1,25 @@
-use crate::mechanism::{Mechanism, Qualifier};
+use crate::spf::mechanism::{Mechanism, Qualifier};
 use ipnetwork::IpNetwork;
 use lazy_static::lazy_static;
 use regex::Regex;
 pub(crate) mod spf_regex;
 
 /// This is the maximum number of characters that an Spf Record can store.
-pub(crate) const MAX_SPF_STRING_LENGTH: usize = 255;
+pub(crate) const MAX_SPF_STRING_LENGTH: usize = 512;
+
+/// Spf Versions
+pub(crate) const SPF1: &str = "v=spf1";
+pub(crate) const SPF2_PRA: &str = "spf2.0/pra";
+pub(crate) const SPF2_MFROM: &str = "spf2.0/mfrom";
+pub(crate) const SPF2_PRA_MFROM: &str = "spf2.0/pra,mfrom";
+pub(crate) const SPF2_MFROM_PRA: &str = "spf2.0/mfrom,pra";
+
+/// Mechanism Const Slices
+pub(crate) const REDIRECT: &str = "redirect=";
+pub(crate) const INCLUDE: &str = "include:";
+pub(crate) const ALL: &str = "all";
+pub(crate) const IP4: &str = "ip4:";
+pub(crate) const IP6: &str = "ip6:";
 
 /// Check for white space in spf record.
 ///
@@ -107,6 +121,7 @@ fn test_remove_qualifier() {
 }
 
 // builds a string representation of the mechanisms stored in the Vec<Mechanism<String>>
+#[allow(dead_code)]
 pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     let mut partial_spf = String::new();
     for i in str.iter() {
@@ -115,6 +130,7 @@ pub(crate) fn build_spf_str(str: &[Mechanism<String>]) -> String {
     partial_spf
 }
 
+#[allow(dead_code)]
 // builds a string representation of the mechanisms stored in the Vec<Mechanism<IpNetwork>>
 pub(crate) fn build_spf_str_from_ip(str: &[Mechanism<IpNetwork>]) -> String {
     let mut partial_spf = String::new();

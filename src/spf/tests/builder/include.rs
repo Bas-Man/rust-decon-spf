@@ -1,6 +1,6 @@
 mod parse {
 
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
 
     #[test]
     fn test_include() {

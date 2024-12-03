@@ -20,7 +20,7 @@ mod parse {
     }
     mod invalid {
         use super::*;
-        use crate::mechanism::MechanismError;
+        use crate::spf::mechanism::MechanismError;
         use crate::spf::SpfError;
 
         #[test]

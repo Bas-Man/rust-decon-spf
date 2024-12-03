@@ -1,7 +1,7 @@
 //! An enumeration of possible qualifiers that are used in Mechanism record.
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Declaration for possible `Qualifier` of a given Mechanism
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
@@ -115,7 +115,7 @@ fn as_neutral() {
 #[cfg(test)]
 #[cfg(feature = "serde")]
 mod serde_test {
-    use crate::mechanism::Qualifier;
+    use crate::spf::mechanism::Qualifier;
     use serde_json;
 
     #[test]
@@ -124,7 +124,7 @@ mod serde_test {
         let json = serde_json::to_string(&q).unwrap();
         assert_eq!(json, "\"Pass\"");
         let deserialized: Qualifier = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized,q);
+        assert_eq!(deserialized, q);
     }
 
     #[test]
@@ -135,5 +135,4 @@ mod serde_test {
         let deserialized: Qualifier = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, q);
     }
-
 }

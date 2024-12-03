@@ -1,9 +1,23 @@
 #[cfg(feature = "builder")]
+pub(crate) mod builder_results;
+#[cfg(feature = "builder")]
+use crate::SpfBuilder;
 #[cfg(test)]
 mod tests;
+mod validate_string;
 
 use crate::core::{self, spf_check_whitespace};
-use crate::spf::{SpfBuilder, SpfError};
+use crate::spf::SpfError;
+
+pub trait Validate {
+    fn validate_version(&self) -> Result<(), SpfError>;
+    fn validate_length(&self) -> Result<(), SpfError>;
+    fn validate_ptr(&self) -> Result<(), SpfError> {
+        Ok(())
+    }
+    fn validate_redirect_all(&self) -> Result<(), SpfError>;
+    fn validate_lookup_count(&self) -> Result<(), SpfError>;
+}
 
 #[allow(dead_code)]
 pub enum SpfRfcStandard {
@@ -11,45 +25,30 @@ pub enum SpfRfcStandard {
     // Add Rfc7208. I think this should be changed to a struct and then make traits
 }
 
-#[derive(Debug)]
-pub enum SpfValidationResult<'a> {
-    Valid(&'a SpfBuilder),
-    InValid(SpfError),
-}
-
-impl<'a> std::fmt::Display for SpfValidationResult<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SpfValidationResult::Valid(obj) => write!(f, "{}", obj),
-            SpfValidationResult::InValid(obj) => write!(f, "{}", obj),
-        }
-    }
-}
-
 /// Checks that the spf record has the minimum start string of "v=spf1" or
 /// "spf2.0"
-/// Returns Ok() or and [`InvalidSource`](SpfError::InvalidSource)
+/// Returns Ok() or and [`InvalidVersion`](SpfError::InvalidVersion)
 pub(crate) fn check_start_of_spf(spf_string: &str) -> Result<(), SpfError> {
-    if spf_string.starts_with("v=spf1")
-        || spf_string.starts_with("spf2.0/pra")
-        || spf_string.starts_with("spf2.0/mfrom")
-        || spf_string.starts_with("spf2.0/pra,mfrom")
-        || spf_string.starts_with("spf2.0/mfrom,pra")
+    if spf_string.starts_with(core::SPF1)
+        || spf_string.starts_with(core::SPF2_PRA)
+        || spf_string.starts_with(core::SPF2_MFROM)
+        || spf_string.starts_with(core::SPF2_PRA_MFROM)
+        || spf_string.starts_with(core::SPF2_MFROM_PRA)
     {
         Ok(())
     } else {
-        Err(SpfError::InvalidSource)
+        Err(SpfError::InvalidVersion)
     }
 }
 
 #[test]
 fn valid_versions() {
     let input = vec![
-        "v=spf1",
-        "spf2.0/pra",
-        "spf2.0/mfrom",
-        "spf2.0/pra,mfrom",
-        "spf2.0/mfrom,pra",
+        core::SPF1,
+        core::SPF2_PRA,
+        core::SPF2_MFROM,
+        core::SPF2_PRA_MFROM,
+        core::SPF2_MFROM_PRA,
     ];
     for v in input.into_iter() {
         assert_eq!(check_start_of_spf(v), Ok(()))
@@ -77,14 +76,14 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
 }
 
 #[cfg(feature = "ptr")]
+#[cfg(feature = "builder")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
-    if spf.ptr.is_some() {
-        Err(SpfError::DeprecatedPtrPresent)
-    } else {
-        Ok(())
+    match spf.ptr {
+        Some(_) => Err(SpfError::DeprecatedPtrDetected),
+        None => Ok(()),
     }
 }
-
+#[cfg(feature = "builder")]
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
 pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
@@ -94,6 +93,7 @@ pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
     Ok(())
 }
 
+#[cfg(feature = "builder")]
 pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     let mut lookup_count: usize = 0;
 
@@ -112,6 +112,7 @@ pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     lookup_count
 }
 
+#[cfg(feature = "builder")]
 #[allow(dead_code)]
 pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfError> {
     if spf.is_valid {

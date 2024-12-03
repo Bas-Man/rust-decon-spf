@@ -28,9 +28,13 @@ name = "decon_spf"
 path = "src/lib.rs"
 
 [[example]]
-name = "trust-dns-demo"
-path = "examples/trust-dns-demo.rs"
+name = "trust-dns-builder"
+path = "examples/trust-dns-demo-builder.rs"
 required-features = ["builder"]
+
+[[example]]
+name = "trust-dns-spf"
+path = "examples/trust-dns-demo-spf.rs"
 
 [[example]]
 name = "build-spf"
@@ -49,21 +53,21 @@ required-features = ["serde", "spf2"]
 
 [dependencies]
 ipnetwork = "0.20.0"
-regex = "1.10.2"
-lazy_static = "1.4.0"
+regex = "1.11.1"
+lazy_static = "1.5.0"
 addr = { version = "0.15.6", optional = true }
-serde = { version = "1.0.196", features = ["derive"], optional = true }
+serde = { version = "1.0.215", features = ["derive"], optional = true }
 
 [dev-dependencies]
 trust-dns-resolver = "0.23.2"
-serde_json = { version = "1.0.113" }
+serde_json = { version = "1.0.133" }
 
 [features]
 default = ["ptr"]
 builder = []
 strict-dns = ["dep:addr"]
 serde = ["dep:serde"]
-spf2 = []
+spf2 = ["builder"]
 ptr = []
 
 [package.metadata.docs.rs]

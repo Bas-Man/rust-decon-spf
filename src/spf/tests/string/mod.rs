@@ -1,23 +1,15 @@
 use crate::spf::Spf;
 
-#[cfg(feature = "serde")]
-mod serde;
-
-mod default_checks {
+mod minus_all {
     use super::*;
-    use crate::SpfError;
+    use crate::mechanism::{Kind, Mechanism, Qualifier};
 
     #[test]
-    fn non_single_space() {
-        // double space before -all
-        let err = "v=spf1 a  -all".parse::<Spf<String>>().unwrap_err();
-        assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
-    }
-
-    #[test]
-    fn space_at_end() {
-        let err = "v=spf1 a -all ".parse::<Spf<String>>().unwrap_err();
-        assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
+    fn minimum_spf() {
+        let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+        assert_eq!(spf.version(), "v=spf1");
+        let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
+        assert_eq!(*spf.all().unwrap(), m);
     }
 }
 
@@ -36,6 +28,7 @@ mod a {
             assert_eq!(spf.version(), "v=spf1");
             assert_eq!(spf.is_v1(), true);
             assert_eq!(spf.mechanisms.len(), 2);
+            assert_eq!(spf.all().unwrap().to_string(), "-all");
         }
 
         #[test]
@@ -59,7 +52,7 @@ mod a {
         #[cfg(feature = "strict-dns")]
         mod strict {
             use super::*;
-            use crate::{MechanismError, SpfError};
+            use crate::{mechanism::MechanismError, SpfError};
 
             mod invalid {
                 use super::*;
@@ -95,7 +88,7 @@ mod a {
 
     mod invalid {
         use super::*;
-        use crate::MechanismError;
+        use crate::mechanism::MechanismError;
         use crate::SpfError;
 
         #[test]
@@ -173,7 +166,7 @@ mod ip {
 
         mod invalid {
             use super::*;
-            use crate::MechanismError::InvalidIPNetwork;
+            use crate::mechanism::MechanismError::InvalidIPNetwork;
             use crate::SpfError;
             use ipnetwork::IpNetwork;
 
@@ -199,13 +192,23 @@ mod redirect {
 
     mod valid {
         use super::*;
-        use crate::Kind;
+        use crate::mechanism::{Kind, Mechanism, Qualifier};
 
+        #[test]
+        fn redirect_at_start() {
+            let spf: Spf<String> = "v=spf1 redirect=example.com".parse().unwrap();
+            let m: Mechanism<String> = Mechanism::redirect(Qualifier::Pass, "example.com").unwrap();
+            assert_eq!(spf.redirect().unwrap(), &m);
+        }
         #[test]
         fn redirect_final() {
             let input = "v=spf1 mx redirect=_spf.example.com";
             let spf: Spf<String> = input.parse().unwrap();
             assert_eq!(spf.version, "v=spf1");
+            assert_eq!(
+                spf.redirect().unwrap().rr_data().as_ref().unwrap(),
+                "_spf.example.com"
+            );
             assert_eq!(spf.mechanisms[1].kind(), &Kind::Redirect);
             assert_eq!(spf.redirect_idx, 1);
             assert_eq!(spf.mechanisms.len(), 2);
@@ -221,14 +224,7 @@ mod redirect {
 
     mod invalid {
         use super::*;
-        use crate::{Kind, SpfError};
-
-        #[test]
-        fn redirect_not_final() {
-            let input = "v=spf1 redirect=example.com mx";
-            let spf: SpfError = input.parse::<Spf<String>>().unwrap_err();
-            assert_eq!(spf, SpfError::RedirectNotFinalMechanism(0));
-        }
+        use crate::{mechanism::Kind, SpfError};
 
         #[test]
         fn redirect_x2() {
@@ -241,7 +237,7 @@ mod redirect {
 
 #[cfg(feature = "builder")]
 mod spf_to_spf_builder {
-    use crate::{Mechanism, Qualifier, Spf, SpfBuilder};
+    use crate::{mechanism::Mechanism, mechanism::Qualifier, Spf, SpfBuilder};
 
     #[test]
     fn basic() {
@@ -252,7 +248,7 @@ mod spf_to_spf_builder {
         let mut builder_hand = SpfBuilder::new();
         builder_hand.set_v1(); // Needed for testing
         builder_hand.append_string_mechanism(Mechanism::a(Qualifier::Pass));
-        builder_hand.append_string_mechanism(Mechanism::all(Qualifier::Fail));
+        builder_hand.append_string_mechanism(Mechanism::all_default().into());
 
         assert_eq!(builder_hand, builder_from);
     }
@@ -272,5 +268,20 @@ mod iter {
             assert_eq!(m.to_string(), m_list[idx]);
             idx = idx + 1;
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+mod serde {
+    use super::*;
+    use serde_json;
+
+    #[test]
+    fn basic() {
+        let input = "v=spf1 a -all";
+        let spf: Spf<String> = input.parse().unwrap();
+        let spf_as_json = serde_json::to_string(&spf).unwrap();
+        assert_eq!(spf_as_json,
+                   "{\"source\":\"v=spf1 a -all\",\"version\":\"v=spf1\",\"redirect_idx\":0,\"has_redirect\":false,\"all_idx\":1,\"mechanisms\":[{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null},{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}]}");
     }
 }

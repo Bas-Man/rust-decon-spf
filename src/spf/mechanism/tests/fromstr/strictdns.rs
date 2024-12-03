@@ -1,6 +1,6 @@
 mod a {
-    use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::Mechanism;
+    use crate::spf::mechanism::MechanismError;
     #[test]
     fn basic_pass_rrdata_invalid_domain() {
         let input = "+a:example.xx";
@@ -11,8 +11,8 @@ mod a {
     }
 }
 mod include {
-    use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::Mechanism;
+    use crate::spf::mechanism::MechanismError;
     #[test]
     fn basic_pass_rrdata_invalid_domain() {
         let input = "+include:example.xx";
@@ -23,8 +23,8 @@ mod include {
     }
 }
 mod mx {
-    use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::Mechanism;
+    use crate::spf::mechanism::MechanismError;
     #[test]
     fn basic_pass_rrdata_invalid_domain() {
         let input = "+mx:example.xx";
@@ -35,8 +35,8 @@ mod mx {
     }
 }
 mod ptr {
-    use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::Mechanism;
+    use crate::spf::mechanism::MechanismError;
     #[test]
     fn basic_pass_rrdata_invalid_domain() {
         let input = "+ptr:example.xx";
@@ -47,8 +47,8 @@ mod ptr {
     }
 }
 mod exists {
-    use crate::mechanism::Mechanism;
-    use crate::mechanism::MechanismError;
+    use crate::spf::mechanism::Mechanism;
+    use crate::spf::mechanism::MechanismError;
     #[test]
     fn basic_pass_rrdata_invalid_domain() {
         let input = "+exists:example.xx";

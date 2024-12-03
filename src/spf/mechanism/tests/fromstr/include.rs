@@ -1,6 +1,6 @@
 #[cfg(test)]
-use crate::mechanism::Mechanism;
-use crate::mechanism::MechanismError;
+use crate::spf::mechanism::Mechanism;
+use crate::spf::mechanism::MechanismError;
 
 #[test]
 fn default() {

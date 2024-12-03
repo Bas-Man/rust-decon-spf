@@ -1,5 +1,5 @@
-use crate::spf::SpfBuilder;
-use crate::{Mechanism, Qualifier};
+use crate::mechanism::{Mechanism, Qualifier};
+use crate::SpfBuilder;
 use ipnetwork::IpNetwork;
 
 #[test]
@@ -10,7 +10,7 @@ fn basic() {
     spf.set_v1()
         .append_string_mechanism(Mechanism::a(Qualifier::Pass))
         .append_string_mechanism(Mechanism::mx(Qualifier::Pass))
-        .append_string_mechanism(Mechanism::all(Qualifier::Fail));
+        .append_string_mechanism(Mechanism::all_default().into());
     assert_eq!(spf.to_string(), input);
 }
 
@@ -22,7 +22,7 @@ fn include_x2() {
     spf.set_v1()
         .append_string_mechanism(Mechanism::include(Qualifier::Pass, "test.com").unwrap())
         .append_string_mechanism(Mechanism::include(Qualifier::Pass, "example.com").unwrap())
-        .append_string_mechanism(Mechanism::all(Qualifier::Fail));
+        .append_string_mechanism(Mechanism::all_default().into());
     assert_eq!(spf.includes().unwrap().len(), 2);
     assert_eq!(spf.to_string(), input);
 }
@@ -48,6 +48,6 @@ fn ip4_x3() {
             .parse::<Mechanism<IpNetwork>>()
             .unwrap(),
     );
-    spf.append_string_mechanism(Mechanism::all(Qualifier::Fail));
+    spf.append_string_mechanism(Mechanism::all_default().into());
     assert_eq!(spf.to_string(), input);
 }

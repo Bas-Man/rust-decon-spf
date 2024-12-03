@@ -1,4 +1,4 @@
-use crate::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
+use crate::spf::mechanism::{Kind, Mechanism, MechanismError, Qualifier};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -90,7 +90,7 @@ pub(crate) fn capture_matches(
 
 #[cfg(test)]
 mod a {
-    use crate::mechanism::Kind;
+    use crate::spf::mechanism::Kind;
 
     #[test]
     fn test_match_on_a_only() {
@@ -130,7 +130,7 @@ mod a {
 
     #[cfg(test)]
     mod invalid {
-        use crate::mechanism::{Kind, MechanismError};
+        use crate::spf::mechanism::{Kind, MechanismError};
         use crate::spf::Mechanism;
 
         #[test]
@@ -165,7 +165,7 @@ mod a {
 
 #[cfg(test)]
 mod exists {
-    use crate::mechanism::{Kind, MechanismError};
+    use crate::spf::mechanism::{Kind, MechanismError};
 
     #[test]
     fn basic() {
@@ -205,7 +205,7 @@ mod exists {
 
 #[cfg(test)]
 mod mx {
-    use crate::mechanism::Kind;
+    use crate::spf::mechanism::Kind;
 
     #[test]
     fn match_on_mx_only() {
@@ -244,7 +244,7 @@ mod mx {
     }
 
     mod invalid {
-        use crate::mechanism::{Kind, Mechanism, MechanismError};
+        use crate::spf::mechanism::{Kind, Mechanism, MechanismError};
 
         #[test]
         fn mx_colon_only() {
@@ -278,7 +278,7 @@ mod mx {
 
 #[cfg(test)]
 mod ptr {
-    use crate::mechanism::{Kind, MechanismError};
+    use crate::spf::mechanism::{Kind, MechanismError};
 
     #[test]
     fn match_on_ptr() {

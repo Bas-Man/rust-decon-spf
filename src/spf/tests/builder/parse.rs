@@ -1,6 +1,6 @@
 mod valid_spf_from_str {
-    use crate::spf::SpfBuilder;
     use crate::spf::SpfError;
+    use crate::SpfBuilder;
 
     #[test]
     fn test_redirect() {
@@ -9,14 +9,14 @@ mod valid_spf_from_str {
         let spf: SpfBuilder = input.parse().unwrap();
 
         assert_eq!(spf.is_redirect(), true);
-        assert_eq!(spf.include.is_none(), true);
-        assert_eq!(spf.a.is_none(), true);
-        assert_eq!(spf.mx.is_none(), true);
-        assert_eq!(spf.ip4.is_none(), true);
-        assert_eq!(spf.ip6.is_none(), true);
-        assert_eq!(spf.ptr.is_none(), true);
-        assert_eq!(spf.exists.is_none(), true);
-        assert_eq!(spf.all.is_none(), true);
+        assert_eq!(spf.includes().is_none(), true);
+        assert_eq!(spf.a().is_none(), true);
+        assert_eq!(spf.mx().is_none(), true);
+        assert_eq!(spf.ip4().is_none(), true);
+        assert_eq!(spf.ip6().is_none(), true);
+        assert_eq!(spf.ptr().is_none(), true);
+        assert_eq!(spf.exists().is_none(), true);
+        assert_eq!(spf.all().is_none(), true);
         assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
         assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
         assert_eq!(
@@ -82,8 +82,8 @@ mod valid_spf_from_str {
 
 #[cfg(test)]
 mod invalid_spf_from_str {
-    use crate::spf::SpfBuilder;
     use crate::spf::SpfError;
+    use crate::SpfBuilder;
 
     #[test]
     fn invalid_spf1() {
@@ -92,9 +92,9 @@ mod invalid_spf_from_str {
         assert_eq!(spf.is_err(), true);
         let err = spf.unwrap_err();
         assert_eq!(err.is_spf_error(), true);
-        assert_eq!(err.is_invalid_source(), true);
-        assert_eq!(err.to_string(), "Source string not valid.");
-        assert_eq!(err, SpfError::InvalidSource);
+        assert_eq!(err.version_is_invalid(), true);
+        assert_eq!(err.to_string(), "Version string not valid.");
+        assert_eq!(err, SpfError::InvalidVersion);
     }
 
     #[test]
@@ -135,9 +135,9 @@ mod invalid_spf_from_str {
 
 #[cfg(test)]
 mod invalid_ip {
-    use crate::mechanism::MechanismError::InvalidIPNetwork;
-    use crate::spf::SpfBuilder;
+    use crate::spf::mechanism::MechanismError::InvalidIPNetwork;
     use crate::spf::SpfError;
+    use crate::SpfBuilder;
     use crate::SpfError::InvalidMechanism;
     use ipnetwork::IpNetworkError::InvalidAddr;
 

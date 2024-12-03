@@ -1,15 +1,16 @@
-use crate::spf::SpfBuilder;
-use crate::{Mechanism, Qualifier};
+use crate::mechanism::{Mechanism, Qualifier};
+use crate::SpfBuilder;
 
 mod valid {
     use super::*;
+    use crate::spf::builder::Append;
 
     #[test]
     fn default() {
         let mut spf: SpfBuilder = SpfBuilder::new();
         spf.set_v1();
-        spf.append_mechanism_of_a(Mechanism::a(Qualifier::Pass));
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::SoftFail));
+        spf.append_mechanism(Mechanism::a(Qualifier::Pass));
+        spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_pass(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "a");
@@ -27,7 +28,7 @@ mod valid {
     fn mechanism_slash_cidr() {
         let mut spf: SpfBuilder = SpfBuilder::new();
         spf.set_v1();
-        spf.append_string_mechanism(Mechanism::a(Qualifier::Fail).with_rrdata("/24").unwrap());
+        spf.append(Mechanism::a(Qualifier::Fail).with_rrdata("/24").unwrap());
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_fail(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "-a/24");
@@ -39,12 +40,12 @@ mod valid {
     #[test]
     fn mechanism_colon_domain() {
         let mut spf: SpfBuilder = SpfBuilder::new();
-        spf.append_mechanism_of_a(
+        spf.append(
             Mechanism::a(Qualifier::Neutral)
                 .with_rrdata("example.com")
                 .unwrap(),
         );
-        spf.append_mechanism_of_all(Mechanism::new_all_with_qualifier(Qualifier::SoftFail));
+        spf.append(Mechanism::all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");
@@ -62,7 +63,7 @@ mod valid {
                 .with_rrdata("example.com")
                 .unwrap(),
         );
-        spf.append_mechanism(Mechanism::all(Qualifier::SoftFail));
+        spf.append(Mechanism::all_with_qualifier(Qualifier::SoftFail));
         assert!(spf.a().is_some());
         assert_eq!(spf.a().unwrap()[0].qualifier().is_neutral(), true);
         assert_eq!(spf.a().unwrap()[0].to_string(), "?a:example.com");

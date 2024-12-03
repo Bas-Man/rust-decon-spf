@@ -1,5 +1,5 @@
+use decon_spf::mechanism::{Mechanism, ParsedMechanism, Qualifier};
 use decon_spf::SpfBuilder;
-use decon_spf::{Mechanism, ParsedMechanism, Qualifier};
 use serde_json;
 
 fn main() {
@@ -30,7 +30,7 @@ fn main() {
     let mut spf2 = SpfBuilder::new();
     spf2.set_v2_pra();
     spf2.append_mechanism(Mechanism::a(Qualifier::Pass));
-    spf2.append_mechanism(Mechanism::all(Qualifier::Neutral));
+    spf2.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Neutral));
 
     println!("\nNew spf 2: >{}<", spf2);
     let spf_as_json = serde_json::to_string_pretty(&spf2).unwrap();

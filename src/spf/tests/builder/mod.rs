@@ -8,3 +8,5 @@ mod ip6;
 mod mx;
 mod parse;
 mod ptr;
+#[cfg(feature = "serde")]
+mod serde;

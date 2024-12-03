@@ -15,7 +15,8 @@ pub enum MechanismError {
     NotIpNetworkMechanism,
     /// Attempted to access a Mechanism as a `Mechanism<String>` but is `Mechanism<IpNetwork>`
     NotStringMechanism,
-    /// Indicates that the host record is not valid. Does not conform to RFC1123
+    /// Indicates that the host record is not valid. Does not conform to
+    /// [RFC1123](https://datatracker.ietf.org/doc/html/rfc1123)
     InvalidDomainHost(String),
 }
 

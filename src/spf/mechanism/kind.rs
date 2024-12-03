@@ -44,12 +44,12 @@ pub enum Kind {
     /// Represents a Mechanism of type *ptr*
     /// # Note:
     /// This is rarely use.
-    Ptr,
-    /// Represents a Mechanism of type *exists*  
-    ///```text
+    /// ```text
     /// ptr
     /// ptr:<domain>
-    ///```
+    /// ```
+    Ptr,
+    /// Represents a Mechanism of type *exists*  
     Exists,
     /// Represents a Mechanism of type *All*
     All,
@@ -77,7 +77,7 @@ impl Kind {
     /// # Examples:
     ///
     /// ```
-    /// # use decon_spf::Kind;
+    /// # use decon_spf::mechanism::Kind;
     /// let ip4 = Kind::IpV4;
     /// let ip6 = Kind::IpV6;
     /// assert_eq!(ip4.is_ip_v4(), true);
@@ -115,7 +115,7 @@ impl Kind {
     /// # Examples:
     ///
     /// ```rust
-    /// # use decon_spf::Kind;
+    /// # use decon_spf::mechanism::Kind;
     /// let a = Kind::A;
     /// let mx = Kind::MX;
     /// assert_eq!(a.as_str(), "a");
@@ -204,7 +204,7 @@ fn all() {
 #[cfg(test)]
 #[cfg(feature = "serde")]
 mod serde_tests {
-    use crate::mechanism::Kind;
+    use crate::spf::mechanism::Kind;
     use serde_json;
 
     #[test]

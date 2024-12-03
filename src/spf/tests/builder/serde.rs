@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::spf::SpfBuilder;
+use crate::SpfBuilder;
 use serde_json;
 
 #[test]

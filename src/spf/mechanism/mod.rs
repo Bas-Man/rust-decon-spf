@@ -1,17 +1,24 @@
-//! This module contains the tools and functions to dealing with Mechanisms found within an Spf DNS record.  
+//! This module contains the tools and functions to dealing with Mechanisms found within a
+//! Spf DNS record.
 //!
-//! The Mechanism struct stores information about the `mechanism` or `modifier` found in the string representation
-//! of the `Spf` record. It contains a number of methods for transversing and accessing this data.
+//! The Mechanism struct stores information about the `mechanism` or `modifier` found in the
+//! string representation of the `Spf` record. It contains a number of methods for transversing
+//! and accessing this data.
 //!
 //! The module also contains a number of ways to create the `Mechanism` instances.
 //! - [`ParsedMechanism`]
-//!     - This provides a unified method for parsing any mechanism string. It will either contain a `Mechanism<String>`
+//!     - This provides a unified method for parsing any mechanism string. It will either contain
+//! a `Mechanism<String>`
 //! or a `Mechanism<IpNetwork>` if the string is successfully parsed.
-//! - Both `Mechanism<String>` and `Mechanism<IpNetwork>` have the `FromStr` trait implemented. Allowing for the strings
+//! - Both `Mechanism<String>` and `Mechanism<IpNetwork>` have the `FromStr` trait implemented.
+//! Allowing for the strings
 //! to be `parsed()`
-//! - The `Mechanism` struct also has a number of specific methods which can be used to create related mechanisms; which are
-//! used with the `FromStr` trait.
+//! - The `Mechanism` struct also has a number of specific methods which can be used to create
+//! related mechanisms; which are used with the `FromStr` trait.
 //!
+#[cfg(feature = "builder")]
+#[cfg_attr(docsrs, doc(cfg(feature = "builder")))]
+pub(crate) mod builder;
 mod errors;
 mod kind;
 mod parsedmechanism;
@@ -19,10 +26,10 @@ mod qualifier;
 #[cfg(test)]
 mod tests;
 
-pub use crate::mechanism::errors::MechanismError;
-pub use crate::mechanism::kind::Kind;
-pub use crate::mechanism::parsedmechanism::ParsedMechanism;
-pub use crate::mechanism::qualifier::Qualifier;
+pub use crate::spf::mechanism::errors::MechanismError;
+pub use crate::spf::mechanism::kind::Kind;
+pub use crate::spf::mechanism::parsedmechanism::ParsedMechanism;
+pub use crate::spf::mechanism::qualifier::Qualifier;
 
 use crate::core;
 
@@ -33,7 +40,7 @@ use std::{convert::TryFrom, str::FromStr};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Stores its [`Kind`], [`Qualifier`], and its `Value`
+/// Stores its [`Kind`], [`Qualifier`], and its `rrdata`
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mechanism<T> {
@@ -42,44 +49,11 @@ pub struct Mechanism<T> {
     rrdata: Option<T>,
 }
 
-#[cfg(test)]
-#[cfg(feature = "serde")]
-mod serde_tests {
-    use super::*;
-    use serde_json;
-
-    #[test]
-    fn a() {
-        let a: Mechanism<String> = "a".parse().unwrap();
-        let json = serde_json::to_string(&a).unwrap();
-
-        assert_eq!(
-            json,
-            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
-        );
-        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, a);
-    }
-
-    #[test]
-    fn mx() {
-        let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
-        let json = serde_json::to_string(&mx).unwrap();
-
-        assert_eq!(
-            json,
-            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
-        );
-        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, mx);
-    }
-}
-
 /// Create a `Mechanism<String>` from the provided string.
 ///
 /// # Examples:
 ///```rust
-/// # use decon_spf::Mechanism;
+/// # use decon_spf::mechanism::Mechanism;
 /// let a: Mechanism<String> = "a".parse().unwrap();
 /// assert_eq!(a.kind().is_a(), true);
 ///
@@ -100,12 +74,12 @@ impl FromStr for Mechanism<String> {
         if s.ends_with(':') || s.ends_with('/') {
             return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         };
-        if s.contains("ip4:") || s.contains("ip6:") {
+        if s.contains(core::IP4) || s.contains(core::IP6) {
             return Err(MechanismError::InvalidMechanismFormat(s.to_string()));
         }
         let mut m: Option<Mechanism<String>> = None;
 
-        if s.contains("redirect=") {
+        if s.contains(core::REDIRECT) {
             let mut items = s.rsplit('=');
             if let Some(rrdata) = items.next() {
                 m = Some(Mechanism::generic_inclusive(
@@ -114,7 +88,7 @@ impl FromStr for Mechanism<String> {
                     Some(rrdata.to_string()),
                 ));
             }
-        } else if s.contains("include:") {
+        } else if s.contains(core::INCLUDE) {
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             if let Some(rrdata) = s.rsplit(':').next() {
                 m = Some(Mechanism::generic_inclusive(
@@ -123,8 +97,12 @@ impl FromStr for Mechanism<String> {
                     Some(rrdata.to_string()),
                 ));
             }
-        } else if s.ends_with("all") && (s.len() == 3 || s.len() == 4) {
-            m = Some(Mechanism::all(core::return_and_remove_qualifier(s, 'a').0));
+        } else if s.ends_with(core::ALL) && (s.len() == 3 || s.len() == 4) {
+            m = Some(Mechanism::generic_inclusive(
+                Kind::All,
+                core::return_and_remove_qualifier(s, 'a').0,
+                None,
+            ));
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::A) {
             m = Some(mechanism);
         } else if let Ok(mechanism) = core::spf_regex::capture_matches(s, Kind::MX) {
@@ -173,7 +151,7 @@ impl TryFrom<Mechanism<String>> for Mechanism<IpNetwork> {
 ///
 /// # Examples:
 ///```rust
-/// # use decon_spf::{Mechanism, MechanismError};
+/// # use decon_spf::mechanism::{Mechanism, MechanismError};
 /// # use ipnetwork::IpNetwork;
 /// let ip4: Mechanism<IpNetwork> = "ip4:203.32.160.0/24".parse().unwrap();
 /// assert_eq!(ip4.kind().is_ip_v4(), true);
@@ -193,15 +171,15 @@ impl FromStr for Mechanism<IpNetwork> {
     type Err = MechanismError;
 
     fn from_str(s: &str) -> Result<Mechanism<IpNetwork>, Self::Err> {
-        if s.contains("ip4:") || s.contains("ip6:") {
+        if s.contains(core::IP4) || s.contains(core::IP6) {
             let kind;
             let raw_ip: Option<&str>;
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
             match qualifier_and_modified_str {
-                (_, str) if str.contains("ip4") => {
+                (_, str) if str.contains(core::IP4) => {
                     kind = Kind::IpV4;
                 }
-                (_, str) if str.contains("ip6") => {
+                (_, str) if str.contains(core::IP6) => {
                     kind = Kind::IpV6;
                 }
                 // This is probably unreachable.
@@ -303,10 +281,9 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ``` rust
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// # #[cfg(feature = "strict-dns")]
-    /// # use decon_spf::MechanismError;
+    /// # use decon_spf::mechanism::MechanismError;
     /// // New `A` without rrdata.
     /// let m = Mechanism::a(Qualifier::Pass);
     /// assert_eq!(m.kind().is_a(), true);
@@ -339,8 +316,7 @@ impl Mechanism<String> {
     ///
     /// # Example:
     /// ```rust
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// // without rrdata
     /// let mx = Mechanism::mx(Qualifier::Pass);
     /// assert_eq!(mx.kind().is_mx(), true);
@@ -359,8 +335,7 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Include`
     /// # Example:
     /// ```rust
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// let include = Mechanism::include(Qualifier::Pass,
     ///                                         "example.com").unwrap();
     /// assert_eq!(include.qualifier().as_str(), "");
@@ -376,8 +351,7 @@ impl Mechanism<String> {
     /// Create a new Mechanism struct of `Ptr`
     /// # Example:
     /// ```rust
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// // without rrdata
     /// let ptr = Mechanism::ptr(Qualifier::Fail);
     /// assert_eq!(ptr.to_string(), "-ptr");
@@ -413,24 +387,14 @@ impl Mechanism<String> {
                 _ => {}
             };
         }
-        match self.kind() {
-            // Ensure that `All` is always None even if with_rrdata() is called
-            Kind::All => self.rrdata = None,
-            _ => self.rrdata = Some(rrdata_string),
-        }
+        self.rrdata = Some(rrdata_string);
         Ok(self)
     }
-    /// Create a new Mechanism struct of `All`
-    pub fn all(qualifier: Qualifier) -> Self {
-        Mechanism::new(Kind::All, qualifier)
-    }
-
     /// Return the mechanism string stored in the `Mechanism`
     ///
     /// # Example:
     /// ```
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// let mechanism_a = Mechanism::a(Qualifier::Neutral);
     /// assert_eq!(mechanism_a.raw(), "a");
     /// let mechanism_a_string = Mechanism::a(Qualifier::Neutral)
@@ -499,7 +463,7 @@ impl Mechanism<IpNetwork> {
     /// This is really just a convenience function around the `FromStr` trait that
     /// creates a `Mechanism<IpNetwork>`
     ///```
-    /// # use decon_spf::{Mechanism, MechanismError};
+    /// # use decon_spf::mechanism::{Mechanism, MechanismError};
     /// let string = "+ip4:203.32.160.0/24";
     /// if let Ok(m) = Mechanism::ip_from_string(&string) {
     ///   assert_eq!(m.raw(), "203.32.160.0/24");
@@ -516,7 +480,7 @@ impl Mechanism<IpNetwork> {
     /// # Examples:
     /// ```
     /// # use ipnetwork::IpNetwork;
-    /// use decon_spf::{Mechanism, Qualifier};
+    /// use decon_spf::mechanism::{Mechanism, Qualifier};
     ///
     /// // Requires: use ipnetwork::IpNetwork;
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
@@ -559,8 +523,7 @@ impl Mechanism<IpNetwork> {
     ///
     ///```
     /// use ipnetwork::IpNetwork;
-    /// use decon_spf::Qualifier;
-    /// use decon_spf::Mechanism;
+    /// use decon_spf::mechanism::{Qualifier, Mechanism};
     /// let ip: IpNetwork = "192.168.11.0/24".parse().unwrap();
     /// let ip_mechanism = Mechanism::ip(Qualifier::Pass, ip);
     /// assert_eq!(ip_mechanism.raw(), "192.168.11.0/24");
@@ -625,69 +588,35 @@ impl Display for Mechanism<IpNetwork> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct All;
-impl Mechanism<All> {
-    pub fn new_all() -> Self {
-        Self {
-            kind: Kind::All,
-            qualifier: Qualifier::Fail,
-            rrdata: None,
-        }
-    }
-    pub fn new_all_with_qualifier(qualifier: Qualifier) -> Self {
-        Self {
-            kind: Kind::All,
-            qualifier,
-            rrdata: None,
-        }
-    }
-}
-
-impl From<Mechanism<All>> for Mechanism<String> {
-    fn from(m: Mechanism<All>) -> Self {
-        Mechanism::all(m.qualifier)
-    }
-}
-
-impl TryFrom<Mechanism<String>> for Mechanism<All> {
-    type Error = MechanismError;
-
-    fn try_from(m: Mechanism<String>) -> Result<Self, Self::Error> {
-        match m.kind {
-            Kind::All => Ok(Mechanism::new_all_with_qualifier(m.qualifier)),
-            _ => Err(MechanismError::InvalidMechanismFormat(m.to_string())),
-        }
-    }
-}
-
-impl Display for Mechanism<All> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", format!("{}all", self.qualifier))
-    }
-}
 #[cfg(test)]
-mod test_all {
+#[cfg(feature = "serde")]
+mod serde_tests {
     use super::*;
     use serde_json;
+
     #[test]
-    #[cfg(feature = "serde")]
-    fn mech_all_to_all_string() {
-        let m = Mechanism::new_all();
-        assert_eq!(m.qualifier, Qualifier::Fail);
-        assert_eq!(m.rrdata, None);
-        assert_eq!(m.to_string(), "-all");
-        let json = serde_json::to_string(&m).unwrap();
+    fn a() {
+        let a: Mechanism<String> = "a".parse().unwrap();
+        let json = serde_json::to_string(&a).unwrap();
+
         assert_eq!(
             json,
-            "{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}"
+            "{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null}"
         );
-        let m_str: Mechanism<String> = m.into();
-        assert_eq!(m_str.kind, Kind::All);
-        assert_eq!(m_str.rrdata, None);
-        assert_eq!(m_str.to_string(), "-all");
-        let s_json = serde_json::to_string(&m_str).unwrap();
-        assert_eq!(json, s_json);
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, a);
+    }
+
+    #[test]
+    fn mx() {
+        let mx = "mx:example.com".parse::<Mechanism<String>>().unwrap();
+        let json = serde_json::to_string(&mx).unwrap();
+
+        assert_eq!(
+            json,
+            "{\"kind\":\"MX\",\"qualifier\":\"Pass\",\"rrdata\":\"example.com\"}"
+        );
+        let deserialized: Mechanism<String> = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, mx);
     }
 }
