@@ -47,7 +47,7 @@ impl Validate for Spf<String> {
         } else if self.all().is_some() && self.has_redirect {
             return Err(SpfError::RedirectWithAllMechanism);
         } else if (self.redirect_idx != self.len() - 1) && self.has_redirect {
-            return Err(SpfError::RedirectNotFinalMechanism(self.redirect_idx as u8));
+            return Err(SpfError::RedirectNotFinalMechanism);
         }
         Ok(())
     }

@@ -25,7 +25,7 @@ pub enum SpfError {
     /// [See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)
     RedirectWithAllMechanism,
     /// REDIRECT **SHOULD** be the final item given in an Spf record when present.
-    RedirectNotFinalMechanism(u8),
+    RedirectNotFinalMechanism,
     /// Modifiers may only occur once in any Spf Record
     ModifierMayOccurOnlyOnce(Kind),
     /// Network Address is not valid
@@ -56,7 +56,7 @@ impl std::fmt::Display for SpfError {
             SpfError::RedirectWithAllMechanism => {
                 write!(f, "Spf record contains both a 'REDIRECT' modifier and 'ALL' mechanism.\nAccording to RFC7208 any redirect MUST be ignored in this case.\n[See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)")
             }
-            SpfError::RedirectNotFinalMechanism(err) => write!(f, "Redirect not last mechanism. Found at idx: {}", err),
+            SpfError::RedirectNotFinalMechanism => write!(f, "Redirect not last mechanism."),
             SpfError::ModifierMayOccurOnlyOnce(kind) => write!(f, "Mechanism: {} occurred more than once.", kind),
             SpfError::InvalidIPAddr(err) => write!(f, "{}", err),
             SpfError::InvalidMechanism(err) => write!(f, "{}", err),
