@@ -1,2 +1,0 @@
-mod mechanism;
-mod parsedmechanism;
