@@ -1,7 +1,7 @@
 use crate::spf::mechanism::builder::All;
 use crate::spf::mechanism::{Kind, Mechanism, MechanismError};
 use crate::spf::validate::builder_results::SpfValidationResult;
-use crate::spf::validate::{self, SpfRfcStandard};
+use crate::spf::validate::{self, SpfRfcStandard, Validate};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 #[cfg(feature = "serde")]
@@ -15,8 +15,8 @@ use std::str::FromStr;
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SpfBuilder {
-    version: String,
     // Version is usually v=spf1 but may be spf2.0/...
+    version: String,
     redirect: Option<Mechanism<String>>,
     is_redirected: bool,
     a: Option<Vec<Mechanism<String>>>,
@@ -24,7 +24,7 @@ pub struct SpfBuilder {
     include: Option<Vec<Mechanism<String>>>,
     ip4: Option<Vec<Mechanism<IpNetwork>>>,
     ip6: Option<Vec<Mechanism<IpNetwork>>>,
-    pub(crate) ptr: Option<Mechanism<String>>,
+    ptr: Option<Mechanism<String>>,
     exists: Option<Vec<Mechanism<String>>>,
     all: Option<Mechanism<All>>,
     pub(crate) is_valid: bool,
@@ -467,9 +467,10 @@ impl SpfBuilder {
         if self.version.is_empty() {
             self.set_v1();
         }
-        if self.get_lookup_count() > 10 {
-            return Err(SpfError::LookupLimitExceeded);
-        }
+        self.validate_lookup_count()?;
+        self.validate_ptr()?;
+        self.validate_redirect_all()?;
+
         let mut redirect_idx = 0;
         let mut has_redirect = false;
         let mut all_idx = 0;
@@ -516,7 +517,7 @@ impl SpfBuilder {
         })
     }
 
-    fn get_lookup_count(&self) -> usize {
+    pub(crate) fn get_lookup_count(&self) -> usize {
         let mut count: usize = 0;
         {
             if let Some(a) = &self.a {
@@ -608,6 +609,7 @@ impl Append<All> for SpfBuilder {
 fn spf_builder_iter() {
     use crate::spf::mechanism::Qualifier;
     let mut spf_b = SpfBuilder::new();
+    let mut count = 0;
     spf_b
         //.append(Mechanism::redirect(Qualifier::Pass, "example.com").unwrap())
         .append(Mechanism::a(Qualifier::Pass))
@@ -615,4 +617,8 @@ fn spf_builder_iter() {
         .append(Mechanism::ip_from_string("ip6:2001:4860:4000::").unwrap())
         .append(Mechanism::include(Qualifier::Pass, "test.com").unwrap())
         .append(Mechanism::all_default());
+    for _m in spf_b.iter() {
+        count += 1;
+    }
+    assert_eq!(count, 5);
 }
