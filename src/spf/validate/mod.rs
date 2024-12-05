@@ -4,13 +4,17 @@ pub(crate) mod builder_results;
 use crate::SpfBuilder;
 #[cfg(test)]
 mod tests;
+#[cfg(feature = "builder")]
+mod validate_builder;
 mod validate_string;
 
 use crate::core::{self, spf_check_whitespace};
 use crate::spf::SpfError;
 
 pub trait Validate {
-    fn validate_version(&self) -> Result<(), SpfError>;
+    fn validate_version(&self) -> Result<(), SpfError> {
+        Ok(())
+    }
     fn validate_length(&self) -> Result<(), SpfError>;
     fn validate_ptr(&self) -> Result<(), SpfError> {
         Ok(())
@@ -78,7 +82,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
 #[cfg(feature = "ptr")]
 #[cfg(feature = "builder")]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
-    match spf.ptr {
+    match spf.ptr() {
         Some(_) => Err(SpfError::DeprecatedPtrDetected),
         None => Ok(()),
     }

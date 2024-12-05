@@ -19,6 +19,8 @@
 #[cfg(feature = "builder")]
 #[cfg_attr(docsrs, doc(cfg(feature = "builder")))]
 pub(crate) mod builder;
+#[cfg(feature = "builder")]
+mod conv_traits;
 mod errors;
 mod kind;
 mod parsedmechanism;
@@ -131,19 +133,6 @@ impl TryFrom<&str> for Mechanism<String> {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         Mechanism::from_str(s)
-    }
-}
-
-impl TryFrom<Mechanism<String>> for Mechanism<IpNetwork> {
-    type Error = MechanismError;
-    fn try_from(value: Mechanism<String>) -> Result<Self, Self::Error> {
-        match value.kind {
-            Kind::IpV4 | Kind::IpV6 => Ok(Mechanism::ip(
-                value.qualifier,
-                value.rrdata.expect("Missing RRData").parse::<IpNetwork>()?,
-            )),
-            _ => Err(MechanismError::InvalidMechanismFormat(value.to_string())),
-        }
     }
 }
 
@@ -566,18 +555,6 @@ impl Mechanism<IpNetwork> {
     /// Returns a reference to the mechanism as an `IpNetwork`
     pub fn as_network(&self) -> &IpNetwork {
         self.rrdata.as_ref().expect("Missing IpNetwork")
-    }
-}
-
-impl From<Mechanism<IpNetwork>> for Mechanism<String> {
-    fn from(value: Mechanism<IpNetwork>) -> Self {
-        Mechanism::generic_inclusive(
-            *value.kind(),
-            value.qualifier,
-            Some(Mechanism::sanitize_ip_addr(
-                value.rr_data().as_ref().expect("Not IpNetwork"),
-            )),
-        )
     }
 }
 
