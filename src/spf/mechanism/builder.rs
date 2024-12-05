@@ -63,7 +63,7 @@ impl Display for Mechanism<All> {
 }
 
 #[cfg(test)]
-mod test_all {
+mod into_new_mechanism {
     use crate::mechanism::*;
     #[cfg(feature = "serde")]
     use serde_json;

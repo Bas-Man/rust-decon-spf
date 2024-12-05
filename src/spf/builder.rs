@@ -48,9 +48,44 @@ impl From<Spf<String>> for SpfBuilder {
         let mut new_spf = SpfBuilder::new();
         new_spf.version = source.version;
         for m in source.mechanisms.into_iter() {
-            new_spf.append_string_mechanism(m);
+            match m.kind() {
+                Kind::IpV4 | Kind::IpV6 => {
+                    let ip_m = Mechanism::ip_from_string(&*m.to_string())
+                        .expect("Mechanism is not a valid IP address. Should never happen");
+                    new_spf.append_mechanism(ip_m);
+                }
+
+                Kind::All => {
+                    new_spf.append_mechanism_of_all(
+                        m.try_into()
+                            .expect("Not ALL Mechanism. Should never happen"),
+                    );
+                }
+                _ => {
+                    new_spf.append_mechanism(m);
+                }
+            }
         }
         new_spf
+    }
+}
+
+mod string_to_builder {
+    use crate::{Spf, SpfBuilder};
+
+    #[test]
+    fn from_string_to_builder() {
+        let spf = "v=spf1 a mx -all".parse::<Spf<String>>().unwrap();
+        let builder = SpfBuilder::from(spf);
+        assert_eq!(builder.version, "v=spf1");
+    }
+    #[test]
+    fn from_string_to_builder_ip() {
+        let spf = "v=spf1 mx ip4:203.32.160.10 -all"
+            .parse::<Spf<String>>()
+            .unwrap();
+        let builder = SpfBuilder::from(spf);
+        assert_eq!(builder.version, "v=spf1");
     }
 }
 
