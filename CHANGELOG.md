@@ -1,3 +1,11 @@
+0.3.1 2024-12-03
+================
+
+- Fix
+    - TryFrom Spf<String> to SpfBuilder\
+      The original code was actually incomplete. This has been corrected
+      and tests have been added.
+
 0.3.0 2024-12-03
 ================
 
