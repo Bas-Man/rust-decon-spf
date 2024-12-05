@@ -70,8 +70,9 @@ impl From<Spf<String>> for SpfBuilder {
     }
 }
 
+#[cfg(test)]
 mod string_to_builder {
-    use crate::{Spf, SpfBuilder};
+    use super::*;
 
     #[test]
     fn from_string_to_builder() {
@@ -86,6 +87,8 @@ mod string_to_builder {
             .unwrap();
         let builder = SpfBuilder::from(spf);
         assert_eq!(builder.version, "v=spf1");
+        assert!(builder.mx.is_some());
+        assert!(builder.ip4.is_some());
     }
 }
 
