@@ -1,10 +1,18 @@
-0.3.1 2024-12-03
+0.3.1 2024-12-06
 ================
 
 - Fix
-    - TryFrom Spf<String> to SpfBuilder\
+    - TryFrom `Spf<String>` to SpfBuilder\
       The original code was actually incomplete. This has been corrected
       and tests have been added.
+
+        - Note: TryFrom traits\
+          The `TryFrom` trait was used for any `Mechanism<String>` as these have the
+          potential to fail if an incorrect `Mechanism<T>` is passed.\
+
+          Example:\
+          "mx" is a `Mechanism<String>` and can not be converted to `Mechanism<IpNetwork>`
+        -
 
 0.3.0 2024-12-03
 ================
