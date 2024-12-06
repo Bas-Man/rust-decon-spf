@@ -1,3 +1,4 @@
+use crate::core;
 use crate::mechanism::Kind;
 use crate::spf::validate::Validate;
 use crate::{Spf, SpfError};
@@ -54,14 +55,14 @@ impl Validate for Spf<String> {
 
     /// Check that the number of looks up does not exceed the limit: 10
     fn validate_lookup_count(&self) -> Result<(), SpfError> {
-        let mut count: u8 = 0;
+        let mut count: usize = 0;
         for m in self.iter() {
             match m.kind() {
                 Kind::A | Kind::MX | Kind::Redirect | Kind::Include | Kind::Exists => count += 1,
                 _ => {}
             }
         }
-        if count < 10 {
+        if count < core::DNS_LOOKUP_LIMIT {
             Ok(())
         } else {
             Err(SpfError::LookupLimitExceeded)
