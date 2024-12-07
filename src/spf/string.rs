@@ -96,17 +96,12 @@ impl Spf<String> {
     pub fn is_v1(&self) -> bool {
         self.version.contains(crate::core::SPF1)
     }
-    /// Check if the Spf record was created from [SpfBuilder] or from `&str`
+    /// Check if the Spf record was created from [SpfBuilder](spf::builder::SpfBuilder) or from `&str`
     /// ```
-    /// # use decon_spf::{Spf, SpfBuilder};
+    /// # use decon_spf::Spf;
     /// # use decon_spf::mechanism::{Mechanism, MechanismError, Qualifier};
     /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
     /// assert!(!spf.built());
-    /// let mut builder = SpfBuilder::new();
-    /// builder.append_mechanism(Mechanism::a(Qualifier::Pass))
-    /// .append_mechanism(Mechanism::all_default());
-    /// let spf2 = builder.build().unwrap();
-    /// assert!(spf2.built())
     /// ```
     pub fn built(&self) -> bool {
         self.source.is_empty()
@@ -152,11 +147,16 @@ impl Spf<String> {
     /// assert!(spf.validate().is_ok());
     /// let spf = "v=spf1 redirect=_spf.example.com -all".parse::<Spf<String>>().unwrap();
     /// assert!(spf.validate().is_err());
-    /// assert_eq!(spf.validate().unwrap_err().errors()[0], SpfError::RedirectWithAllMechanism);
+    /// let spf: SpfErrors = spf.validate().unwrap_err();
+    /// println!("{}", spf.source());
+    /// for e in spf.errors() {
+    ///     # assert_eq!(e.to_string(), "Spf record contains both a 'REDIRECT' modifier and 'ALL' mechanism.\nAccording to RFC7208 any redirect MUST be ignored in this case.\n[See Section 5.1](https://datatracker.ietf.org/doc/html/rfc7208#section-5.1)");
+    ///     println!("{}",e);
+    /// }
     /// ```
     /// # Returns
-    /// Either Ok or a `Vec<SpfError>`
-    /// # Errors: [SpfError]
+    /// Either Ok or a [SpfErrors] containing any [SpfError]
+    /// # Errors:
     /// - Hard Errors
     ///     - [Invalid version](SpfError::InvalidVersion)
     ///     - [Source Length Exceeded](SpfError::SourceLengthExceeded)
