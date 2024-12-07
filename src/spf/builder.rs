@@ -508,6 +508,7 @@ impl SpfBuilder {
         self.validate_lookup_count()?;
         self.validate_ptr()?;
         self.validate_redirect_all()?;
+        let lookup_count: u8 = self.get_lookup_count() as u8;
 
         let mut redirect_idx = 0;
         let mut has_redirect = false;
@@ -551,6 +552,7 @@ impl SpfBuilder {
             redirect_idx,
             has_redirect,
             all_idx,
+            lookup_count,
             mechanisms,
         })
     }

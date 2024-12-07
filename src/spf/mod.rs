@@ -27,6 +27,7 @@ pub struct Spf<T> {
     redirect_idx: usize,
     has_redirect: bool,
     all_idx: usize,
+    lookup_count: u8,
     mechanisms: Vec<Mechanism<T>>,
 }
 
@@ -51,6 +52,10 @@ where
     /// Access the version attribute associated with the Spf record.
     pub fn version(&self) -> &T {
         &self.version
+    }
+    /// Access the number of DNS lookups required for this Spf record.
+    pub fn lookup_count(&self) -> u8 {
+        self.lookup_count
     }
     /// Iterate over the Spf Mechanisms of the Spf Record. This does not return the Spf `version`,
     /// but iterates over the mechanisms contained within the Spf record.

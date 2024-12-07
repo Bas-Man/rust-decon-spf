@@ -65,6 +65,13 @@ mod tests {
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
         assert!(matches!(spf.validate_lookup_count(), Ok(_)));
+        let spf = spf.build().unwrap();
+        assert_eq!(spf.lookup_count(), 9);
+        assert_eq!(spf.source, "");
+        assert_eq!(
+            spf.to_string(),
+            String::from("v=spf1 a mx mx mx mx mx mx mx mx")
+        );
     }
     #[test]
     fn test_validate_lookup_count_above_10() {

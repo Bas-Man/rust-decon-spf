@@ -63,6 +63,7 @@ impl FromStr for Spf<String> {
                     _ => {}
                 }
                 spf.mechanisms.push(m_str);
+                spf.lookup_count += 1;
                 idx += 1;
             }
         }
