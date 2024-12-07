@@ -282,6 +282,6 @@ mod serde {
         let spf: Spf<String> = input.parse().unwrap();
         let spf_as_json = serde_json::to_string(&spf).unwrap();
         assert_eq!(spf_as_json,
-                   "{\"source\":\"v=spf1 a -all\",\"version\":\"v=spf1\",\"redirect_idx\":0,\"has_redirect\":false,\"all_idx\":1,\"lookup_count\":2,\"mechanisms\":[{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null},{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}]}");
+                   "{\"source\":\"v=spf1 a -all\",\"version\":\"v=spf1\",\"redirect_idx\":0,\"has_redirect\":false,\"all_idx\":1,\"lookup_count\":1,\"mechanisms\":[{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null},{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}]}");
     }
 }

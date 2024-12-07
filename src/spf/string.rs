@@ -50,6 +50,7 @@ impl FromStr for Spf<String> {
                 spf.mechanisms.push(m_ip.into());
             } else {
                 let m_str = m.parse::<Mechanism<String>>()?;
+                spf.lookup_count += Self::update_lookup_count(&m_str);
                 match *m_str.kind() {
                     Kind::Redirect => {
                         if !spf.has_redirect {
@@ -59,11 +60,12 @@ impl FromStr for Spf<String> {
                             return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
                         }
                     }
-                    Kind::All => all_idx = idx,
+                    Kind::All => {
+                        all_idx = idx;
+                    }
                     _ => {}
                 }
                 spf.mechanisms.push(m_str);
-                spf.lookup_count += 1;
                 idx += 1;
             }
         }
@@ -197,6 +199,14 @@ impl Spf<String> {
             Err(errors)
         }
     }
+
+    // If the Mechanism will cause a DNS Lookup 1 should be added to the `lookup_count`. Otherwise 0
+    fn update_lookup_count(m_str: &Mechanism<String>) -> u8 {
+        match *m_str.kind() {
+            Kind::Redirect | Kind::A | Kind::MX | Kind::Include | Kind::Ptr | Kind::Exists => 1,
+            _ => 0,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -212,6 +222,7 @@ mod tests {
         assert_eq!(spf.redirect(), None);
         assert_eq!(spf.has_redirect, false);
         assert_eq!(spf.all_idx, 0);
+        assert_eq!(spf.lookup_count(), 0);
         assert_eq!(spf.all().unwrap().to_string(), "-all");
         let validation_result = spf.validate();
         assert!(validation_result.is_ok());
