@@ -94,6 +94,21 @@ impl Spf<String> {
     pub fn is_v1(&self) -> bool {
         self.version.contains(crate::core::SPF1)
     }
+    /// Check if the Spf record was created from [SpfBuilder] or from `&str`
+    /// ```
+    /// # use decon_spf::{Spf, SpfBuilder};
+    /// # use decon_spf::mechanism::{Mechanism, MechanismError, Qualifier};
+    /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+    /// assert!(!spf.built());
+    /// let mut builder = SpfBuilder::new();
+    /// builder.append_mechanism(Mechanism::a(Qualifier::Pass))
+    /// .append_mechanism(Mechanism::all_default());
+    /// let spf2 = builder.build().unwrap();
+    /// assert!(spf2.built())
+    /// ```
+    pub fn built(&self) -> bool {
+        self.source.is_empty()
+    }
     /// Give access to the redirect modifier if present
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
         if self.redirect_idx == 0 {
