@@ -1,3 +1,13 @@
+0.3.2 2024-12-07
+================
+
+- Add
+    - spf.lookup_count()\
+      `Spf<String>` now contain the number of lookup that will be needed given
+      its definition.
+    - Tests and serde checks updated.
+    - For informative documentation for spf.validate() also added.
+
 0.3.1 2024-12-06
 ================
 
