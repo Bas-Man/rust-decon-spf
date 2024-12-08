@@ -1,33 +1,50 @@
+use crate::SpfBuilder;
+use crate::SpfError;
+mod redirect {
+    use super::*;
+    mod valid {
+        use super::*;
+        #[test]
+        fn test_redirect() {
+            let input = "v=spf1 redirect=_spf.google.com";
+
+            let spf: SpfBuilder = input.parse().unwrap();
+
+            assert_eq!(spf.is_redirect(), true);
+            assert_eq!(spf.includes().is_none(), true);
+            assert_eq!(spf.a().is_none(), true);
+            assert_eq!(spf.mx().is_none(), true);
+            assert_eq!(spf.ip4().is_none(), true);
+            assert_eq!(spf.ip6().is_none(), true);
+            assert_eq!(spf.ptr().is_none(), true);
+            assert_eq!(spf.exists().is_none(), true);
+            assert_eq!(spf.all().is_none(), true);
+            assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
+            assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
+            assert_eq!(
+                spf.redirect().unwrap().to_string(),
+                "redirect=_spf.google.com"
+            );
+            assert_eq!(
+                spf.to_string(),
+                "v=spf1 redirect=_spf.google.com".to_string()
+            );
+        }
+    }
+    mod invalid {
+        use super::*;
+
+        #[test]
+        fn redirect_x2() {
+            let input = "v=spf1 redirect=_spf.google.com redirect=_spf.example.com";
+            let spf = input.parse::<SpfBuilder>().unwrap_err();
+            assert!(matches!(spf, SpfError::ModifierMayOccurOnlyOnce(_)))
+        }
+    }
+}
 mod valid_spf_from_str {
     use crate::spf::SpfError;
     use crate::SpfBuilder;
-
-    #[test]
-    fn test_redirect() {
-        let input = "v=spf1 redirect=_spf.google.com";
-
-        let spf: SpfBuilder = input.parse().unwrap();
-
-        assert_eq!(spf.is_redirect(), true);
-        assert_eq!(spf.includes().is_none(), true);
-        assert_eq!(spf.a().is_none(), true);
-        assert_eq!(spf.mx().is_none(), true);
-        assert_eq!(spf.ip4().is_none(), true);
-        assert_eq!(spf.ip6().is_none(), true);
-        assert_eq!(spf.ptr().is_none(), true);
-        assert_eq!(spf.exists().is_none(), true);
-        assert_eq!(spf.all().is_none(), true);
-        assert_eq!(spf.redirect().unwrap().qualifier().as_str(), "");
-        assert_eq!(spf.redirect().unwrap().raw(), "_spf.google.com");
-        assert_eq!(
-            spf.redirect().unwrap().to_string(),
-            "redirect=_spf.google.com"
-        );
-        assert_eq!(
-            spf.to_string(),
-            "v=spf1 redirect=_spf.google.com".to_string()
-        );
-    }
 
     #[test]
     fn test_hotmail() {

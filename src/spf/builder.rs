@@ -144,6 +144,9 @@ impl FromStr for SpfBuilder {
             if record.contains(crate::core::SPF1) || record.starts_with("spf2.0") {
                 spf.version = record.to_string();
             } else if record.contains("redirect=") {
+                if spf.is_redirected {
+                    return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
+                }
                 let m: Mechanism<String> = record.parse()?;
                 spf.redirect = Some(m);
                 spf.is_redirected = true;
