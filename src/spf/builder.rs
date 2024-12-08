@@ -79,6 +79,8 @@ mod string_to_builder {
         let spf = "v=spf1 a mx -all".parse::<Spf<String>>().unwrap();
         let builder = SpfBuilder::from(spf);
         assert_eq!(builder.version, "v=spf1");
+        assert!(builder.mx().is_some());
+        assert!(builder.redirect().is_none());
     }
     #[test]
     fn from_string_to_builder_ip() {
@@ -89,6 +91,7 @@ mod string_to_builder {
         assert_eq!(builder.version, "v=spf1");
         assert!(builder.mx.is_some());
         assert!(builder.ip4.is_some());
+        assert!(builder.a().is_none());
     }
 }
 
