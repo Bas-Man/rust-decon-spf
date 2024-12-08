@@ -1,7 +1,7 @@
 #[cfg(not(feature = "ptr"))]
 mod parse {
 
-    use crate::spf::SpfBuilder;
+    use crate::SpfBuilder;
     #[test]
     fn test_exist() {
         let input = "v=spf1 ptr ~all";
