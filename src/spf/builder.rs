@@ -125,6 +125,7 @@ impl FromStr for SpfBuilder {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
         validate::check_spf_length(s)?;
+        // Consider making this a soft Error similar to Spf<String>
         validate::check_whitespaces(s)?;
         let source = String::from(s);
 
