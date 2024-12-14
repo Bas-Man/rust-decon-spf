@@ -1,20 +1,32 @@
-use crate::spf::mechanism::builder::All;
-use crate::spf::mechanism::{Kind, Mechanism, MechanismError};
-use crate::spf::validate::builder_results::SpfValidationResult;
-use crate::spf::validate::{self, SpfRfcStandard, Validate};
+use crate::core::DNS_LOOKUP_LIMIT;
+use crate::core::{SPF1, SPF2};
+use crate::spf::mechanism::{builder::All, Kind, Mechanism, MechanismError};
+use crate::spf::validate::{self, Validate};
 use crate::{Spf, SpfError};
 use ipnetwork::IpNetwork;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 use std::fmt::{Display, Formatter};
+use std::marker::PhantomData;
 use std::str::FromStr;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Builder;
+#[derive(Debug, Clone, PartialEq)]
+pub struct Parsed;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Redirected;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ContainsAll;
 
 /// The definition of the SpfBuilder struct which contains all information related a single
 /// SPF record.
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct SpfBuilder {
+pub struct SpfBuilder<State = Builder> {
     // Version is usually v=spf1 but may be spf2.0/...
     version: String,
     redirect: Option<Mechanism<String>>,
@@ -28,8 +40,39 @@ pub struct SpfBuilder {
     exists: Option<Vec<Mechanism<String>>>,
     all: Option<Mechanism<All>>,
     pub(crate) is_valid: bool,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    state: PhantomData<State>,
 }
 
+pub trait Modifiable {}
+
+impl Modifiable for Builder {}
+impl Modifiable for Redirected {}
+impl Modifiable for ContainsAll {}
+impl Modifiable for SpfBuilder {}
+
+pub trait Buildable {}
+impl Buildable for Builder {}
+impl Buildable for Parsed {}
+impl<State> Default for SpfBuilder<State> {
+    fn default() -> Self {
+        Self {
+            version: "".to_string(),
+            redirect: None,
+            is_redirected: false,
+            a: None,
+            mx: None,
+            include: None,
+            ip4: None,
+            ip6: None,
+            ptr: None,
+            exists: None,
+            all: None,
+            is_valid: false,
+            state: Default::default(),
+        }
+    }
+}
 pub struct SpfBuilderIterator {
     m_iter: std::vec::IntoIter<Mechanism<String>>,
 }
@@ -43,33 +86,16 @@ impl Iterator for SpfBuilderIterator {
 }
 
 /// Converts a `Spf<String> into a `SpfBuilder`struct.
-impl From<Spf<String>> for SpfBuilder {
-    fn from(source: Spf<String>) -> Self {
-        let mut new_spf = SpfBuilder::new();
-        new_spf.version = source.version;
-        for m in source.mechanisms.into_iter() {
-            match m.kind() {
-                Kind::IpV4 | Kind::IpV6 => {
-                    let ip_m = Mechanism::ip_from_string(&*m.to_string())
-                        .expect("Mechanism is not a valid IP address. Should never happen");
-                    new_spf.append_mechanism(ip_m);
-                }
-
-                Kind::All => {
-                    new_spf.append_mechanism_of_all(
-                        m.try_into()
-                            .expect("Not ALL Mechanism. Should never happen"),
-                    );
-                }
-                _ => {
-                    new_spf.append_mechanism(m);
-                }
-            }
-        }
-        new_spf
+impl From<Spf<String>> for SpfBuilder<Parsed> {
+    fn from(source: Spf<String>) -> SpfBuilder<Parsed> {
+        build_spf(source)
     }
 }
-
+impl From<Spf<String>> for SpfBuilder<Builder> {
+    fn from(source: Spf<String>) -> SpfBuilder<Builder> {
+        build_spf(source)
+    }
+}
 #[cfg(test)]
 mod string_to_builder {
     use super::*;
@@ -77,7 +103,7 @@ mod string_to_builder {
     #[test]
     fn from_string_to_builder() {
         let spf = "v=spf1 a mx -all".parse::<Spf<String>>().unwrap();
-        let builder = SpfBuilder::from(spf);
+        let builder = SpfBuilder::<Builder>::from(spf);
         assert_eq!(builder.version, "v=spf1");
         assert!(builder.mx().is_some());
         assert!(builder.redirect().is_none());
@@ -87,7 +113,7 @@ mod string_to_builder {
         let spf = "v=spf1 mx ip4:203.32.160.10 -all"
             .parse::<Spf<String>>()
             .unwrap();
-        let builder = SpfBuilder::from(spf);
+        let builder: SpfBuilder<Builder> = SpfBuilder::from(spf);
         assert_eq!(builder.version, "v=spf1");
         assert!(builder.mx.is_some());
         assert!(builder.ip4.is_some());
@@ -95,7 +121,7 @@ mod string_to_builder {
     }
 }
 
-impl Display for SpfBuilder {
+impl<State> Display for SpfBuilder<State> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.build_spf_string())
     }
@@ -106,21 +132,21 @@ impl Display for SpfBuilder {
 /// # Examples:
 ///
 ///```rust
-/// use decon_spf::SpfBuilder;
+/// use decon_spf::{Parsed, SpfBuilder};
 /// use decon_spf::SpfError;
 /// // Successful
 /// let input = "v=spf1 a mx -all";
-/// let spf: SpfBuilder = input.parse().unwrap();
+/// let spf: SpfBuilder<Parsed> = input.parse::<SpfBuilder<_>>().unwrap();
 /// assert_eq!(spf.to_string(), input);
 ///
 /// // Additional Space between `A` and `MX`
 /// let invalid_input = "v=spf1 a   mx -all";
-/// let err: SpfError = invalid_input.parse::<SpfBuilder>().unwrap_err();
+/// let err: SpfError = invalid_input.parse::<SpfBuilder<_>>().unwrap_err();
 /// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///```
 ///
-impl FromStr for SpfBuilder {
+impl FromStr for SpfBuilder<Parsed> {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
@@ -133,99 +159,102 @@ impl FromStr for SpfBuilder {
         let mut spf = SpfBuilder::new();
         // Setup Vectors
         let records = source.split_whitespace();
+        /*
         let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
         let mut vec_of_ip6: Vec<Mechanism<IpNetwork>> = Vec::new();
         let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
         let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
+         */
 
         for record in records {
             // Consider ensuring we do this once at least and then skip
-            if record.contains(crate::core::SPF1) || record.starts_with("spf2.0") {
+            if record.contains(SPF1) || record.starts_with(SPF2) {
                 spf.version = record.to_string();
-            } else if record.contains("redirect=") {
+            } else if record.contains(crate::core::REDIRECT) {
                 if spf.is_redirected {
                     return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
                 }
                 let m: Mechanism<String> = record.parse()?;
                 spf.redirect = Some(m);
                 spf.is_redirected = true;
-            } else if record.contains("include:") {
+            } else if record.contains(crate::core::INCLUDE) {
                 let m: Mechanism<String> = record.parse()?;
-                vec_of_includes.push(m);
+                spf.append_string_mechanism(m);
             } else if record.contains(crate::core::IP4) || record.contains(crate::core::IP6) {
                 let m = record.parse::<Mechanism<IpNetwork>>()?;
-                match m.kind() {
-                    Kind::IpV4 => vec_of_ip4.push(m),
-                    Kind::IpV6 => vec_of_ip6.push(m),
-                    _ => unreachable!(),
-                }
-            } else if record.ends_with("all") && (record.len() == 3 || record.len() == 4) {
+                spf.append_ip_mechanism(m);
+            } else if record.ends_with(crate::core::ALL) && (record.len() == 3 || record.len() == 4)
+            {
                 spf.all = Some(Mechanism::all_with_qualifier(
                     crate::core::return_and_remove_qualifier(record, 'a').0,
                 ));
                 // Handle A, MX, Exists and PTR types.
             } else if let Ok(a_mechanism) = crate::core::spf_regex::capture_matches(record, Kind::A)
             {
-                vec_of_a.push(a_mechanism);
+                spf.append_string_mechanism(a_mechanism);
             } else if let Ok(mx_mechanism) =
                 crate::core::spf_regex::capture_matches(record, Kind::MX)
             {
-                vec_of_mx.push(mx_mechanism);
+                spf.append_string_mechanism(mx_mechanism);
             } else if let Ok(ptr_mechanism) =
                 crate::core::spf_regex::capture_matches(record, Kind::Ptr)
             {
+                if spf.ptr.is_some() {
+                    return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Ptr));
+                }
                 spf.ptr = Some(ptr_mechanism);
             } else if let Ok(exists_mechanism) =
                 crate::core::spf_regex::capture_matches(record, Kind::Exists)
             {
-                vec_of_exists.push(exists_mechanism);
+                spf.append_string_mechanism(exists_mechanism);
             } else {
                 return Err(SpfError::InvalidMechanism(
                     MechanismError::InvalidMechanismFormat(record.to_string()),
                 ));
             }
         }
-        // Move vec_of_* into the SpfBuilder struct
-        if !vec_of_includes.is_empty() {
-            spf.include = Some(vec_of_includes);
-        };
-        if !vec_of_ip4.is_empty() {
-            spf.ip4 = Some(vec_of_ip4);
-        };
-        if !vec_of_ip6.is_empty() {
-            spf.ip6 = Some(vec_of_ip6);
-        };
-        if !vec_of_a.is_empty() {
-            spf.a = Some(vec_of_a);
-        }
-        if !vec_of_mx.is_empty() {
-            spf.mx = Some(vec_of_mx);
-        }
-        if !vec_of_exists.is_empty() {
-            spf.exists = Some(vec_of_exists);
-        }
 
         Ok(spf)
     }
 }
 
-impl SpfBuilder {
+impl<State> SpfBuilder<State> {
     /// Create a new empty SpfBuilder struct.
     pub fn new() -> Self {
         SpfBuilder::default()
     }
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) -> &mut Self {
-        self.version = String::from(crate::core::SPF1);
+        self.version = String::from(SPF1);
         self
+    }
+    /// Access the version attribute
+    pub fn version(&self) -> &String {
+        &self.version
+    }
+}
+impl SpfBuilder<Builder> {
+    pub fn new_builder() -> SpfBuilder<Builder> {
+        SpfBuilder {
+            state: PhantomData::<Builder>,
+            ..Default::default()
+        }
+    }
+}
+impl SpfBuilder<Parsed> {
+    pub fn new_parsed() -> SpfBuilder<Parsed> {
+        SpfBuilder {
+            state: PhantomData::<Parsed>,
+            ..Default::default()
+        }
     }
 }
 
 #[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
 #[cfg(feature = "spf2")]
-impl SpfBuilder {
+impl<State: Modifiable> SpfBuilder<State> {
     /// Set version to `spf2.0/pra`
     pub fn set_v2_pra(&mut self) -> &mut Self {
         self.version = String::from(crate::core::SPF2_PRA);
@@ -253,22 +282,55 @@ impl SpfBuilder {
     }
 }
 
-impl SpfBuilder {
-    /// Access the version attribute
-    pub fn version(&self) -> &String {
-        &self.version
+impl SpfBuilder<Builder> {
+    pub fn add_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+        self.append_mechanism(mechanism)
+    }
+    pub fn add_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+        self.append_mechanism(mechanism)
+    }
+    pub fn add_include(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+        self.append_mechanism(mechanism)
+    }
+    pub fn add_ip(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+        self.append_mechanism(mechanism)
     }
     /// Append a Redirect Mechanism to the Spf Struct.
-    fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) -> &mut Self {
-        self.redirect = Some(mechanism);
-        // # todo This line is not needed.
-        if !self.is_redirected {}
-        self.is_redirected = true;
-        if self.all.is_some() {
-            self.all = None;
+    pub fn add_redirect(mut self, mechanism: Mechanism<String>) -> SpfBuilder<Redirected> {
+        SpfBuilder {
+            version: self.version.to_owned(),
+            redirect: Some(mechanism),
+            is_redirected: true,
+            a: self.a.take(),
+            mx: self.mx.take(),
+            include: self.include.take(),
+            ip4: self.ip4.take(),
+            ip6: self.ip6.take(),
+            ptr: self.ptr.take(),
+            exists: self.exists.take(),
+            all: self.all.take(),
+            is_valid: false,
+            state: PhantomData::<Redirected>,
         }
-        self
     }
+    pub fn add_all(mut self, mechanism: Mechanism<All>) -> SpfBuilder<ContainsAll> {
+        SpfBuilder {
+            version: self.version.to_owned(),
+            a: self.a.take(),
+            mx: self.mx.take(),
+            include: self.include.take(),
+            ip4: self.ip4.take(),
+            ip6: self.ip6.take(),
+            ptr: self.ptr.take(),
+            exists: self.exists.take(),
+            all: Some(mechanism),
+            is_valid: false,
+            state: PhantomData::<ContainsAll>,
+            ..Default::default()
+        }
+    }
+}
+impl<State> SpfBuilder<State> {
     /// Clear the passed Kind which has been passed.
     /// Sets the passed mechanism to `None`
     ///
@@ -278,8 +340,8 @@ impl SpfBuilder {
     /// # Example:
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Kind, Mechanism};
-    /// use decon_spf::SpfBuilder;
-    /// let mut spf = SpfBuilder::new();
+    /// use decon_spf::{Builder, SpfBuilder};
+    /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
     /// spf.append_mechanism(Mechanism::a(Qualifier::Pass));
@@ -305,6 +367,14 @@ impl SpfBuilder {
         }
     }
 
+    pub(crate) fn append_mechanism_of_redirect(
+        &mut self,
+        mechanism: Mechanism<String>,
+    ) -> &mut Self {
+        self.redirect = Some(mechanism);
+        self.is_redirected = true;
+        self
+    }
     pub(crate) fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(a) = &mut self.a {
             a.push(mechanism);
@@ -313,7 +383,7 @@ impl SpfBuilder {
         }
         self
     }
-    fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    pub(crate) fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(mx) = &mut self.mx {
             mx.push(mechanism);
         } else {
@@ -321,7 +391,10 @@ impl SpfBuilder {
         }
         self
     }
-    fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    pub(crate) fn append_mechanism_of_include(
+        &mut self,
+        mechanism: Mechanism<String>,
+    ) -> &mut Self {
         if let Some(include) = &mut self.include {
             include.push(mechanism);
         } else {
@@ -345,7 +418,7 @@ impl SpfBuilder {
         }
         self
     }
-    fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    pub(crate) fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(exists) = &mut self.exists {
             exists.push(mechanism);
         } else {
@@ -353,7 +426,7 @@ impl SpfBuilder {
         }
         self
     }
-    fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    pub(crate) fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.ptr = Some(mechanism);
         self
     }
@@ -364,6 +437,9 @@ impl SpfBuilder {
         self
     }
     pub(crate) fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+        // Should never be able to append Redirect as <State>
+        //assert!(!mechanism.kind().is_redirect());
+        //assert!(!mechanism.kind().is_all());
         match mechanism.kind() {
             Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
             Kind::A => self.append_mechanism_of_a(mechanism),
@@ -390,8 +466,8 @@ impl SpfBuilder {
     }
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::SpfBuilder;
-    /// let mut spf = SpfBuilder::new();
+    /// use decon_spf::{Builder, SpfBuilder};
+    /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap())
@@ -409,22 +485,6 @@ impl SpfBuilder {
         self
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn validate(&mut self, rfc: SpfRfcStandard) -> Result<&Self, SpfError> {
-        match rfc {
-            SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
-        }
-    }
-    #[allow(dead_code)]
-    pub(crate) fn validate_to_string(&mut self, rfc: SpfRfcStandard) -> SpfValidationResult {
-        let res = match rfc {
-            SpfRfcStandard::Rfc4408 => validate::validate_rfc4408(self),
-        };
-        match res {
-            Ok(x) => SpfValidationResult::Valid(x),
-            Err(x) => SpfValidationResult::InValid(x),
-        }
-    }
     fn build_spf_string(&self) -> String {
         let mut spf = String::new();
         spf.push_str(self.version());
@@ -508,9 +568,12 @@ impl SpfBuilder {
     }
     /// Creates a `Spf<String>` from `SpfBuilder`
     // #todo This should probably require that a validation has been completed first.
-    pub fn build(mut self) -> Result<Spf<String>, SpfError> {
+    pub fn build(mut self) -> Result<Spf<String>, SpfError>
+    where
+        State: Buildable,
+    {
         if self.version.is_empty() {
-            self.set_v1();
+            self.version = SPF1.to_owned();
         }
         self.validate_lookup_count()?;
         self.validate_ptr()?;
@@ -520,7 +583,7 @@ impl SpfBuilder {
         let mut redirect_idx = 0;
         let mut has_redirect = false;
         let mut all_idx = 0;
-        let mut mechanisms: Vec<Mechanism<String>> = Vec::with_capacity(10);
+        let mut mechanisms: Vec<Mechanism<String>> = Vec::with_capacity(DNS_LOOKUP_LIMIT + 1); // +1 for Version information
 
         if let Some(list) = self.a.as_mut() {
             mechanisms.append(list);
@@ -590,7 +653,7 @@ impl SpfBuilder {
     }
 }
 
-impl SpfBuilder {
+impl<State> SpfBuilder<State> {
     /// Allows you to iterate over Mechanisms contained within the SPF record.
     /// # Note: Version string is not included.
     pub fn iter(&self) -> SpfBuilderIterator {
@@ -634,19 +697,19 @@ impl SpfBuilder {
 pub trait Append<T> {
     fn append(&mut self, mechanism: Mechanism<T>) -> &mut Self;
 }
-impl Append<String> for SpfBuilder {
+impl<State> Append<String> for SpfBuilder<State> {
     fn append(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_string_mechanism(mechanism)
     }
 }
 
-impl Append<IpNetwork> for SpfBuilder {
+impl<State> Append<IpNetwork> for SpfBuilder<State> {
     fn append(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         self.append_ip_mechanism(mechanism)
     }
 }
 
-impl Append<All> for SpfBuilder {
+impl<State> Append<All> for SpfBuilder<State> {
     fn append(&mut self, mechanism: Mechanism<All>) -> &mut Self {
         self.append_mechanism_of_all(mechanism)
     }
@@ -655,7 +718,7 @@ impl Append<All> for SpfBuilder {
 #[test]
 fn spf_builder_iter() {
     use crate::spf::mechanism::Qualifier;
-    let mut spf_b = SpfBuilder::new();
+    let mut spf_b: SpfBuilder<Builder> = SpfBuilder::new();
     let mut count = 0;
     spf_b
         //.append(Mechanism::redirect(Qualifier::Pass, "example.com").unwrap())
@@ -668,4 +731,33 @@ fn spf_builder_iter() {
         count += 1;
     }
     assert_eq!(count, 5);
+}
+
+fn build_spf<T>(source: Spf<String>) -> SpfBuilder<T> {
+    let mut new_spf = SpfBuilder::new();
+    new_spf.version = source.version;
+
+    for m in source.mechanisms.into_iter() {
+        match m.kind() {
+            Kind::IpV4 | Kind::IpV6 => {
+                let ip_m = Mechanism::ip_from_string(&*m.to_string())
+                    .expect("Mechanism is not a valid IP address. Should never happen");
+                new_spf.append_mechanism(ip_m);
+            }
+            Kind::All => {
+                new_spf.all = Some(
+                    m.try_into()
+                        .expect("Not All Mechanisms. Should never happen."),
+                );
+            }
+            Kind::Redirect => {
+                new_spf.redirect = Some(m);
+            }
+            _ => {
+                new_spf.append_mechanism(m);
+            }
+        }
+    }
+
+    new_spf
 }

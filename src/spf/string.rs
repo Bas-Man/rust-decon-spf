@@ -96,7 +96,7 @@ impl Spf<String> {
     pub fn is_v1(&self) -> bool {
         self.version.contains(crate::core::SPF1)
     }
-    /// Check if the Spf record was created from [SpfBuilder](spf::builder::SpfBuilder) or from `&str`
+    /// Check if the Spf record was created from [`crate::SpfBuilder<Builder>`] or from `&str`
     /// ```
     /// # use decon_spf::Spf;
     /// # use decon_spf::mechanism::{Mechanism, MechanismError, Qualifier};

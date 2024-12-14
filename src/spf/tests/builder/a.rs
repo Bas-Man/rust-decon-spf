@@ -3,11 +3,11 @@ use crate::SpfBuilder;
 
 mod valid {
     use super::*;
-    use crate::spf::builder::Append;
+    use crate::spf::builder::{Append, Builder};
 
     #[test]
     fn default() {
-        let mut spf: SpfBuilder = SpfBuilder::new();
+        let mut spf = SpfBuilder::new_builder();
         spf.set_v1();
         spf.append_mechanism(Mechanism::a(Qualifier::Pass));
         spf.append_mechanism(Mechanism::all_with_qualifier(Qualifier::SoftFail));
@@ -26,7 +26,7 @@ mod valid {
 
     #[test]
     fn mechanism_slash_cidr() {
-        let mut spf: SpfBuilder = SpfBuilder::new();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
         spf.set_v1();
         spf.append(Mechanism::a(Qualifier::Fail).with_rrdata("/24").unwrap());
         assert!(spf.a().is_some());
@@ -39,7 +39,7 @@ mod valid {
 
     #[test]
     fn mechanism_colon_domain() {
-        let mut spf: SpfBuilder = SpfBuilder::new();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
         spf.append(
             Mechanism::a(Qualifier::Neutral)
                 .with_rrdata("example.com")
@@ -57,7 +57,7 @@ mod valid {
 
     #[test]
     fn mechanism_appender() {
-        let mut spf: SpfBuilder = SpfBuilder::new();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
         spf.append_mechanism(
             Mechanism::a(Qualifier::Neutral)
                 .with_rrdata("example.com")
@@ -75,7 +75,7 @@ mod valid {
 
     #[test]
     fn mechanism_domain_cidr() {
-        let mut spf: SpfBuilder = SpfBuilder::new();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
         spf.set_v1().append_string_mechanism(
             Mechanism::a(Qualifier::SoftFail)
                 .with_rrdata("example.com/24")

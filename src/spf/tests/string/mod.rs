@@ -237,13 +237,13 @@ mod redirect {
 
 #[cfg(feature = "builder")]
 mod spf_to_spf_builder {
-    use crate::{mechanism::Mechanism, mechanism::Qualifier, Spf, SpfBuilder};
+    use crate::{mechanism::Mechanism, mechanism::Qualifier, Builder, Spf, SpfBuilder};
 
     #[test]
     fn basic() {
         let input = "v=spf1 a -all";
         let spf: Spf<String> = input.parse().unwrap();
-        let builder_from: SpfBuilder = spf.into();
+        let builder_from: SpfBuilder<Builder> = spf.into();
 
         let mut builder_hand = SpfBuilder::new();
         builder_hand.set_v1(); // Needed for testing

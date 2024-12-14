@@ -2,7 +2,7 @@ use crate::core::{DNS_LOOKUP_LIMIT, MAX_SPF_STRING_LENGTH};
 use crate::spf::validate::Validate;
 use crate::{SpfBuilder, SpfError};
 
-impl Validate for SpfBuilder {
+impl<State> Validate for SpfBuilder<State> {
     fn validate_length(&self) -> Result<(), SpfError> {
         let mut length = 0;
         length += self.version().len();
@@ -43,17 +43,18 @@ impl Validate for SpfBuilder {
 mod tests {
     use crate::spf::validate::Validate;
     use crate::spf::Mechanism;
-    use crate::{SpfBuilder, SpfError};
+    use crate::{Builder, SpfBuilder, SpfError};
+    use std::convert::TryInto;
 
     #[test]
     fn test_validate_version() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         assert!(spf.validate_version().is_ok());
     }
     #[test]
     fn test_validate_lookup_count_below_10() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
@@ -75,7 +76,7 @@ mod tests {
     }
     #[test]
     fn test_validate_lookup_count_above_10() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
@@ -92,16 +93,22 @@ mod tests {
     }
     #[test]
     fn test_length_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("-all".parse::<Mechanism<String>>().unwrap());
+        let spf = spf.add_all(
+            "-all"
+                .parse::<Mechanism<String>>()
+                .unwrap()
+                .try_into()
+                .expect("Should be All"),
+        );
         assert_eq!(spf.validate_length(), Ok(()));
     }
     #[test]
     fn test_length_not_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism(
             "a:testaasdfadadadsfaefdasdfadsfaf.dasdfadfadfafasdfadsfadadsfadf.com"
@@ -148,34 +155,58 @@ mod tests {
                 .parse::<Mechanism<String>>()
                 .unwrap(),
         );
-        spf.append_mechanism("-all".parse::<Mechanism<String>>().unwrap());
+        let spf = spf.add_all(
+            "-all"
+                .parse::<Mechanism<String>>()
+                .unwrap()
+                .try_into()
+                .expect("Should be All"),
+        );
         assert_eq!(spf.validate_length(), Err(SpfError::SourceLengthExceeded));
     }
     #[test]
     #[cfg(feature = "ptr")]
     fn test_ptr_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("-all".parse::<Mechanism<String>>().unwrap());
+        let spf = spf.add_all(
+            "-all"
+                .parse::<Mechanism<String>>()
+                .unwrap()
+                .try_into()
+                .expect("Should be All"),
+        );
         assert_eq!(spf.validate_ptr(), Ok(()));
     }
     #[test]
     #[cfg(feature = "ptr")]
     fn test_ptr_not_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("ptr".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("-all".parse::<Mechanism<String>>().unwrap());
+        let spf = spf.add_all(
+            "-all"
+                .parse::<Mechanism<String>>()
+                .unwrap()
+                .try_into()
+                .expect("Should be All"),
+        );
         assert_eq!(spf.validate_ptr(), Err(SpfError::DeprecatedPtrDetected));
     }
     #[test]
     fn test_redirect_all_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf = SpfBuilder::new_builder();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("-all".parse::<Mechanism<String>>().unwrap());
+        let spf = spf.add_all(
+            "-all"
+                .parse::<Mechanism<String>>()
+                .unwrap()
+                .try_into()
+                .expect("Should be All"),
+        );
         assert_eq!(spf.validate_redirect_all(), Ok(()));
     }
     #[test]
@@ -184,7 +215,7 @@ mod tests {
     // Adding a `All` will quietly fail with the current code when a redirect is already
     // present.
     fn test_redirect_all_not_ok() {
-        let mut spf = SpfBuilder::default();
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism(

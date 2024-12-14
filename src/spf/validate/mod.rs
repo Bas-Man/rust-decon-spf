@@ -1,6 +1,4 @@
 #[cfg(feature = "builder")]
-pub(crate) mod builder_results;
-#[cfg(feature = "builder")]
 use crate::SpfBuilder;
 #[cfg(test)]
 mod tests;
@@ -21,12 +19,6 @@ pub trait Validate {
     }
     fn validate_redirect_all(&self) -> Result<(), SpfError>;
     fn validate_lookup_count(&self) -> Result<(), SpfError>;
-}
-
-#[allow(dead_code)]
-pub enum SpfRfcStandard {
-    Rfc4408,
-    // Add Rfc7208. I think this should be changed to a struct and then make traits
 }
 
 /// Checks that the spf record has the minimum start string of "v=spf1" or
@@ -81,6 +73,7 @@ pub(crate) fn check_spf_length(spf_string: &str) -> Result<(), SpfError> {
 
 #[cfg(feature = "ptr")]
 #[cfg(feature = "builder")]
+#[allow(dead_code)]
 pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     match spf.ptr() {
         Some(_) => Err(SpfError::DeprecatedPtrDetected),
@@ -88,6 +81,7 @@ pub(crate) fn check_ptr(spf: &SpfBuilder) -> Result<(), SpfError> {
     }
 }
 #[cfg(feature = "builder")]
+#[allow(dead_code)]
 /// Redirect should be the only mechanism present. Any additional values are not permitted.
 /// This is wrong need to re-read rfc
 pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
@@ -98,6 +92,7 @@ pub(crate) fn check_redirect_all(spf: &SpfBuilder) -> Result<(), SpfError> {
 }
 
 #[cfg(feature = "builder")]
+#[allow(dead_code)]
 pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
     let mut lookup_count: usize = 0;
 
@@ -114,21 +109,4 @@ pub(crate) fn check_lookup_count(spf: &SpfBuilder) -> usize {
         lookup_count += includes.len();
     }
     lookup_count
-}
-
-#[cfg(feature = "builder")]
-#[allow(dead_code)]
-pub(crate) fn validate_rfc4408(spf: &mut SpfBuilder) -> Result<&SpfBuilder, SpfError> {
-    if spf.is_valid {
-        return Ok(spf);
-    };
-    #[cfg(feature = "ptr")]
-    check_ptr(spf)?;
-    check_redirect_all(spf)?;
-    // Basic check of lookup limit
-    if check_lookup_count(spf) > 10 {
-        return Err(SpfError::LookupLimitExceeded);
-    }
-    spf.is_valid = true;
-    Ok(spf)
 }

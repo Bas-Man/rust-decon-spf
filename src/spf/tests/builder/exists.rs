@@ -17,13 +17,14 @@ mod parse {
 
     mod invalid {
         use super::*;
+        use crate::Parsed;
 
         #[test]
         fn with_slash() {
             let input = "v=spf1 exists:example.com/ ~all";
             let invalid_str = "exists:example.com/";
 
-            let err: SpfError = input.parse::<SpfBuilder>().unwrap_err();
+            let err: SpfError = input.parse::<SpfBuilder<Parsed>>().unwrap_err();
             assert_eq!(
                 err,
                 SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(

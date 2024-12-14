@@ -1,9 +1,9 @@
 use decon_spf::mechanism::{Mechanism, ParsedMechanism, Qualifier};
-use decon_spf::SpfBuilder;
+use decon_spf::{Builder, SpfBuilder};
 use serde_json;
 
 fn main() {
-    let mut spf1 = SpfBuilder::new();
+    let mut spf1: SpfBuilder<Builder> = SpfBuilder::new();
     spf1.set_v1();
     let ip_m_1 = ParsedMechanism::new("ip4:203.32.160.0/24");
     let ip_m_2 = ParsedMechanism::new("+ip4:203.32.166.0/24");
@@ -27,7 +27,7 @@ fn main() {
     let spf_as_json = serde_json::to_string_pretty(&spf1).unwrap();
     println!("JSON:\n{}", spf_as_json);
 
-    let mut spf2 = SpfBuilder::new();
+    let mut spf2: SpfBuilder<Builder> = SpfBuilder::new();
     spf2.set_v2_pra();
     spf2.append_mechanism(Mechanism::a(Qualifier::Pass));
     spf2.append_mechanism(Mechanism::all_with_qualifier(Qualifier::Neutral));
