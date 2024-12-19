@@ -86,11 +86,6 @@ impl Iterator for SpfBuilderIterator {
 }
 
 /// Converts a `Spf<String> into a `SpfBuilder`struct.
-impl From<Spf<String>> for SpfBuilder<Parsed> {
-    fn from(source: Spf<String>) -> SpfBuilder<Parsed> {
-        build_spf(source)
-    }
-}
 impl From<Spf<String>> for SpfBuilder<Builder> {
     fn from(source: Spf<String>) -> SpfBuilder<Builder> {
         build_spf(source)
@@ -159,14 +154,6 @@ impl FromStr for SpfBuilder<Parsed> {
         let mut spf = SpfBuilder::new();
         // Setup Vectors
         let records = source.split_whitespace();
-        /*
-        let mut vec_of_includes: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_ip4: Vec<Mechanism<IpNetwork>> = Vec::new();
-        let mut vec_of_ip6: Vec<Mechanism<IpNetwork>> = Vec::new();
-        let mut vec_of_a: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_mx: Vec<Mechanism<String>> = Vec::new();
-        let mut vec_of_exists: Vec<Mechanism<String>> = Vec::new();
-         */
 
         for record in records {
             // Consider ensuring we do this once at least and then skip
@@ -215,7 +202,6 @@ impl FromStr for SpfBuilder<Parsed> {
                 ));
             }
         }
-
         Ok(spf)
     }
 }
@@ -224,11 +210,6 @@ impl<State> SpfBuilder<State> {
     /// Create a new empty SpfBuilder struct.
     pub fn new() -> Self {
         SpfBuilder::default()
-    }
-    /// Set version to `v=spf1`
-    pub fn set_v1(&mut self) -> &mut Self {
-        self.version = String::from(SPF1);
-        self
     }
     /// Access the version attribute
     pub fn version(&self) -> &String {
@@ -252,37 +233,12 @@ impl SpfBuilder<Parsed> {
     }
 }
 
-#[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
-#[cfg(feature = "spf2")]
-impl<State: Modifiable> SpfBuilder<State> {
-    /// Set version to `spf2.0/pra`
-    pub fn set_v2_pra(&mut self) -> &mut Self {
-        self.version = String::from(crate::core::SPF2_PRA);
-        self
-    }
-    /// Set version to `spf2.0/mfrom`
-    pub fn set_v2_mfrom(&mut self) -> &mut Self {
-        self.version = String::from(crate::core::SPF2_MFROM);
-        self
-    }
-    /// Set version to `spf2.0/pra,mfrom`
-    pub fn set_v2_pra_mfrom(&mut self) -> &mut Self {
-        self.version = String::from(crate::core::SPF2_PRA_MFROM);
-        self
-    }
-    /// Set version to `spf2.0/mfrom,pra`
-    pub fn set_v2_mfrom_pra(&mut self) -> &mut Self {
-        self.version = String::from(crate::core::SPF2_MFROM_PRA);
-        self
-    }
-    /// Check that version is v2
-    pub fn is_v2(&self) -> bool {
-        self.version.starts_with(crate::core::SPF2_PRA)
-            || self.version.starts_with(crate::core::SPF2_MFROM)
-    }
-}
-
 impl SpfBuilder<Builder> {
+    /// Set version to `v=spf1`
+    pub fn set_v1(&mut self) -> &mut Self {
+        self.version = String::from(SPF1);
+        self
+    }
     pub fn add_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
@@ -316,6 +272,8 @@ impl SpfBuilder<Builder> {
     pub fn add_all(mut self, mechanism: Mechanism<All>) -> SpfBuilder<ContainsAll> {
         SpfBuilder {
             version: self.version.to_owned(),
+            redirect: self.redirect.take(),
+            is_redirected: self.is_redirected,
             a: self.a.take(),
             mx: self.mx.take(),
             include: self.include.take(),
@@ -326,8 +284,36 @@ impl SpfBuilder<Builder> {
             all: Some(mechanism),
             is_valid: false,
             state: PhantomData::<ContainsAll>,
-            ..Default::default()
         }
+    }
+}
+#[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
+#[cfg(feature = "spf2")]
+impl<State: Modifiable> SpfBuilder<State> {
+    /// Set version to `spf2.0/pra`
+    pub fn set_v2_pra(&mut self) -> &mut Self {
+        self.version = String::from(crate::core::SPF2_PRA);
+        self
+    }
+    /// Set version to `spf2.0/mfrom`
+    pub fn set_v2_mfrom(&mut self) -> &mut Self {
+        self.version = String::from(crate::core::SPF2_MFROM);
+        self
+    }
+    /// Set version to `spf2.0/pra,mfrom`
+    pub fn set_v2_pra_mfrom(&mut self) -> &mut Self {
+        self.version = String::from(crate::core::SPF2_PRA_MFROM);
+        self
+    }
+    /// Set version to `spf2.0/mfrom,pra`
+    pub fn set_v2_mfrom_pra(&mut self) -> &mut Self {
+        self.version = String::from(crate::core::SPF2_MFROM_PRA);
+        self
+    }
+    /// Check that version is v2
+    pub fn is_v2(&self) -> bool {
+        self.version.starts_with(crate::core::SPF2_PRA)
+            || self.version.starts_with(crate::core::SPF2_MFROM)
     }
 }
 impl<State> SpfBuilder<State> {
@@ -350,7 +336,10 @@ impl<State> SpfBuilder<State> {
     /// // Remove ip4 Mechanism
     /// spf.clear_mechanism(Kind::IpV4);
     ///```
-    pub fn clear_mechanism(&mut self, kind: Kind) {
+    pub fn clear_mechanism(&mut self, kind: Kind)
+    where
+        State: Modifiable,
+    {
         match kind {
             Kind::Redirect => {
                 self.redirect = None;
@@ -463,15 +452,10 @@ impl<State> SpfBuilder<State> {
         self
     }
     pub(crate) fn append_mechanism_of_all(&mut self, mechanism: Mechanism<All>) -> &mut Self {
-        if self.redirect.is_none() {
-            self.all = Some(mechanism);
-        }
+        self.all = Some(mechanism);
         self
     }
     pub(crate) fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
-        // Should never be able to append Redirect as <State>
-        //assert!(!mechanism.kind().is_redirect());
-        //assert!(!mechanism.kind().is_all());
         match mechanism.kind() {
             Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
             Kind::A => self.append_mechanism_of_a(mechanism),
@@ -504,7 +488,6 @@ impl<State> SpfBuilder<State> {
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap())
     ///    .append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
-    /// assert!(spf.all().is_none());
     /// ```
     /// # Note
     /// When Redirect is present, All will be set to None.
