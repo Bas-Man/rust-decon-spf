@@ -30,7 +30,6 @@ pub struct SpfBuilder<State = Builder> {
     // Version is usually v=spf1 but may be spf2.0/...
     version: String,
     redirect: Option<Mechanism<String>>,
-    is_redirected: bool,
     a: Option<Vec<Mechanism<String>>>,
     mx: Option<Vec<Mechanism<String>>>,
     include: Option<Vec<Mechanism<String>>>,
@@ -59,7 +58,6 @@ impl<State> Default for SpfBuilder<State> {
         Self {
             version: "".to_string(),
             redirect: None,
-            is_redirected: false,
             a: None,
             mx: None,
             include: None,
@@ -160,12 +158,11 @@ impl FromStr for SpfBuilder<Parsed> {
             if record.contains(SPF1) || record.starts_with(SPF2) {
                 spf.version = record.to_string();
             } else if record.contains(crate::core::REDIRECT) {
-                if spf.is_redirected {
+                if spf.redirect.is_some() {
                     return Err(SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
                 }
                 let m: Mechanism<String> = record.parse()?;
                 spf.redirect = Some(m);
-                spf.is_redirected = true;
             } else if record.contains(crate::core::INCLUDE) {
                 let m: Mechanism<String> = record.parse()?;
                 spf.append_string_mechanism(m);
@@ -256,7 +253,6 @@ impl SpfBuilder<Builder> {
         SpfBuilder {
             version: self.version.to_owned(),
             redirect: Some(mechanism),
-            is_redirected: true,
             a: self.a.take(),
             mx: self.mx.take(),
             include: self.include.take(),
@@ -273,7 +269,6 @@ impl SpfBuilder<Builder> {
         SpfBuilder {
             version: self.version.to_owned(),
             redirect: self.redirect.take(),
-            is_redirected: self.is_redirected,
             a: self.a.take(),
             mx: self.mx.take(),
             include: self.include.take(),
@@ -341,10 +336,7 @@ impl<State> SpfBuilder<State> {
         State: Modifiable,
     {
         match kind {
-            Kind::Redirect => {
-                self.redirect = None;
-                self.is_redirected = false;
-            }
+            Kind::Redirect => self.redirect = None,
             Kind::A => self.a = None,
             Kind::MX => self.mx = None,
             Kind::Include => self.include = None,
@@ -361,7 +353,6 @@ impl<State> SpfBuilder<State> {
         mechanism: Mechanism<String>,
     ) -> &mut Self {
         self.redirect = Some(mechanism);
-        self.is_redirected = true;
         self
     }
     pub(crate) fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
@@ -525,7 +516,7 @@ impl<State> SpfBuilder<State> {
             spf.push(' ');
             spf.push_str(ptr.to_string().as_str());
         }
-        if self.is_redirected {
+        if self.redirect.is_some() {
             spf.push(' ');
             spf.push_str(
                 self.redirect()
@@ -535,7 +526,7 @@ impl<State> SpfBuilder<State> {
             );
         }
         // All can only be used if this is not a redirect.
-        if !self.is_redirected && self.all().is_some() {
+        if self.redirect.is_none() && self.all().is_some() {
             spf.push(' ');
             spf.push_str(self.all().expect("Should not fail.").to_string().as_str());
         }
@@ -543,7 +534,7 @@ impl<State> SpfBuilder<State> {
     }
     /// True if there is a redirect present in the spf record.
     pub fn is_redirect(&self) -> bool {
-        self.is_redirected
+        self.redirect.is_some()
     }
     /// Returns a reference to the `Redirect` Mechanism
     pub fn redirect(&self) -> Option<&Mechanism<String>> {
