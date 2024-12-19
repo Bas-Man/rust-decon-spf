@@ -13,6 +13,7 @@ pub(crate) const SPF1: &str = "v=spf1";
 
 /// SPF2 is only for an initial check and we are just checking that the string
 /// starts with spf2.0
+#[allow(dead_code)]
 pub(crate) const SPF2: &str = "spf2.0";
 pub(crate) const SPF2_PRA: &str = "spf2.0/pra";
 pub(crate) const SPF2_MFROM: &str = "spf2.0/mfrom";
