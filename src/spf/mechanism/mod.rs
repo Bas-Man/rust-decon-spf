@@ -161,19 +161,14 @@ impl FromStr for Mechanism<IpNetwork> {
 
     fn from_str(s: &str) -> Result<Mechanism<IpNetwork>, Self::Err> {
         if s.contains(core::IP4) || s.contains(core::IP6) {
-            let kind;
             let raw_ip: Option<&str>;
             let qualifier_and_modified_str = core::return_and_remove_qualifier(s, 'i');
-            match qualifier_and_modified_str {
-                (_, str) if str.contains(core::IP4) => {
-                    kind = Kind::IpV4;
-                }
-                (_, str) if str.contains(core::IP6) => {
-                    kind = Kind::IpV6;
-                }
+            let kind = match qualifier_and_modified_str {
+                (_, str) if str.contains(core::IP4) => Kind::IpV4,
+                (_, str) if str.contains(core::IP6) => Kind::IpV6,
                 // This is probably unreachable.
                 _ => return Err(MechanismError::InvalidMechanismFormat(s.to_string())),
-            }
+            };
             raw_ip = qualifier_and_modified_str.1.splitn(2, ":").last();
             return match raw_ip.unwrap().parse::<IpNetwork>() {
                 Err(e) => Err(MechanismError::InvalidIPNetwork(e)),
