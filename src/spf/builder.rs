@@ -376,16 +376,36 @@ impl<State> SpfBuilder<State> {
         self
     }
     pub(crate) fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
-        if let Some(a) = &mut self.a {
-            a.push(mechanism);
+        if let Some(m_vec) = &mut self.a {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.a = Some(vec![mechanism]);
         }
         self
     }
+
+    // Before add a Mechanism to its Vec we check to make sure the same Mechanism does not already
+    // exist. If it exists it is not appended to avoid duplication.
+    fn check_mechanism_in_vec<T>(mechanism: &Mechanism<T>, m_vec: &Vec<Mechanism<T>>) -> bool
+    where
+        T: PartialEq,
+    {
+        let mut exists = false;
+        for m in m_vec.iter() {
+            exists = m == mechanism;
+        }
+        exists
+    }
+
     pub(crate) fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
-        if let Some(mx) = &mut self.mx {
-            mx.push(mechanism);
+        if let Some(m_vec) = &mut self.mx {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.mx = Some(vec![mechanism]);
         }
@@ -395,32 +415,44 @@ impl<State> SpfBuilder<State> {
         &mut self,
         mechanism: Mechanism<String>,
     ) -> &mut Self {
-        if let Some(include) = &mut self.include {
-            include.push(mechanism);
+        if let Some(m_vec) = &mut self.include {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.include = Some(vec![mechanism]);
         }
         self
     }
     pub(crate) fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
-        if let Some(ip4) = &mut self.ip4 {
-            ip4.push(mechanism);
+        if let Some(m_vec) = &mut self.ip4 {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.ip4 = Some(vec![mechanism]);
         }
         self
     }
     pub(crate) fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
-        if let Some(ip6) = &mut self.ip6 {
-            ip6.push(mechanism);
+        if let Some(m_vec) = &mut self.ip6 {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.ip6 = Some(vec![mechanism]);
         }
         self
     }
     pub(crate) fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) -> &mut Self {
-        if let Some(exists) = &mut self.exists {
-            exists.push(mechanism);
+        if let Some(m_vec) = &mut self.exists {
+            let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
+            if !exists {
+                m_vec.push(mechanism);
+            }
         } else {
             self.exists = Some(vec![mechanism]);
         }

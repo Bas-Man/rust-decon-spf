@@ -58,20 +58,20 @@ mod tests {
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:a.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:b.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:c.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:d.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:e.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:f.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:g.test.com".parse::<Mechanism<String>>().unwrap());
         assert!(matches!(spf.validate_lookup_count(), Ok(_)));
         let spf = spf.build().unwrap();
         assert_eq!(spf.lookup_count(), 9);
         assert_eq!(spf.source, "");
         assert_eq!(
             spf.to_string(),
-            String::from("v=spf1 a mx mx mx mx mx mx mx mx")
+            String::from("v=spf1 a mx mx:a.test.com mx:b.test.com mx:c.test.com mx:d.test.com mx:e.test.com mx:f.test.com mx:g.test.com")
         );
     }
     #[test]
@@ -79,16 +79,17 @@ mod tests {
         let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();
         spf.append_mechanism("a".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("a:test.com".parse::<Mechanism<String>>().unwrap());
         spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
-        spf.append_mechanism("mx".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:a.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:b.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:c.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:d.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:e.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:f.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:g.test.com".parse::<Mechanism<String>>().unwrap());
+        spf.append_mechanism("mx:h.test.com".parse::<Mechanism<String>>().unwrap());
         assert!(matches!(spf.validate_lookup_count(), Err(_)));
     }
     #[test]

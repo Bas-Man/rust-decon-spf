@@ -8,7 +8,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Defines the possible mechanisms.
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Kind {
     /// Represents a *Modifier* of type redirect=  

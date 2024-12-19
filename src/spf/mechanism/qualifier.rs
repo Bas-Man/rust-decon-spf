@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Declaration for possible `Qualifier` of a given Mechanism
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Qualifier {
     /// This is the default value for a qualifier if the value is not present in the SPF record.
