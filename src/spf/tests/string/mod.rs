@@ -141,7 +141,6 @@ mod ip {
                 let input = "v=spf1 ip4:203.32.160.10 -all";
                 let spf: Spf<String> = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
-                dbg!(&spf);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
 
@@ -150,7 +149,6 @@ mod ip {
                 let input = "v=spf1 ip4:203.32.160.10/32 -all";
                 let spf: Spf<String> = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
-                dbg!(&spf);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
 
@@ -159,7 +157,6 @@ mod ip {
                 let input = "v=spf1 ip4:203.32.160.10/27 -all";
                 let spf: Spf<String> = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
-                dbg!(&spf);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10/27");
             }
         }

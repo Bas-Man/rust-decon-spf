@@ -87,6 +87,5 @@ mod valid {
         let new_spf = spf.build().unwrap();
         assert_eq!(new_spf.mechanisms[0].to_string(), "~a:example.com/24");
         assert_eq!(new_spf.mechanisms.len(), 1);
-        dbg!(&new_spf);
     }
 }
