@@ -1,5 +1,4 @@
-use crate::core::DNS_LOOKUP_LIMIT;
-use crate::core::{SPF1, SPF2};
+use crate::core::{DNS_LOOKUP_LIMIT, SPF1, SPF2};
 use crate::spf::mechanism::{builder::All, Kind, Mechanism, MechanismError};
 use crate::spf::validate::{self, Validate};
 use crate::{Spf, SpfError};
