@@ -205,4 +205,20 @@ mod build {
         let new_spf = spf.clone().build().unwrap();
         assert_eq!(new_spf.to_string(), spf.to_string());
     }
+    #[test]
+    fn b_to_redirect() {
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
+        spf.set_v1();
+        let mut spf = spf.add_redirect(Mechanism::redirect(Qualifier::Pass, "test.com").unwrap());
+        spf.add_mx(Mechanism::mx(Qualifier::Pass));
+        let _spf = spf.build();
+    }
+    #[test]
+    fn b_to_all() {
+        let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
+        spf.set_v1();
+        let mut spf = spf.add_all(Mechanism::all_default());
+        spf.add_mx(Mechanism::mx(Qualifier::Pass));
+        let _spf = spf.build();
+    }
 }

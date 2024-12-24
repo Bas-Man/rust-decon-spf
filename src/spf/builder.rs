@@ -46,11 +46,8 @@ pub trait Modifiable {}
 impl Modifiable for Builder {}
 impl Modifiable for Redirected {}
 impl Modifiable for ContainsAll {}
-impl Modifiable for SpfBuilder {}
+//impl Modifiable for SpfBuilder {}
 
-pub trait Buildable {}
-impl Buildable for Builder {}
-impl Buildable for Parsed {}
 impl<State> Default for SpfBuilder<State> {
     fn default() -> Self {
         Self {
@@ -64,7 +61,6 @@ impl<State> Default for SpfBuilder<State> {
             ptr: None,
             exists: None,
             all: None,
-            is_valid: false,
             state: Default::default(),
         }
     }
@@ -203,6 +199,25 @@ impl FromStr for SpfBuilder<Parsed> {
 
 impl<State> SpfBuilder<State> {
     /// Create a new empty SpfBuilder struct.
+    /// ```rust
+    /// use decon_spf::{SpfBuilder, Builder};
+    /// use decon_spf::mechanism::{Mechanism, MechanismError, Qualifier};
+    ///
+    /// // Strict building style.
+    /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
+    /// spf.set_v1()
+    ///     .add_a(Mechanism::a(Qualifier::Pass))
+    ///     .add_mx(Mechanism::mx(Qualifier::Pass).with_rrdata("test.com").unwrap());
+    /// // add_all() changes the struct state from Builder to ContainsAll
+    /// let mut spf = spf.add_all(Mechanism::all_default());
+    ///
+    /// let mut spf = SpfBuilder::new_builder();
+    /// spf
+    ///     .set_v1()
+    ///     .append_mechanism(Mechanism::a(Qualifier::Pass))
+    ///     .append_mechanism(Mechanism::ip_from_string("ip4:203.32.160.10").unwrap())
+    ///     .append_mechanism(Mechanism::all_default());
+    /// ```
     pub fn new() -> Self {
         SpfBuilder::default()
     }
@@ -228,7 +243,10 @@ impl SpfBuilder<Parsed> {
     }
 }
 
-impl SpfBuilder<Builder> {
+impl<State> SpfBuilder<State>
+where
+    State: Modifiable,
+{
     /// Set version to `v=spf1`
     pub fn set_v1(&mut self) -> &mut Self {
         self.version = String::from(SPF1);
@@ -246,6 +264,8 @@ impl SpfBuilder<Builder> {
     pub fn add_ip(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
+}
+impl SpfBuilder<Builder> {
     /// Append a Redirect Mechanism to the Spf Struct.
     pub fn add_redirect(mut self, mechanism: Mechanism<String>) -> SpfBuilder<Redirected> {
         SpfBuilder {
@@ -259,7 +279,6 @@ impl SpfBuilder<Builder> {
             ptr: self.ptr.take(),
             exists: self.exists.take(),
             all: self.all.take(),
-            is_valid: false,
             state: PhantomData::<Redirected>,
         }
     }
@@ -275,14 +294,16 @@ impl SpfBuilder<Builder> {
             ptr: self.ptr.take(),
             exists: self.exists.take(),
             all: Some(mechanism),
-            is_valid: false,
             state: PhantomData::<ContainsAll>,
         }
     }
 }
 #[cfg_attr(docsrs, doc(cfg(feature = "spf2")))]
 #[cfg(feature = "spf2")]
-impl<State: Modifiable> SpfBuilder<State> {
+impl<State> SpfBuilder<State>
+where
+    State: Modifiable,
+{
     /// Set version to `spf2.0/pra`
     pub fn set_v2_pra(&mut self) -> &mut Self {
         self.version = String::from(crate::core::SPF2_PRA);
@@ -572,10 +593,7 @@ impl<State> SpfBuilder<State> {
     }
     /// Creates a `Spf<String>` from `SpfBuilder`
     // #todo This should probably require that a validation has been completed first.
-    pub fn build(mut self) -> Result<Spf<String>, SpfError>
-    where
-        State: Buildable,
-    {
+    pub fn build(mut self) -> Result<Spf<String>, SpfError> {
         if self.version.is_empty() {
             self.version = SPF1.to_owned();
         }

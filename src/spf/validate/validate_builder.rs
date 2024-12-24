@@ -41,11 +41,32 @@ impl<State> Validate for SpfBuilder<State> {
 #[cfg(test)]
 #[cfg(feature = "builder")]
 mod tests {
+    use crate::mechanism::Qualifier;
     use crate::spf::validate::Validate;
     use crate::spf::Mechanism;
     use crate::{Builder, SpfBuilder, SpfError};
     use std::convert::TryInto;
 
+    #[test]
+    fn building() {
+        let mut spf = SpfBuilder::new_builder();
+        let input = ["a", "mx", "-all"];
+        for m in input.iter() {
+            spf.append_mechanism(m.parse::<Mechanism<String>>().unwrap());
+        }
+        spf.set_v1();
+        assert_eq!(spf.version(), "v=spf1");
+        assert!(spf.validate_length().is_ok());
+
+        let mut spf2 = SpfBuilder::new_builder();
+        spf2.set_v1().add_a(
+            Mechanism::a(Qualifier::Pass)
+                .with_rrdata("test.com")
+                .unwrap(),
+        );
+        let spf2 = spf2.add_all(Mechanism::all_default());
+        assert_eq!(spf2.to_string(), "v=spf1 a:test.com -all");
+    }
     #[test]
     fn test_validate_version() {
         let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
