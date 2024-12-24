@@ -37,7 +37,6 @@ pub struct SpfBuilder<State = Builder> {
     ptr: Option<Mechanism<String>>,
     exists: Option<Vec<Mechanism<String>>>,
     all: Option<Mechanism<All>>,
-    pub(crate) is_valid: bool,
     #[cfg_attr(feature = "serde", serde(skip))]
     state: PhantomData<State>,
 }
