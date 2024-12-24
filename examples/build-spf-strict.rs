@@ -58,6 +58,6 @@ fn main() {
 
     println!("\nNew spf 3: >{}<", spf3);
     println!("Change spf3 all to Fail");
-    spf3.append_mechanism(Mechanism::all_default());
+    spf3.append_mechanism(Mechanism::all());
     println!("Altered spf 3: >{}<", spf3);
 }

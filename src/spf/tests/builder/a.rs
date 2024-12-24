@@ -76,7 +76,7 @@ mod valid {
     #[test]
     fn mechanism_domain_cidr() {
         let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
-        spf.set_v1().append_string_mechanism(
+        spf.set_v1().append_mechanism(
             Mechanism::a(Qualifier::SoftFail)
                 .with_rrdata("example.com/24")
                 .unwrap(),

@@ -64,7 +64,7 @@ mod tests {
                 .with_rrdata("test.com")
                 .unwrap(),
         );
-        let spf2 = spf2.add_all(Mechanism::all_default());
+        let spf2 = spf2.add_all(Mechanism::all());
         assert_eq!(spf2.to_string(), "v=spf1 a:test.com -all");
     }
     #[test]

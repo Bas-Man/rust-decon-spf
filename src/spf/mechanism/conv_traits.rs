@@ -26,7 +26,7 @@ mod into_new_mechanism {
     use serde_json;
     #[test]
     fn mech_all_to_all_string() {
-        let m = Mechanism::all_default();
+        let m = Mechanism::all();
         let m_pass = Mechanism::all_with_qualifier(Qualifier::Pass);
         assert_eq!(m_pass.to_string(), "all");
         assert_eq!(m.qualifier, Qualifier::Fail);

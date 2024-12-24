@@ -20,7 +20,7 @@ impl Default for Mechanism<All> {
 
 impl Mechanism<All> {
     /// Create a `Mechanism<All>` with default `Qualifier` of `Fail`
-    pub fn all_default() -> Self {
+    pub fn all() -> Self {
         Self::default()
     }
     /// Create a `Mechanism<All>` with a custom`Qualifier`

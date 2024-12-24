@@ -46,7 +46,6 @@ pub trait Modifiable {}
 impl Modifiable for Builder {}
 impl Modifiable for Redirected {}
 impl Modifiable for ContainsAll {}
-//impl Modifiable for SpfBuilder {}
 
 impl<State> Default for SpfBuilder<State> {
     fn default() -> Self {
@@ -123,12 +122,12 @@ impl<State> Display for SpfBuilder<State> {
 /// use decon_spf::SpfError;
 /// // Successful
 /// let input = "v=spf1 a mx -all";
-/// let spf: SpfBuilder<Parsed> = input.parse::<SpfBuilder<_>>().unwrap();
+/// let spf: SpfBuilder<Parsed> = input.parse().unwrap();
 /// assert_eq!(spf.to_string(), input);
 ///
 /// // Additional Space between `A` and `MX`
 /// let invalid_input = "v=spf1 a   mx -all";
-/// let err: SpfError = invalid_input.parse::<SpfBuilder<_>>().unwrap_err();
+/// let err: SpfError = invalid_input.parse::<SpfBuilder<Parsed>>().unwrap_err();
 /// assert_eq!(err, SpfError::WhiteSpaceSyntaxError);
 /// //  err.to_string() -> "Spf contains two or more consecutive whitespace characters.");
 ///```
@@ -209,14 +208,14 @@ impl<State> SpfBuilder<State> {
     ///     .add_a(Mechanism::a(Qualifier::Pass))
     ///     .add_mx(Mechanism::mx(Qualifier::Pass).with_rrdata("test.com").unwrap());
     /// // add_all() changes the struct state from Builder to ContainsAll
-    /// let mut spf = spf.add_all(Mechanism::all_default());
+    /// let mut spf = spf.add_all(Mechanism::all());
     ///
     /// let mut spf = SpfBuilder::new_builder();
     /// spf
     ///     .set_v1()
     ///     .append_mechanism(Mechanism::a(Qualifier::Pass))
     ///     .append_mechanism(Mechanism::ip_from_string("ip4:203.32.160.10").unwrap())
-    ///     .append_mechanism(Mechanism::all_default());
+    ///     .append_mechanism(Mechanism::all());
     /// ```
     pub fn new() -> Self {
         SpfBuilder::default()
@@ -367,14 +366,11 @@ impl<State> SpfBuilder<State> {
         }
     }
 
-    pub(crate) fn append_mechanism_of_redirect(
-        &mut self,
-        mechanism: Mechanism<String>,
-    ) -> &mut Self {
+    fn append_mechanism_of_redirect(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.redirect = Some(mechanism);
         self
     }
-    pub(crate) fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_mechanism_of_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(m_vec) = &mut self.a {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -386,7 +382,7 @@ impl<State> SpfBuilder<State> {
         self
     }
 
-    // Before add a Mechanism to its Vec we check to make sure the same Mechanism does not already
+    // Before adding a Mechanism to its Vec we check to make sure the same Mechanism does not already
     // exist. If it exists it is not appended to avoid duplication.
     fn check_mechanism_in_vec<T>(mechanism: &Mechanism<T>, m_vec: &Vec<Mechanism<T>>) -> bool
     where
@@ -399,7 +395,7 @@ impl<State> SpfBuilder<State> {
         exists
     }
 
-    pub(crate) fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_mechanism_of_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(m_vec) = &mut self.mx {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -410,10 +406,7 @@ impl<State> SpfBuilder<State> {
         }
         self
     }
-    pub(crate) fn append_mechanism_of_include(
-        &mut self,
-        mechanism: Mechanism<String>,
-    ) -> &mut Self {
+    fn append_mechanism_of_include(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(m_vec) = &mut self.include {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -424,7 +417,7 @@ impl<State> SpfBuilder<State> {
         }
         self
     }
-    pub(crate) fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+    fn append_mechanism_of_ip4(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         if let Some(m_vec) = &mut self.ip4 {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -435,7 +428,7 @@ impl<State> SpfBuilder<State> {
         }
         self
     }
-    pub(crate) fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+    fn append_mechanism_of_ip6(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         if let Some(m_vec) = &mut self.ip6 {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -446,7 +439,7 @@ impl<State> SpfBuilder<State> {
         }
         self
     }
-    pub(crate) fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_mechanism_of_exists(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         if let Some(m_vec) = &mut self.exists {
             let exists = Self::check_mechanism_in_vec(&mechanism, m_vec);
             if !exists {
@@ -457,15 +450,15 @@ impl<State> SpfBuilder<State> {
         }
         self
     }
-    pub(crate) fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_mechanism_of_ptr(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.ptr = Some(mechanism);
         self
     }
-    pub(crate) fn append_mechanism_of_all(&mut self, mechanism: Mechanism<All>) -> &mut Self {
+    fn append_mechanism_of_all(&mut self, mechanism: Mechanism<All>) -> &mut Self {
         self.all = Some(mechanism);
         self
     }
-    pub(crate) fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
+    fn append_string_mechanism(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         match mechanism.kind() {
             Kind::Redirect => self.append_mechanism_of_redirect(mechanism),
             Kind::A => self.append_mechanism_of_a(mechanism),
@@ -481,7 +474,7 @@ impl<State> SpfBuilder<State> {
             }
         }
     }
-    pub(crate) fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
+    fn append_ip_mechanism(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         match mechanism.kind() {
             Kind::IpV4 => self.append_mechanism_of_ip4(mechanism),
             Kind::IpV6 => self.append_mechanism_of_ip6(mechanism),
@@ -490,18 +483,26 @@ impl<State> SpfBuilder<State> {
             }
         }
     }
+    /// This is generic method for adding Mechanism`<T>` to the SpfBuilder struct.
+    /// # Note:
+    /// This approach does not provide protection to prevent `redirect` and `all` from both being present in a single SpfBuilder struct.
+    /// If you wish to prevent this. Please use the [add_redirect()](SpfBuilder::add_redirect()) and [add_all()](SpfBuilder::add_all()) functions.
     /// ```
     /// use decon_spf::mechanism::{Qualifier, Mechanism};
-    /// use decon_spf::{Builder, SpfBuilder};
+    /// use decon_spf::{Builder, Spf, SpfBuilder};
     /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
     /// spf.set_v1();
     /// spf.append_mechanism(Mechanism::redirect(Qualifier::Pass,
     ///                                 "_spf.example.com").unwrap())
     ///    .append_mechanism(Mechanism::all_with_qualifier(Qualifier::Pass));
-    /// ```
-    /// # Note
-    /// When Redirect is present, All will be set to None.
     ///
+    /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new_builder();
+    /// spf.set_v1().add_a(Mechanism::a(Qualifier::Pass));
+    /// let mut spf = spf.add_all(Mechanism::all()); // spf -> SpfBuilder<ContainsAll>
+    /// // spf.redirect() is not implemented for SpfBuilder<ContainsAll>
+    /// // Spf.add_all() is not implemented for SpfBuilder<Redirected>
+    ///
+    /// ```
     pub fn append_mechanism<T>(&mut self, mechanism: Mechanism<T>) -> &mut Self
     where
         Self: Append<T>,
@@ -748,7 +749,7 @@ fn spf_builder_iter() {
         .append(Mechanism::ip_from_string("ip4:203.160.10.10").unwrap())
         .append(Mechanism::ip_from_string("ip6:2001:4860:4000::").unwrap())
         .append(Mechanism::include(Qualifier::Pass, "test.com").unwrap())
-        .append(Mechanism::all_default());
+        .append(Mechanism::all());
     for _m in spf_b.iter() {
         count += 1;
     }
