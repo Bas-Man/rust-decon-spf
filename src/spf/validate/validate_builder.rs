@@ -232,10 +232,6 @@ mod tests {
         assert_eq!(spf.validate_redirect_all(), Ok(()));
     }
     #[test]
-    #[ignore]
-    // This test will fail with the current implementation.
-    // Adding a `All` will quietly fail with the current code when a redirect is already
-    // present.
     fn test_redirect_all_not_ok() {
         let mut spf: SpfBuilder<Builder> = SpfBuilder::default();
         spf.set_v1();

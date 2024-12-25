@@ -7,7 +7,6 @@ mod validate {
     use crate::spf::mechanism::{Mechanism, Qualifier};
 
     #[test]
-    #[ignore]
     fn validate() {
         let mut spf: SpfBuilder<Builder> = SpfBuilder::new();
         spf.set_v1();
@@ -19,19 +18,8 @@ mod validate {
             Qualifier::Pass,
             "2001:5160:4000::/36".parse().unwrap(),
         ));
-        /*
-        assert_eq!(
-            spf.validate_to_string(SpfRfcStandard::Rfc4408).to_string(),
-            "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()
-        );
-        let res = spf.validate(SpfRfcStandard::Rfc4408);
-        assert_eq!(res.is_ok(), true);
-        let res2 = res.unwrap();
-        assert_eq!(
-            res2.to_string(),
-            "v=spf1 ip4:203.32.160.0/23 ip6:2001:5160:4000::/36".to_string()
-        );
-         */
+        let spf = spf.build().unwrap();
+        assert!(spf.validate().is_ok());
     }
     #[test]
     // todo: This needs to be fixed
