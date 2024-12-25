@@ -10,8 +10,12 @@ use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::str::FromStr;
 
+/// The default `State` for the SpfBuilder
 #[derive(Debug, Clone, PartialEq)]
 pub struct Builder;
+
+/// The SpfBuilder `State` when it has been created using `parse()`. In this state
+/// the struct can not be modified.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Parsed;
 
@@ -226,6 +230,7 @@ impl<State> SpfBuilder<State> {
     }
 }
 impl SpfBuilder<Builder> {
+    /// Create an SpfBuilder with `State` of [Builder]
     pub fn new_builder() -> SpfBuilder<Builder> {
         SpfBuilder {
             state: PhantomData::<Builder>,
@@ -234,6 +239,7 @@ impl SpfBuilder<Builder> {
     }
 }
 impl SpfBuilder<Parsed> {
+    /// Create an SpfBuilder with `State` of [Parsed]
     pub fn new_parsed() -> SpfBuilder<Parsed> {
         SpfBuilder {
             state: PhantomData::<Parsed>,
@@ -251,21 +257,25 @@ where
         self.version = String::from(SPF1);
         self
     }
+    /// Add an a mechanism
     pub fn add_a(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
+    /// Add an mx mechanism
     pub fn add_mx(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
+    /// Add an include Mechanism
     pub fn add_include(&mut self, mechanism: Mechanism<String>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
+    /// Add either and Ip4 or Ip6 Mechanism
     pub fn add_ip(&mut self, mechanism: Mechanism<IpNetwork>) -> &mut Self {
         self.append_mechanism(mechanism)
     }
 }
 impl SpfBuilder<Builder> {
-    /// Append a Redirect Mechanism to the Spf Struct.
+    /// Append a Redirect Mechanism to the Spf Struct. This also changes the struct's `State`
     pub fn add_redirect(mut self, mechanism: Mechanism<String>) -> SpfBuilder<Redirected> {
         SpfBuilder {
             version: self.version.to_owned(),
@@ -281,6 +291,7 @@ impl SpfBuilder<Builder> {
             state: PhantomData::<Redirected>,
         }
     }
+    /// Add a Mechanism<All> to the SpfBuilder struct. This also changes the `State` to `ContainsAll`
     pub fn add_all(mut self, mechanism: Mechanism<All>) -> SpfBuilder<ContainsAll> {
         SpfBuilder {
             version: self.version.to_owned(),
@@ -499,8 +510,8 @@ impl<State> SpfBuilder<State> {
     /// let mut spf: SpfBuilder<Builder> = SpfBuilder::new_builder();
     /// spf.set_v1().add_a(Mechanism::a(Qualifier::Pass));
     /// let mut spf = spf.add_all(Mechanism::all()); // spf -> SpfBuilder<ContainsAll>
-    /// // spf.redirect() is not implemented for SpfBuilder<ContainsAll>
-    /// // Spf.add_all() is not implemented for SpfBuilder<Redirected>
+    /// // spf.redirect() and spf.add_all() are only defined for SpfBuilder<Builder>
+    /// // As such they do not exist for <ContainsAll> or <Redirect>
     ///
     /// ```
     pub fn append_mechanism<T>(&mut self, mechanism: Mechanism<T>) -> &mut Self
@@ -593,10 +604,39 @@ impl<State> SpfBuilder<State> {
         self.all.as_ref()
     }
     /// Creates a `Spf<String>` from `SpfBuilder`
-    // #todo This should probably require that a validation has been completed first.
+    /// This function also validates the SpfBuilder struct before returning a Spf<String>
+    /// ```
+    /// use decon_spf::{Spf, SpfBuilder, Builder, SpfError};
+    /// use decon_spf::mechanism::{Mechanism, Qualifier};
+    /// let mut builder: SpfBuilder<Builder> = SpfBuilder::new();
+    /// // Note Version was not Set. build() assumes v=spf1 when not present
+    /// builder.add_a(Mechanism::a(Qualifier::Pass));
+    /// let mut builder = builder.add_all(Mechanism::all());
+    /// let spf = match builder.build() {
+    ///     Ok(result) => { result },
+    ///     Err(_) => { panic!() }
+    /// };
+    /// assert_eq!(1,spf.lookup_count());
+    ///
+    /// let mut builder: SpfBuilder<Builder> = SpfBuilder::new();
+    /// builder.append_mechanism(Mechanism::redirect(Qualifier::Pass,"test.com").expect("ok"));
+    /// builder.append_mechanism(Mechanism::all());
+    ///
+    /// let result = match builder.build() {
+    ///     Ok(_) => { panic!()},
+    ///     Err(e) => {
+    ///         assert!(matches!(e, SpfError::RedirectWithAllMechanism));
+    ///         e
+    ///     }
+    /// };
+    /// assert!(result.is_spf_error());
+    ///
+    /// ```
     pub fn build(mut self) -> Result<Spf<String>, SpfError> {
         if self.version.is_empty() {
             self.version = SPF1.to_owned();
+        } else {
+            self.validate_version()?;
         }
         self.validate_lookup_count()?;
         self.validate_ptr()?;
