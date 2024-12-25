@@ -1,3 +1,20 @@
+0.3.x 2024-12-25
+================
+
+- Add
+    - SpfBuilder now ensures that only unique mechanisms are added to a given Mechanism`<T>`.
+      Adding duplicates programmatically is not possible. This is handled silently. There is no warning.
+
+    - SpfBuilder function `build()` does validation as part of its Spf creation. No additional validation
+      is required.
+
+- Note:
+    - The append_mechanism() function is quite loose in its behaviour. This is to say rules regarding "redirect" and "
+      all"
+      are ignored. You can freely add both mechanisms to an SpfBuilder struct.
+    - add_redirect() and add_all() return SpfBuilder in different states. This prevents
+      a "redirect" or "all" from both being present. I am considering his may well be over engineered.
+
 0.3.2 2024-12-07
 ================
 
