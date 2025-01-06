@@ -10,6 +10,7 @@ mod minus_all {
         assert_eq!(spf.version(), "v=spf1");
         let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
         assert_eq!(*spf.all().unwrap(), m);
+        assert!(spf.validate().is_ok());
     }
 }
 
@@ -29,6 +30,8 @@ mod a {
             assert_eq!(spf.is_v1(), true);
             assert_eq!(spf.mechanisms.len(), 2);
             assert_eq!(spf.all().unwrap().to_string(), "-all");
+            assert!(spf.validate().is_ok());
+            assert_eq!(spf.lookup_count, 1);
         }
 
         #[test]
