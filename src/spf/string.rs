@@ -50,6 +50,7 @@ impl FromStr for Spf<String> {
                 spf.mechanisms.push(m_ip.into());
             } else {
                 let m_str = m.parse::<Mechanism<String>>()?;
+                // todo: Change lookup_count if we ever change the code to allow other `Modifiers` that would be ignored in Spf.
                 spf.lookup_count += Self::update_lookup_count(&m_str);
                 match *m_str.kind() {
                     Kind::Redirect => {
