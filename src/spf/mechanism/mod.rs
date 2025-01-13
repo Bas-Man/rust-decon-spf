@@ -254,6 +254,12 @@ impl<T> Mechanism<T> {
     pub fn rr_data(&self) -> &Option<T> {
         &self.rrdata
     }
+    pub fn requires_lookup(&self) -> bool {
+        matches!(
+            self.kind(),
+            Kind::A | Kind::MX | Kind::Exists | Kind::Ptr | Kind::Include | Kind::Redirect
+        )
+    }
 }
 
 impl Mechanism<String> {
@@ -655,5 +661,22 @@ mod string_ip_conversion {
             res.unwrap_err(),
             MechanismError::InvalidMechanismFormat("a:host.example.com".to_string())
         );
+    }
+}
+
+#[cfg(test)]
+mod requires_lookup {
+    use crate::mechanism::Qualifier;
+    use crate::spf::Mechanism;
+
+    #[test]
+    fn mx_lookup() {
+        let m = Mechanism::mx(Qualifier::Pass);
+        assert_eq!(m.requires_lookup(), true);
+    }
+    #[test]
+    fn ip_lookup() {
+        let m = Mechanism::ip_from_string("ip4:192.168.0.1").unwrap();
+        assert_ne!(m.requires_lookup(), true);
     }
 }
