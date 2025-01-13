@@ -52,15 +52,15 @@ path = "examples/serde-demo.rs"
 required-features = ["serde", "spf2"]
 
 [dependencies]
-ipnetwork = "0.20.0"
+ipnetwork = "0.21.1"
 regex = "1.11.1"
 lazy_static = "1.5.0"
 addr = { version = "0.15.6", optional = true }
-serde = { version = "1.0.215", features = ["derive"], optional = true }
+serde = { version = "1.0.217", features = ["derive"], optional = true }
 
 [dev-dependencies]
 trust-dns-resolver = "0.23.2"
-serde_json = "1.0.133"
+serde_json = "1.0.135"
 
 [features]
 default = ["ptr"]
