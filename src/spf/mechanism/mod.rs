@@ -200,6 +200,18 @@ impl TryFrom<&str> for Mechanism<IpNetwork> {
     }
 }
 
+impl<T> AsRef<Mechanism<T>> for Mechanism<T> {
+    fn as_ref(&self) -> &Mechanism<T> {
+        self
+    }
+}
+
+impl<T> AsMut<Mechanism<T>> for Mechanism<T> {
+    fn as_mut(&mut self) -> &mut Mechanism<T> {
+        self
+    }
+}
+
 impl<T> Mechanism<T> {
     //! These are the generic methods for the struct of Mechanism.  
     //! All the following methods can be used on any struct of type Mechanism.
