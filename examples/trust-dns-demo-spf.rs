@@ -16,6 +16,7 @@ fn main() {
     // the query
 
     let query = "gmail.com.";
+    //let query = "_spf.google.com";
     //let query = "hotmail.com.";
     //let query = "_netblocks.google.com."; // ip4
     //let query = "_netblocks2.google.com."; // ip6
@@ -31,6 +32,11 @@ fn main() {
     match spf_record.validate() {
         Ok(_) => {
             println!(" is Valid");
+            println!("Number of lookups: {}", spf_record.lookup_count());
+            let m: Vec<_> = spf_record.iter().filter(|s| s.requires_lookup()).collect();
+            for v in m {
+                println!("{:?}", v);
+            }
         }
         Err(_) => {
             println!("is Invalid")
