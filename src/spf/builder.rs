@@ -80,9 +80,9 @@ impl Iterator for SpfBuilderIterator {
     }
 }
 
-/// Converts a `Spf<String> into a `SpfBuilder`struct.
-impl From<Spf<String>> for SpfBuilder<Builder> {
-    fn from(source: Spf<String>) -> SpfBuilder<Builder> {
+/// Converts a `Spf into a `SpfBuilder`struct.
+impl From<Spf> for SpfBuilder<Builder> {
+    fn from(source: Spf) -> SpfBuilder<Builder> {
         build_spf(source)
     }
 }
@@ -92,7 +92,7 @@ mod string_to_builder {
 
     #[test]
     fn from_string_to_builder() {
-        let spf = "v=spf1 a mx -all".parse::<Spf<String>>().unwrap();
+        let spf = "v=spf1 a mx -all".parse::<Spf>().unwrap();
         let builder = SpfBuilder::<Builder>::from(spf);
         assert_eq!(builder.version, "v=spf1");
         assert!(builder.mx().is_some());
@@ -100,9 +100,7 @@ mod string_to_builder {
     }
     #[test]
     fn from_string_to_builder_ip() {
-        let spf = "v=spf1 mx ip4:203.32.160.10 -all"
-            .parse::<Spf<String>>()
-            .unwrap();
+        let spf = "v=spf1 mx ip4:203.32.160.10 -all".parse::<Spf>().unwrap();
         let builder: SpfBuilder<Builder> = SpfBuilder::from(spf);
         assert_eq!(builder.version, "v=spf1");
         assert!(builder.mx.is_some());
@@ -141,7 +139,7 @@ impl FromStr for SpfBuilder<Parsed> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
         validate::check_spf_length(s)?;
-        // Consider making this a soft Error similar to Spf<String>
+        // Consider making this a soft Error similar to Spf
         validate::check_whitespaces(s)?;
         let source = String::from(s);
 
@@ -603,8 +601,8 @@ impl<State> SpfBuilder<State> {
     pub fn all(&self) -> Option<&Mechanism<All>> {
         self.all.as_ref()
     }
-    /// Creates a `Spf<String>` from `SpfBuilder`
-    /// This function also validates the SpfBuilder struct before returning a Spf<String>
+    /// Creates a `Spf` from `SpfBuilder`
+    /// This function also validates the SpfBuilder struct before returning a Spf
     /// ```
     /// use decon_spf::{Spf, SpfBuilder, Builder, SpfError};
     /// use decon_spf::mechanism::{Mechanism, Qualifier};
@@ -632,7 +630,7 @@ impl<State> SpfBuilder<State> {
     /// assert!(result.is_spf_error());
     ///
     /// ```
-    pub fn build(mut self) -> Result<Spf<String>, SpfError> {
+    pub fn build(mut self) -> Result<Spf, SpfError> {
         if self.version.is_empty() {
             self.version = SPF1.to_owned();
         } else {
@@ -679,7 +677,7 @@ impl<State> SpfBuilder<State> {
             has_redirect = true;
             redirect_idx = mechanisms.len() - 1;
         }
-        Ok(Spf::<String> {
+        Ok(Spf {
             source: "".to_string(),
             version: self.version,
             redirect_idx,
@@ -796,7 +794,7 @@ fn spf_builder_iter() {
     assert_eq!(count, 5);
 }
 
-fn build_spf<T>(source: Spf<String>) -> SpfBuilder<T> {
+fn build_spf<T>(source: Spf) -> SpfBuilder<T> {
     let mut new_spf = SpfBuilder::new();
     new_spf.version = source.version;
 

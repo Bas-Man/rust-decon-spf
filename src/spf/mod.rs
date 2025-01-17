@@ -13,7 +13,7 @@ mod validate;
 
 pub use crate::spf::errors::SpfError;
 pub use mechanism::Mechanism;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
