@@ -289,7 +289,7 @@ impl SpfBuilder<Builder> {
             state: PhantomData::<Redirected>,
         }
     }
-    /// Add a Mechanism<All> to the SpfBuilder struct. This also changes the `State` to `ContainsAll`
+    /// Add a `Mechanism<All>` to the SpfBuilder struct. This also changes the `State` to `ContainsAll`
     pub fn add_all(mut self, mechanism: Mechanism<All>) -> SpfBuilder<ContainsAll> {
         SpfBuilder {
             version: self.version.to_owned(),
