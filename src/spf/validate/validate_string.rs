@@ -3,7 +3,7 @@ use crate::mechanism::Kind;
 use crate::spf::validate::Validate;
 use crate::{Spf, SpfError};
 
-impl Validate for Spf<String> {
+impl Validate for Spf {
     /// Validate that the version is one that is of a known type.
     fn validate_version(&self) -> Result<(), SpfError> {
         if self.version.starts_with(crate::core::SPF1)

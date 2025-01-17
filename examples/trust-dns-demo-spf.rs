@@ -44,7 +44,7 @@ fn main() {
     }
 }
 
-fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf<String> {
+fn display_txt(query: &str, txt_response: &ResolveResult<TxtLookup>) -> Spf {
     let mut spf_record = Spf::default();
     match txt_response {
         Err(_) => println!("No TXT Records."),

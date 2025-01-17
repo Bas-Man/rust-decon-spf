@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
-impl Display for Spf<String> {
+impl Display for Spf {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if !&self.source.is_empty() {
             write!(f, "{}", self.source)
@@ -22,14 +22,14 @@ impl Display for Spf<String> {
     }
 }
 
-/// Implement parse for `Spf<String>`
+/// Implement parse for `Spf`
 /// # Errors
 /// - Invalid Version
 /// - String length exceeds 512 octets (characters)
 ///
 /// # Soft Errors
-/// These will be found when calling `validate()` on `Spf<String>`
-impl FromStr for Spf<String> {
+/// These will be found when calling `validate()` on `Spf`
+impl FromStr for Spf {
     type Err = SpfError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         validate::check_start_of_spf(s)?;
@@ -77,7 +77,7 @@ impl FromStr for Spf<String> {
     }
 }
 
-impl TryFrom<&str> for Spf<String> {
+impl TryFrom<&str> for Spf {
     type Error = SpfError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
@@ -85,12 +85,12 @@ impl TryFrom<&str> for Spf<String> {
     }
 }
 
-impl Spf<String> {
-    /// Creates a `Spf<String>` from the passed str reference.
-    /// This is basically a rapper around FromStr which has been implemented for `Spf<String>`
+impl Spf {
+    /// Creates a `Spf` from the passed str reference.
+    /// This is basically a rapper around FromStr which has been implemented for `Spf`
     #[allow(dead_code)]
     pub fn new(s: &str) -> Result<Self, SpfError> {
-        s.parse::<Spf<String>>()
+        s.parse::<Spf>()
     }
 
     /// Check that version is v1
@@ -101,7 +101,7 @@ impl Spf<String> {
     /// ```
     /// # use decon_spf::Spf;
     /// # use decon_spf::mechanism::{Mechanism, MechanismError, Qualifier};
-    /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+    /// let spf = "v=spf1 -all".parse::<Spf>().unwrap();
     /// assert!(!spf.built());
     /// ```
     pub fn built(&self) -> bool {
@@ -140,13 +140,13 @@ impl Spf<String> {
         }
     }
 
-    /// Validation for `Spf<String>`
+    /// Validation for `Spf`
     /// # Examples
     /// ```rust
     /// use decon_spf::{Spf, SpfError, SpfErrors};
-    /// let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+    /// let spf = "v=spf1 -all".parse::<Spf>().unwrap();
     /// assert!(spf.validate().is_ok());
-    /// let spf = "v=spf1 redirect=_spf.example.com -all".parse::<Spf<String>>().unwrap();
+    /// let spf = "v=spf1 redirect=_spf.example.com -all".parse::<Spf>().unwrap();
     /// assert!(spf.validate().is_err());
     /// let spf: SpfErrors = spf.validate().unwrap_err();
     /// println!("{}", spf.source());
@@ -218,7 +218,7 @@ mod tests {
     use crate::SpfError;
     #[test]
     fn basic_disallow() {
-        let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+        let spf = "v=spf1 -all".parse::<Spf>().unwrap();
         assert!(!spf.source.is_empty());
         assert_eq!(spf.redirect(), None);
         assert_eq!(spf.has_redirect, false);
@@ -231,7 +231,7 @@ mod tests {
     #[test]
     #[cfg(not(feature = "ptr"))]
     fn ptr_allowed_() {
-        let spf = "v=spf1 ptr -all".parse::<Spf<String>>().unwrap();
+        let spf = "v=spf1 ptr -all".parse::<Spf>().unwrap();
         assert!(!spf.source.is_empty());
         assert_eq!(spf.redirect(), None);
         assert_eq!(spf.has_redirect, false);
@@ -242,7 +242,7 @@ mod tests {
     #[test]
     #[cfg(feature = "ptr")]
     fn ptr_not_allowed_() {
-        let spf = "v=spf1 ptr -all".parse::<Spf<String>>().unwrap();
+        let spf = "v=spf1 ptr -all".parse::<Spf>().unwrap();
         assert!(!spf.source.is_empty());
         assert_eq!(spf.redirect(), None);
         assert_eq!(spf.has_redirect, false);
@@ -260,7 +260,7 @@ mod tests {
         #[test]
         fn multiple_redirects() {
             let spf = "v=spf1 redirect=_spf.example.com redirect=_spf.example.com"
-                .parse::<Spf<String>>()
+                .parse::<Spf>()
                 .unwrap_err();
             assert_eq!(spf, SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
         }
@@ -271,7 +271,7 @@ mod tests {
         #[test]
         fn redirect_with_all() {
             let spf = "v=spf1 redirect=_spf.example.com -all"
-                .parse::<Spf<String>>()
+                .parse::<Spf>()
                 .unwrap()
                 .validate();
 
@@ -283,7 +283,7 @@ mod tests {
         #[test]
         fn all_with_redirect() {
             let spf = "v=spf1 -all redirect=_spf.example.com"
-                .parse::<Spf<String>>()
+                .parse::<Spf>()
                 .unwrap()
                 .validate();
             assert_eq!(
@@ -300,7 +300,7 @@ mod tests {
             #[test]
             fn test() {
                 let spf = "v=spf1 redirect=_spf.example.xx -all"
-                    .parse::<Spf<String>>()
+                    .parse::<Spf>()
                     .unwrap_err();
                 assert!(matches!(
                     spf,

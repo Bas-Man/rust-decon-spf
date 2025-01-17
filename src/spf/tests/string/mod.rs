@@ -6,7 +6,7 @@ mod minus_all {
 
     #[test]
     fn minimum_spf() {
-        let spf = "v=spf1 -all".parse::<Spf<String>>().unwrap();
+        let spf = "v=spf1 -all".parse::<Spf>().unwrap();
         assert_eq!(spf.version(), "v=spf1");
         let m: Mechanism<String> = Mechanism::new(Kind::All, Qualifier::Fail);
         assert_eq!(*spf.all().unwrap(), m);
@@ -23,7 +23,7 @@ mod a {
         #[test]
         fn default() {
             let input = "v=spf1 a -all";
-            let spf: Spf<String> = input.parse().unwrap();
+            let spf: Spf = input.parse().unwrap();
             assert_eq!(spf.source, input);
             assert_eq!(spf.version, "v=spf1");
             assert_eq!(spf.version(), "v=spf1");
@@ -37,7 +37,7 @@ mod a {
         #[test]
         fn new() {
             let input = "v=spf1 a -all";
-            let spf: Spf<String> = Spf::new(input).unwrap();
+            let spf: Spf = Spf::new(input).unwrap();
             assert_eq!(spf.source, input);
             assert_eq!(spf.mechanisms.len(), 2);
         }
@@ -46,7 +46,7 @@ mod a {
         #[test]
         fn unchecked_domain() {
             let input = "v=spf1 a:example.xx -all";
-            let spf: Spf<String> = input.parse().unwrap();
+            let spf: Spf = input.parse().unwrap();
             assert_eq!(spf.source, input);
             assert_eq!(spf.mechanisms[0].raw(), "example.xx".to_string());
             assert_eq!(spf.mechanisms.len(), 2);
@@ -63,7 +63,7 @@ mod a {
                 #[test]
                 fn checked_domain() {
                     let input = "v=spf1 a:example.xx -all";
-                    let spf = input.parse::<Spf<String>>().unwrap_err();
+                    let spf = input.parse::<Spf>().unwrap_err();
                     assert_eq!(
                         spf,
                         SpfError::InvalidMechanism(MechanismError::InvalidDomainHost(
@@ -80,7 +80,7 @@ mod a {
             #[test]
             fn valid_domain() {
                 let input = "v=spf1 a:example.com -all";
-                let spf: Spf<String> = input.parse().unwrap();
+                let spf: Spf = input.parse().unwrap();
                 assert_eq!(spf.source, input);
                 assert_eq!(spf.to_string(), input);
                 assert_eq!(spf.mechanisms[0].raw(), "example.com".to_string());
@@ -99,7 +99,7 @@ mod a {
             let input = "v=spf1 a: -all";
             let err_mechanism = "a:";
 
-            let err = input.parse::<Spf<String>>().unwrap_err();
+            let err = input.parse::<Spf>().unwrap_err();
             assert_eq!(
                 err,
                 SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
@@ -113,7 +113,7 @@ mod a {
             let input = "v=spf1 a/ -all";
             let err_mechanism = "a/";
 
-            let err = input.parse::<Spf<String>>().unwrap_err();
+            let err = input.parse::<Spf>().unwrap_err();
             assert_eq!(
                 err,
                 SpfError::InvalidMechanism(MechanismError::InvalidMechanismFormat(
@@ -142,7 +142,7 @@ mod ip {
             #[test]
             fn basic() {
                 let input = "v=spf1 ip4:203.32.160.10 -all";
-                let spf: Spf<String> = input.parse().unwrap();
+                let spf: Spf = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
@@ -150,7 +150,7 @@ mod ip {
             #[test]
             fn basic_strip_prefix_32() {
                 let input = "v=spf1 ip4:203.32.160.10/32 -all";
-                let spf: Spf<String> = input.parse().unwrap();
+                let spf: Spf = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10");
             }
@@ -158,7 +158,7 @@ mod ip {
             #[test]
             fn with_prefix() {
                 let input = "v=spf1 ip4:203.32.160.10/27 -all";
-                let spf: Spf<String> = input.parse().unwrap();
+                let spf: Spf = input.parse().unwrap();
                 assert_eq!(spf.mechanisms.len(), 2);
                 assert_eq!(spf.mechanisms[0].to_string(), "ip4:203.32.160.10/27");
             }
@@ -173,7 +173,7 @@ mod ip {
             #[test]
             fn basic() {
                 let input = "v=spf1 ip4:203.32.160.10/34 -all";
-                let spf = input.parse::<Spf<String>>().unwrap_err();
+                let spf = input.parse::<Spf>().unwrap_err();
                 assert_eq!(
                     spf,
                     SpfError::InvalidMechanism(InvalidIPNetwork(
@@ -196,14 +196,14 @@ mod redirect {
 
         #[test]
         fn redirect_at_start() {
-            let spf: Spf<String> = "v=spf1 redirect=example.com".parse().unwrap();
+            let spf: Spf = "v=spf1 redirect=example.com".parse().unwrap();
             let m: Mechanism<String> = Mechanism::redirect(Qualifier::Pass, "example.com").unwrap();
             assert_eq!(spf.redirect().unwrap(), &m);
         }
         #[test]
         fn redirect_final() {
             let input = "v=spf1 mx redirect=_spf.example.com";
-            let spf: Spf<String> = input.parse().unwrap();
+            let spf: Spf = input.parse().unwrap();
             assert_eq!(spf.version, "v=spf1");
             assert_eq!(
                 spf.redirect().unwrap().rr_data().as_ref().unwrap(),
@@ -217,7 +217,7 @@ mod redirect {
         #[test]
         fn redirect_final_2() {
             let input = "v=spf1 a mx redirect=_spf.example.com";
-            let spf: Spf<String> = input.parse().unwrap();
+            let spf: Spf = input.parse().unwrap();
             assert_eq!(spf.mechanisms[2].kind(), &Kind::Redirect);
         }
     }
@@ -229,7 +229,7 @@ mod redirect {
         #[test]
         fn redirect_x2() {
             let input = "v=spf1 redirect=example.com redirect=test.com";
-            let spf: SpfError = input.parse::<Spf<String>>().unwrap_err();
+            let spf: SpfError = input.parse::<Spf>().unwrap_err();
             assert_eq!(spf, SpfError::ModifierMayOccurOnlyOnce(Kind::Redirect));
         }
     }
@@ -242,7 +242,7 @@ mod spf_to_spf_builder {
     #[test]
     fn basic() {
         let input = "v=spf1 a -all";
-        let spf: Spf<String> = input.parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         let builder_from: SpfBuilder<Builder> = spf.into();
 
         let mut builder_hand = SpfBuilder::new();
@@ -260,7 +260,7 @@ mod iter {
     #[test]
     fn basic() {
         let input = "v=spf1 a mx -all";
-        let spf: Spf<String> = input.parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         let m_list = vec!["a", "mx", "-all"];
         assert_eq!(spf.version(), "v=spf1");
         let mut idx: usize = 0;
@@ -279,7 +279,7 @@ mod serde {
     #[test]
     fn basic() {
         let input = "v=spf1 a -all";
-        let spf: Spf<String> = input.parse().unwrap();
+        let spf: Spf = input.parse().unwrap();
         let spf_as_json = serde_json::to_string(&spf).unwrap();
         assert_eq!(spf_as_json,
                    "{\"source\":\"v=spf1 a -all\",\"version\":\"v=spf1\",\"redirect_idx\":0,\"has_redirect\":false,\"all_idx\":1,\"lookup_count\":1,\"mechanisms\":[{\"kind\":\"A\",\"qualifier\":\"Pass\",\"rrdata\":null},{\"kind\":\"All\",\"qualifier\":\"Fail\",\"rrdata\":null}]}");

@@ -21,36 +21,31 @@ use serde::{Deserialize, Serialize};
 /// Base struct for an Spf of any type.
 #[derive(Debug, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Spf<T> {
-    source: T,
-    version: T,
+pub struct Spf {
+    source: String,
+    version: String,
     redirect_idx: usize,
     has_redirect: bool,
     all_idx: usize,
     lookup_count: u8,
-    mechanisms: Vec<Mechanism<T>>,
+    mechanisms: Vec<Mechanism<String>>,
 }
 
-pub struct SpfIterator<'a, T> {
-    mechanism_iter: std::slice::Iter<'a, Mechanism<T>>,
+pub struct SpfIterator<'a> {
+    mechanism_iter: std::slice::Iter<'a, Mechanism<String>>,
 }
 
-impl<'a, T> Iterator for SpfIterator<'a, T> {
-    type Item = &'a Mechanism<T>; // Change the Item type to Mechanism<T>
+impl<'a> Iterator for SpfIterator<'a> {
+    type Item = &'a Mechanism<String>; // Change the Item type to Mechanism<T>
 
     fn next(&mut self) -> Option<Self::Item> {
         self.mechanism_iter.next()
     }
 }
 
-impl<T> Spf<T>
-where
-    T: Default,
-    T: Debug,
-    T: Display,
-{
+impl Spf {
     /// Access the version attribute associated with the Spf record.
-    pub fn version(&self) -> &T {
+    pub fn version(&self) -> &String {
         &self.version
     }
     /// Access the number of DNS lookups required for this Spf record.
@@ -59,7 +54,7 @@ where
     }
     /// Iterate over the Spf Mechanisms of the Spf Record. This does not return the Spf `version`,
     /// but iterates over the mechanisms contained within the Spf record.
-    pub fn iter(&self) -> SpfIterator<'_, T> {
+    pub fn iter(&self) -> SpfIterator<'_> {
         SpfIterator {
             mechanism_iter: self.mechanisms.iter(),
         }
@@ -70,8 +65,8 @@ where
     }
 }
 
-impl<T> IntoIterator for Spf<T> {
-    type Item = Mechanism<T>;
+impl IntoIterator for Spf {
+    type Item = Mechanism<String>;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
