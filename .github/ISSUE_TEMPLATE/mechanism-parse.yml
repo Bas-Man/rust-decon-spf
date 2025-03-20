@@ -1,0 +1,44 @@
+name: Mechanism Parsing Issue
+description: |
+  File an issue when an spf record can not be parsed.
+title: "[ Unable to parse SPF record ]:"
+labels:
+  - "parse"
+assignees:
+  - bas-man
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to submit this failed spf record.
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Versions
+      description: What version are you using?
+      options:
+        - 0.2.1
+        - 0.2.5
+        - 0.2.6
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: spf-record
+    attributes:
+      label: SPF String that failed
+      description: blah
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+#  - type: checkboxes
+#    id: terms
+#    attributes:
+#      label: Code of Conduct
+#      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com).
+#      options:
+#        - label: I agree to follow this project's Code of Conduct
+#          required: true
