@@ -5,7 +5,7 @@ use regex::Regex;
 pub(crate) mod spf_regex;
 
 /// This is the maximum number of characters that an Spf Record can store.
-pub(crate) const MAX_SPF_STRING_LENGTH: usize = 512;
+pub(crate) const MAX_SPF_STRING_LENGTH: usize = 1024;
 pub(crate) const DNS_LOOKUP_LIMIT: usize = 10;
 
 /// Spf Versions
