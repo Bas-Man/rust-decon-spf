@@ -15,7 +15,8 @@ fn main() {
     // This is a list of servers you can test the code against. Feel free to edit
     // the query
 
-    let query = "gmail.com.";
+    let query = "me.com.";
+    //let query = "gmail.com.";
     //let query = "_spf.google.com";
     //let query = "hotmail.com.";
     //let query = "_netblocks.google.com."; // ip4
